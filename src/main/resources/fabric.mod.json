@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "lighty",
+  "version": "${version}",
+  "name": "Lighty",
+  "description": "Another Light Overlay Mod",
+  "authors": [
+    "Andreas Kohler"
+  ],
+  "contact": {
+    "email": "contact@schmarrn.dev",
+    "sources": "https://github.com/SchmarrnDevs/Lighty"
+  },
+  "license": "Apache-2.0",
+  "icon": "assets/lighty/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "dev.schmarrn.lighty.Lighty"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.14.8",
+    "minecraft": "1.18.2",
+    "fabric": "*"
+  }
+}
