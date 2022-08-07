@@ -25,4 +25,8 @@ public class KeyBind {
         }
         KeyBind.oldKeyState = KeyBind.newKeyState;
     }
+
+    public static void init() {
+        // Does nothing besides making sure the keybinds get registered
+    }
 }

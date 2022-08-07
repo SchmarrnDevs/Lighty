@@ -31,6 +31,7 @@ public class Lighty implements ClientModInitializer {
         LOGGER.info("Hello from {}", MOD_NAME);
 
         Blocks.init();
+        KeyBind.init();
 
         ClientTickEvents.END_CLIENT_TICK.register(KeyBind::handleKeyBind);
         WorldRenderEvents.AFTER_TRANSLUCENT.register(Render::renderOverlay);
