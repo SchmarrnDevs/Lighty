@@ -36,24 +36,26 @@ public class Render {
         matrixStack.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
 
         VertexConsumerProvider.Immediate provider = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+        Random random = new Random();
         for (int x = -16; x <= 16; ++x) {
             for (int y = -16; y <= 16; ++y) {
                 for (int z = -16; z <= 16; ++z) {
                     BlockPos pos = new BlockPos(player.getPos().x + x, player.getPos().y + y, player.getPos().z + z);
-                    Block up = world.getBlockState(pos.up()).getBlock();
+                    BlockPos posUp = pos.up();
+                    Block up = world.getBlockState(posUp).getBlock();
 
-                    boolean validSpawn = world.getBlockState(pos).isSolidBlock(world, pos) && up.canMobSpawnInside() && !world.isAir(pos);
+                    boolean validSpawn = world.getBlockState(pos).isSolidBlock(world, pos) && up.canMobSpawnInside();
                     boolean overlayVisible = frustum.isVisible(new Box(
-                            pos.up().getX(), pos.up().getY(), pos.up().getZ(),
-                            pos.up().getX() + 1, pos.up().getY() + 1f/16f, pos.up().getZ() + 1
+                            posUp.getX(), posUp.getY(), posUp.getZ(),
+                            posUp.getX() + 1, posUp.getY() + 1f / 16f, posUp.getZ() + 1
                     ));
 
                     if (!validSpawn || !overlayVisible) {
                         continue;
                     }
 
-                    int blockLightLevel = world.getLightLevel(LightType.BLOCK, pos.up());
-                    int skyLightLevel = world.getLightLevel(LightType.SKY, pos.up());
+                    int blockLightLevel = world.getLightLevel(LightType.BLOCK, posUp);
+                    int skyLightLevel = world.getLightLevel(LightType.SKY, posUp);
 
                     BlockState overlayState = Blocks.GREEN_OVERLAY.getDefaultState();
                     if (blockLightLevel == 0) {
@@ -66,8 +68,8 @@ public class Render {
 
                     double offset = 0;
                     if (up instanceof SnowBlock) { // snow layers
-                        int layer = world.getBlockState(pos.up()).get(SnowBlock.LAYERS);
-                        // One layer of snow is one pixel high, with one pixel being 1/16
+                        int layer = world.getBlockState(posUp).get(SnowBlock.LAYERS);
+                        // One layer of snow is two pixels high, with one pixel being 1/16
                         offset = 2f / 16f * layer;
                     } else if (up instanceof CarpetBlock) {
                         // Carpet is just one pixel high
@@ -79,12 +81,12 @@ public class Render {
 
                     MinecraftClient.getInstance().getBlockRenderManager().renderBlock(
                             overlayState,
-                            pos.up(),
+                            posUp,
                             world,
                             matrixStack,
                             provider.getBuffer(RenderLayer.getTranslucent()),
                             false,
-                            new Random()
+                            random
                     );
 
                     matrixStack.pop();
