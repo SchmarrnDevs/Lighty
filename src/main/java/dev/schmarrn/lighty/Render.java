@@ -14,43 +14,36 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.LightType;
 
-import java.util.Random;
+import java.util.*;
 
 public class Render {
-    static void renderOverlay(WorldRenderContext worldRenderContext) {
-        if (!KeyBind.enabled) return;
+    private static class OverlayData {
+        BlockPos pos;
+        BlockState state;
+        double offset;
 
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        ClientWorld world = MinecraftClient.getInstance().world;
-        Frustum frustum = worldRenderContext.frustum();
-
-        if (player == null || world == null || frustum == null) {
-            return;
+        OverlayData(BlockPos pos, BlockState state, double offset) {
+            this.pos = pos;
+            this.state = state;
+            this.offset = offset;
         }
+    }
 
-        MatrixStack matrixStack = worldRenderContext.matrixStack();
-        Camera camera = worldRenderContext.camera();
+    private static final List<OverlayData> cache = new ArrayList<>();
+    private static BlockPos oldPlayerPos = BlockPos.ORIGIN;
 
-        matrixStack.push();
-        // Reset matrix position to 0,0,0
-        matrixStack.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
-
-        VertexConsumerProvider.Immediate provider = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-        Random random = new Random();
+    private static void computeCache(BlockPos playerPos, ClientWorld world) {
+        Lighty.LOGGER.info("NEW COMPUTE");
         for (int x = -16; x <= 16; ++x) {
             for (int y = -16; y <= 16; ++y) {
                 for (int z = -16; z <= 16; ++z) {
-                    BlockPos pos = new BlockPos(player.getPos().x + x, player.getPos().y + y, player.getPos().z + z);
+                    BlockPos pos = new BlockPos(playerPos.getX() + x, playerPos.getY() + y, playerPos.getZ() + z);
                     BlockPos posUp = pos.up();
                     Block up = world.getBlockState(posUp).getBlock();
 
                     boolean validSpawn = world.getBlockState(pos).isSolidBlock(world, pos) && up.canMobSpawnInside();
-                    boolean overlayVisible = frustum.isVisible(new Box(
-                            posUp.getX(), posUp.getY(), posUp.getZ(),
-                            posUp.getX() + 1, posUp.getY() + 1f / 16f, posUp.getZ() + 1
-                    ));
 
-                    if (!validSpawn || !overlayVisible) {
+                    if (!validSpawn) {
                         continue;
                     }
 
@@ -68,7 +61,7 @@ public class Render {
 
                     double offset = 0;
                     if (up instanceof SnowBlock) { // snow layers
-                        int layer = world.getBlockState(posUp).get(SnowBlock.LAYERS);
+                        int layer = world.getBlockState(pos).get(SnowBlock.LAYERS);
                         // One layer of snow is two pixels high, with one pixel being 1/16
                         offset = 2f / 16f * layer;
                     } else if (up instanceof CarpetBlock) {
@@ -76,25 +69,77 @@ public class Render {
                         offset = 1f / 16f;
                     }
 
-                    matrixStack.push();
-                    matrixStack.translate(pos.getX(), pos.getY() + 1 + offset, pos.getZ());
-
-                    MinecraftClient.getInstance().getBlockRenderManager().renderBlock(
-                            overlayState,
-                            posUp,
-                            world,
-                            matrixStack,
-                            provider.getBuffer(RenderLayer.getTranslucent()),
-                            false,
-                            random
-                    );
-
-                    matrixStack.pop();
+                    cache.add(new OverlayData(posUp, overlayState, offset));
                 }
             }
         }
-        matrixStack.pop();
+    }
 
+    private static final VertexConsumerProvider.Immediate provider = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+    private static final Random random = new Random();
+    private static void renderTranslucent(WorldRenderContext worldRenderContext, ClientWorld world, Frustum frustum) {
+        MatrixStack matrixStack = worldRenderContext.matrixStack();
+        Camera camera = worldRenderContext.camera();
+
+        matrixStack.push();
+        // Reset matrix position to 0,0,0
+        matrixStack.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
+        for (OverlayData data : cache) {
+            boolean overlayVisible = frustum.isVisible(new Box(
+                    data.pos.getX(), data.pos.getY(), data.pos.getZ(),
+                    data.pos.getX() + 1, data.pos.getY() + 1f / 16f, data.pos.getZ() + 1
+            ));
+
+            if (!overlayVisible) {
+                continue;
+            }
+
+            matrixStack.push();
+            matrixStack.translate(data.pos.getX(), data.pos.getY() + data.offset, data.pos.getZ());
+
+            MinecraftClient.getInstance().getBlockRenderManager().renderBlock(
+                    data.state,
+                    data.pos,
+                    world,
+                    matrixStack,
+                    provider.getBuffer(RenderLayer.getTranslucent()),
+                    false,
+                    random
+            );
+
+            matrixStack.pop();
+        }
+
+        matrixStack.pop();
         provider.draw();
+    }
+
+    static void renderOverlay(WorldRenderContext worldRenderContext) {
+        if (!KeyBind.enabled) return;
+
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        ClientWorld world = MinecraftClient.getInstance().world;
+        Frustum frustum = worldRenderContext.frustum();
+
+        if (player == null || world == null || frustum == null) {
+            return;
+        }
+
+        BlockPos playerPos = new BlockPos(player.getPos());
+        if (!oldPlayerPos.equals(playerPos)) {
+            cache.clear();
+        }
+        oldPlayerPos = playerPos;
+
+        if (cache.isEmpty()) {
+            computeCache(playerPos, world);
+        }
+
+        // Render
+        renderTranslucent(worldRenderContext, world, frustum);
+    }
+
+    public static void clearCache() {
+        cache.clear();
     }
 }
