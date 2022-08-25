@@ -61,7 +61,7 @@ public class Render {
 
                     double offset = 0;
                     if (up instanceof SnowBlock) { // snow layers
-                        int layer = world.getBlockState(pos).get(SnowBlock.LAYERS);
+                        int layer = world.getBlockState(posUp).get(SnowBlock.LAYERS);
                         // One layer of snow is two pixels high, with one pixel being 1/16
                         offset = 2f / 16f * layer;
                     } else if (up instanceof CarpetBlock) {
