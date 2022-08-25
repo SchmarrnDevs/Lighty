@@ -41,7 +41,7 @@ public class Render {
                     BlockPos posUp = pos.up();
                     Block up = world.getBlockState(posUp).getBlock();
 
-                    boolean validSpawn = world.getBlockState(pos).isSolidBlock(world, pos) && up.canMobSpawnInside();
+                    boolean validSpawn = world.getBlockState(pos).allowsSpawning(world, pos, null) && up.canMobSpawnInside();
 
                     if (!validSpawn) {
                         continue;
