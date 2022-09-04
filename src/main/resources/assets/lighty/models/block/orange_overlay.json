@@ -1,6 +1,0 @@
-{
-  "parent": "lighty:block/overlay",
-  "textures": {
-    "color": "lighty:block/orange_overlay"
-  }
-}
