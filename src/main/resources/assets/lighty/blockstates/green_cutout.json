@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "lighty:block/overlay"
+      "model": "lighty:block/cutout"
     }
   }
 }

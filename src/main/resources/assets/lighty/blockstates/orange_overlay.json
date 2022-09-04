@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "lighty:block/orange_overlay"
+      "model": "lighty:block/overlay"
     }
   }
 }

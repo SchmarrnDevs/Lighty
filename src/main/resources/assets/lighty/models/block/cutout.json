@@ -1,7 +1,7 @@
 {
   "parent": "block/thin_block",
   "textures": {
-    "color": "lighty:block/transparent",
+    "color": "lighty:block/cutout",
     "particle": "#color"
   },
   "elements": [

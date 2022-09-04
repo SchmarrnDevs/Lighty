@@ -16,6 +16,7 @@ package dev.schmarrn.lighty;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,5 +36,13 @@ public class Lighty implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(KeyBind::handleKeyBind);
         WorldRenderEvents.AFTER_TRANSLUCENT.register(Render::renderOverlay);
+
+        ColorProviderRegistry.BLOCK.register((blockState, blockRenderView, blockPos, i) -> {
+            if (blockState.getBlock() instanceof OverlayBlock block) {
+                return block.color;
+            } else {
+                return 0xFFFFFF;
+            }
+        }, Blocks.GREEN_OVERLAY, Blocks.RED_OVERLAY, Blocks.ORANGE_OVERLAY);
     }
 }
