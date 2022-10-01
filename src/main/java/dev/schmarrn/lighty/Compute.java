@@ -1,9 +1,6 @@
 package dev.schmarrn.lighty;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.CarpetBlock;
-import net.minecraft.block.SnowBlock;
+import net.minecraft.block.*;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.math.BlockPos;
@@ -42,8 +39,11 @@ public class Compute {
                         BlockPos pos = new BlockPos(playerPos.getX() + x, playerPos.getY() + y, playerPos.getZ() + z);
                         BlockPos posUp = pos.up();
                         Block up = world.getBlockState(posUp).getBlock();
-
-                        boolean validSpawn = world.getBlockState(pos).allowsSpawning(world, pos, type) && up.canMobSpawnInside();
+                        BlockState block = world.getBlockState(pos);
+                        boolean validSpawn = up.canMobSpawnInside();
+                        if (!(block.getBlock() instanceof MagmaBlock)) {
+                            validSpawn = validSpawn && block.allowsSpawning(world, pos, type);
+                        }
 
                         if (!validSpawn) {
                             continue;
