@@ -15,7 +15,6 @@ import java.util.Random;
 
 public class Render {
     private static final VertexConsumerProvider.Immediate provider = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-    private static final Random random = new Random();
     private static void renderTranslucent(WorldRenderContext worldRenderContext, ClientWorld world, Frustum frustum, List<Compute.OverlayData> cache) {
         MatrixStack matrixStack = worldRenderContext.matrixStack();
         Camera camera = worldRenderContext.camera();
