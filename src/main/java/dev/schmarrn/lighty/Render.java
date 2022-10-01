@@ -8,6 +8,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.random.LocalRandom;
 
 import java.util.List;
 import java.util.Random;
@@ -42,7 +43,7 @@ public class Render {
                     matrixStack,
                     provider.getBuffer(RenderLayer.getTranslucent()),
                     false,
-                    random
+                    new LocalRandom(1337)
             );
 
             matrixStack.pop();
