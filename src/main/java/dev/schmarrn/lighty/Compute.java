@@ -22,6 +22,13 @@ public class Compute {
         }
     }
 
+    public static boolean isBlocked(BlockState block, BlockState up) {
+        // If block with FluidState (think Kelp, Seagrass, Glowlichen underwater), disable overlay
+        return (!up.getFluidState().isEmpty()) ||
+                // MagmaBlocks caused a Crash - But Mobs can still spawn on them, I need to fix this
+                block.getBlock() instanceof MagmaBlock;
+    }
+
     private static final List<OverlayData> cache = new ArrayList<>();
     private static BlockPos oldPlayerPos = BlockPos.ORIGIN;
 
@@ -38,12 +45,14 @@ public class Compute {
                     for (int z = -16; z <= 16; ++z) {
                         BlockPos pos = new BlockPos(playerPos.getX() + x, playerPos.getY() + y, playerPos.getZ() + z);
                         BlockPos posUp = pos.up();
-                        Block up = world.getBlockState(posUp).getBlock();
+                        BlockState up = world.getBlockState(posUp);
+                        Block upBlock = up.getBlock();
                         BlockState block = world.getBlockState(pos);
-                        boolean validSpawn = up.canMobSpawnInside();
-                        if (!(block.getBlock() instanceof MagmaBlock)) {
-                            validSpawn = validSpawn && world.getBlockState(pos).allowsSpawning(world, pos, type);
+                        boolean validSpawn = upBlock.canMobSpawnInside();
+                        if (isBlocked(block, up)) {
+                            continue;
                         }
+                        validSpawn = validSpawn && world.getBlockState(pos).allowsSpawning(world, pos, type);
 
                         if (!validSpawn) {
                             continue;
@@ -62,11 +71,11 @@ public class Compute {
                         }
 
                         double offset = 0;
-                        if (up instanceof SnowBlock) { // snow layers
+                        if (upBlock instanceof SnowBlock) { // snow layers
                             int layer = world.getBlockState(posUp).get(SnowBlock.LAYERS);
                             // One layer of snow is two pixels high, with one pixel being 1/16
                             offset = 2f / 16f * layer;
-                        } else if (up instanceof CarpetBlock) {
+                        } else if (upBlock instanceof CarpetBlock) {
                             // Carpet is just one pixel high
                             offset = 1f / 16f;
                         }
