@@ -3,6 +3,7 @@ package dev.schmarrn.lighty;
 import net.minecraft.block.*;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.EntityType;
+import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.LightType;
 
@@ -22,9 +23,13 @@ public class Compute {
         }
     }
 
-    public static boolean isBlocked(BlockState block, BlockState up) {
+    public static boolean isBlocked(BlockState block, BlockState up, ClientWorld world, BlockPos upPos) {
+        // See SpawnHelper.isClearForSpawn
         // If block with FluidState (think Kelp, Seagrass, Glowlichen underwater), disable overlay
-        return (!up.getFluidState().isEmpty()) ||
+        return (up.isFullCube(world, upPos) ||
+                up.emitsRedstonePower() ||
+                !up.getFluidState().isEmpty()) ||
+                up.isIn(BlockTags.PREVENT_MOB_SPAWNING_INSIDE) ||
                 // MagmaBlocks caused a Crash - But Mobs can still spawn on them, I need to fix this
                 block.getBlock() instanceof MagmaBlock;
     }
@@ -49,7 +54,7 @@ public class Compute {
                         Block upBlock = up.getBlock();
                         BlockState block = world.getBlockState(pos);
                         boolean validSpawn = upBlock.canMobSpawnInside();
-                        if (isBlocked(block, up)) {
+                        if (isBlocked(block, up, world, posUp)) {
                             continue;
                         }
                         validSpawn = validSpawn && world.getBlockState(pos).allowsSpawning(world, pos, type);
