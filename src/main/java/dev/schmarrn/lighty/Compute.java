@@ -39,9 +39,9 @@ public class Compute {
 
     public static List<OverlayData> computeCache(BlockPos playerPos, ClientWorld world, EntityType<?> type) {
         if (!oldPlayerPos.equals(playerPos)) {
-            cache.clear();
+            clearCache();
+            oldPlayerPos = playerPos;
         }
-        oldPlayerPos = playerPos;
 
         if (cache.isEmpty()) {
             Lighty.LOGGER.debug("NEW COMPUTE");
