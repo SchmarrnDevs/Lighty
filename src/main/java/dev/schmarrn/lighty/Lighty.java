@@ -29,7 +29,7 @@ public class Lighty implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        LOGGER.info("Hello from {}", MOD_NAME);
+        LOGGER.info("Let there be {}", MOD_NAME);
 
         Blocks.init();
         KeyBind.init();
