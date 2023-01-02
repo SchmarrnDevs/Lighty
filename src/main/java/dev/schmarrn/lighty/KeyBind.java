@@ -1,5 +1,6 @@
 package dev.schmarrn.lighty;
 
+import dev.schmarrn.lighty.ui.ModeSwitcherScreen;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
@@ -15,13 +16,12 @@ public class KeyBind {
     ));
     private static boolean oldKeyState = false;
     private static boolean newKeyState = false;
-    public static boolean enabled = false;
 
     public static void handleKeyBind(MinecraftClient ignoredClient) {
         KeyBind.newKeyState = KeyBind.enableKeyBind.isPressed();
         // Rising edge
         if (KeyBind.newKeyState && !KeyBind.oldKeyState) {
-            KeyBind.enabled = !KeyBind.enabled;
+            MinecraftClient.getInstance().setScreen(new ModeSwitcherScreen());
         }
         KeyBind.oldKeyState = KeyBind.newKeyState;
     }

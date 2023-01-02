@@ -8,8 +8,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 
-import java.lang.invoke.VolatileCallSite;
-
 public class OverlayBlock extends Block {
     public final int color;
 
