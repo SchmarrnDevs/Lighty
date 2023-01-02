@@ -14,16 +14,22 @@
 
 package dev.schmarrn.lighty;
 
+import dev.schmarrn.lighty.mode.CarpetMode;
+import dev.schmarrn.lighty.mode.LightyMode;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Lighty implements ClientModInitializer {
     public static final String MOD_ID = "lighty";
     public static final String MOD_NAME = "Lighty";
+
+    @Nullable
+    public static LightyMode mode = null;
 
     public static Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
@@ -44,5 +50,7 @@ public class Lighty implements ClientModInitializer {
                 return 0xFFFFFF;
             }
         }, Blocks.GREEN_OVERLAY, Blocks.RED_OVERLAY, Blocks.ORANGE_OVERLAY);
+
+        CarpetMode.init();
     }
 }
