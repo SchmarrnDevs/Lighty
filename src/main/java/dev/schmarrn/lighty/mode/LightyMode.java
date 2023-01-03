@@ -1,13 +1,11 @@
 package dev.schmarrn.lighty.mode;
 
-import dev.schmarrn.lighty.Lighty;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.EntityType;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.compress.utils.Lists;
 
@@ -27,7 +25,7 @@ public abstract class LightyMode {
     }
     protected final List<Data> cache = Lists.newArrayList();
 
-    public abstract void compute(BlockPos playerPos, ClientWorld world, EntityType<?> type, int x, int y, int z);
+    public abstract void compute(ClientWorld world, BlockPos pos);
 
     public abstract void render(WorldRenderContext worldRenderContext, ClientWorld world, Frustum frustum, VertexConsumerProvider.Immediate provider, MinecraftClient client);
 

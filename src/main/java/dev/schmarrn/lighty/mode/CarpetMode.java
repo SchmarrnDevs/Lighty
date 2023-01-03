@@ -10,7 +10,6 @@ import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.EntityType;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -36,8 +35,7 @@ public class CarpetMode extends LightyMode {
     }
 
     @Override
-    public void compute(BlockPos playerPos, ClientWorld world, EntityType<?> type, int x, int y, int z) {
-        BlockPos pos = new BlockPos(playerPos.getX() + x, playerPos.getY() + y, playerPos.getZ() + z);
+    public void compute(ClientWorld world, BlockPos pos) {
         BlockPos posUp = pos.up();
         BlockState up = world.getBlockState(posUp);
         Block upBlock = up.getBlock();
@@ -46,7 +44,7 @@ public class CarpetMode extends LightyMode {
         if (isBlocked(block, up, world, posUp)) {
             return;
         }
-        validSpawn = validSpawn && block.allowsSpawning(world, pos, type);
+        validSpawn = validSpawn && block.allowsSpawning(world, pos, null);
 
         if (!validSpawn) {
             return;
