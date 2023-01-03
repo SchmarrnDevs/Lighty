@@ -15,18 +15,18 @@ public class LightUpdateMixin {
     @Inject(method = "onBlockUpdate", at = @At("TAIL"))
     private void lighty$onBlockUpdate(BlockUpdateS2CPacket packet, CallbackInfo info) {
 //        Lighty.LOGGER.info("BLOCK UPDATE");
-        Compute.clearCache();
+        Compute.markDirty();
     }
 
     @Inject(method = "onChunkDeltaUpdate", at = @At("TAIL"))
     private void lighty$onChunkDeltaUpdate(ChunkDeltaUpdateS2CPacket packet, CallbackInfo info) {
 //        Lighty.LOGGER.info("CHUNK DELTA UPDATE");
-        Compute.clearCache();
+        Compute.markDirty();
     }
 
     @Inject(method = "onLightUpdate", at = @At("TAIL"))
     private void lighty$onLightUpdate(LightUpdateS2CPacket packet, CallbackInfo info) {
 //        Lighty.LOGGER.info("LIGHT UPDATE");
-        Compute.clearCache();
+        Compute.markDirty();
     }
 }

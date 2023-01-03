@@ -41,6 +41,7 @@ public class Lighty implements ClientModInitializer {
         KeyBind.init();
 
         ClientTickEvents.END_CLIENT_TICK.register(KeyBind::handleKeyBind);
+        ClientTickEvents.END_CLIENT_TICK.register(Compute::computeCache);
         WorldRenderEvents.AFTER_TRANSLUCENT.register(Render::renderOverlay);
 
         ColorProviderRegistry.BLOCK.register((blockState, blockRenderView, blockPos, i) -> {
