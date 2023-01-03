@@ -17,7 +17,9 @@ import net.minecraft.util.math.Box;
 import net.minecraft.world.LightType;
 
 public class CarpetMode extends LightyMode {
+    private record Data(BlockPos pos, BlockState state, double offset) {}
     public static final CarpetMode MODE = new CarpetMode();
+    private final ModeCache<BlockPos, Data> cache = new ModeCache<>();
 
     private CarpetMode() {
         ModeSwitcherScreen.addButton(Text.of("Carpet Mode"), button -> Lighty.mode = MODE);
@@ -32,6 +34,11 @@ public class CarpetMode extends LightyMode {
                 up.isIn(BlockTags.PREVENT_MOB_SPAWNING_INSIDE) ||
                 // MagmaBlocks caused a Crash - But Mobs can still spawn on them, I need to fix this
                 block.getBlock() instanceof MagmaBlock;
+    }
+
+    @Override
+    public void afterCompute() {
+        cache.swap();
     }
 
     @Override
@@ -72,7 +79,7 @@ public class CarpetMode extends LightyMode {
             offset = 1f / 16f;
         }
 
-        cache.add(new LightyMode.Data(posUp, overlayState, offset));
+        cache.put(posUp, new Data(posUp, overlayState, offset));
     }
 
     @Override
@@ -85,7 +92,7 @@ public class CarpetMode extends LightyMode {
         matrixStack.push();
         // Reset matrix position to 0,0,0
         matrixStack.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
-        for (LightyMode.Data data : cache) {
+        for (Data data : cache.getRenderBank().values()) {
             double x = data.pos.getX(),
                     y = data.pos.getY() + data.offset,
                     z = data.pos.getZ();
