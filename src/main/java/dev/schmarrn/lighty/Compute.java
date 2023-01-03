@@ -1,13 +1,12 @@
 package dev.schmarrn.lighty;
 
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.EntityType;
 import net.minecraft.util.math.BlockPos;
 
 public class Compute {
     private static BlockPos oldPlayerPos = BlockPos.ORIGIN;
 
-    public static void computeCache(BlockPos playerPos, ClientWorld world, EntityType<?> type) {
+    public static void computeCache(BlockPos playerPos, ClientWorld world) {
         if (Lighty.mode == null) return;
         if (!oldPlayerPos.equals(playerPos)) {
             clearCache();
@@ -15,19 +14,15 @@ public class Compute {
         }
 
         if (Lighty.mode.shouldReCompute()) {
-            Lighty.LOGGER.debug("NEW COMPUTE");
             for (int x = -16; x <= 16; ++x) {
                 for (int y = -16; y <= 16; ++y) {
                     for (int z = -16; z <= 16; ++z) {
-                        Lighty.mode.compute(playerPos, world, type, x, y, z);
+                        BlockPos pos = playerPos.add(x, y, z);
+                        Lighty.mode.compute(world, pos);
                     }
                 }
             }
         }
-    }
-
-    public static void computeCache(BlockPos playerPos, ClientWorld world) {
-        computeCache(playerPos, world, null);
     }
 
     public static void clearCache() {
