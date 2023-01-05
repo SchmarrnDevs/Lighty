@@ -1,7 +1,6 @@
 package dev.schmarrn.lighty.mode;
 
-import dev.schmarrn.lighty.Compute;
-import dev.schmarrn.lighty.Lighty;
+import dev.schmarrn.lighty.ModeManager;
 import dev.schmarrn.lighty.LightyColors;
 import dev.schmarrn.lighty.ui.ModeSwitcherScreen;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
@@ -13,11 +12,11 @@ import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.tag.BlockTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Quaternion;
 import net.minecraft.world.LightType;
 
 public class NumberMode extends LightyMode {
@@ -26,10 +25,12 @@ public class NumberMode extends LightyMode {
     private final ModeCache<BlockPos, Data> cache = new ModeCache<>();
 
     private NumberMode() {
-        ModeSwitcherScreen.addButton(Text.of("Number Mode"), button -> {
-            Lighty.mode = MODE;
-            Compute.markDirty();
-        });
+        ModeSwitcherScreen.addButton(Text.of("Number Mode"), button -> ModeManager.loadMode(MODE));
+    }
+
+    @Override
+    public void unload() {
+        cache.clear();
     }
 
     public static boolean isBlocked(BlockState block, BlockState up, ClientWorld world, BlockPos upPos) {
@@ -113,8 +114,8 @@ public class NumberMode extends LightyMode {
             matrixStack.translate(x, y, z);
             matrixStack.scale(1f/32f, -1f/32f, 1f/32f);
 
-            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotation((float) -(Math.PI + camera.getYaw() / 180f * Math.PI)));
-            matrixStack.multiply(RotationAxis.POSITIVE_X.rotation((float) (camera.getPitch() / 180f * Math.PI)));
+            matrixStack.multiply(new Quaternion(0f, (float) Math.sin(-(Math.PI + camera.getYaw() / 180f * Math.PI) * 0.5f), 0f, (float) Math.cos(-(Math.PI + camera.getYaw() / 180f * Math.PI) * 0.5f)));
+            matrixStack.multiply(new Quaternion((float) Math.sin(camera.getPitch() / 180f * Math.PI * 0.5f), 0f, 0f, (float) Math.cos(camera.getPitch() / 180f * Math.PI * 0.5f)));
 
             String text = data.skyLightLevel >= 0 ? data.blockLightLevel + "|" + data.skyLightLevel : data.blockLightLevel + "";
 

@@ -23,4 +23,9 @@ public class ModeCache<K, V> {
         HashMap<K, V> oldRenderBank = firstActive ? bankOne : bankTwo;
         oldRenderBank.clear();
     }
+
+    public void clear() {
+        bankOne.clear();
+        bankTwo.clear();
+    }
 }

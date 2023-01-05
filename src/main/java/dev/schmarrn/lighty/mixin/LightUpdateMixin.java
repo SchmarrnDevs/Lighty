@@ -1,6 +1,6 @@
 package dev.schmarrn.lighty.mixin;
 
-import dev.schmarrn.lighty.Compute;
+import dev.schmarrn.lighty.ModeManager;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
@@ -15,18 +15,18 @@ public class LightUpdateMixin {
     @Inject(method = "onBlockUpdate", at = @At("TAIL"))
     private void lighty$onBlockUpdate(BlockUpdateS2CPacket packet, CallbackInfo info) {
 //        Lighty.LOGGER.info("BLOCK UPDATE");
-        Compute.markDirty();
+        ModeManager.Compute.markDirty();
     }
 
     @Inject(method = "onChunkDeltaUpdate", at = @At("TAIL"))
     private void lighty$onChunkDeltaUpdate(ChunkDeltaUpdateS2CPacket packet, CallbackInfo info) {
 //        Lighty.LOGGER.info("CHUNK DELTA UPDATE");
-        Compute.markDirty();
+        ModeManager.Compute.markDirty();
     }
 
     @Inject(method = "onLightUpdate", at = @At("TAIL"))
     private void lighty$onLightUpdate(LightUpdateS2CPacket packet, CallbackInfo info) {
 //        Lighty.LOGGER.info("LIGHT UPDATE");
-        Compute.markDirty();
+        ModeManager.Compute.markDirty();
     }
 }
