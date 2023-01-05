@@ -12,6 +12,8 @@ public abstract class LightyMode {
 
     public void afterCompute() {}
 
+    public void unload() {}
+
     public abstract void compute(ClientWorld world, BlockPos pos);
 
     public abstract void render(WorldRenderContext worldRenderContext, ClientWorld world, Frustum frustum, VertexConsumerProvider.Immediate provider, MinecraftClient client);
