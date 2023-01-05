@@ -1,29 +1,32 @@
 package dev.schmarrn.lighty.mode;
 
-import dev.schmarrn.lighty.Blocks;
 import dev.schmarrn.lighty.Compute;
 import dev.schmarrn.lighty.Lighty;
+import dev.schmarrn.lighty.LightyColors;
 import dev.schmarrn.lighty.ui.ModeSwitcherScreen;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.block.BlockRenderManager;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.Frustum;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.tag.BlockTags;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.LightType;
 
-public class CarpetMode extends LightyMode {
-    private record Data(BlockPos pos, BlockState state, double offset) {}
-    public static final CarpetMode MODE = new CarpetMode();
+public class NumberMode extends LightyMode {
+    private record Data(BlockPos pos, int blockLightLevel, int skyLightLevel, double offset, int color) {}
+    public static final NumberMode MODE = new NumberMode();
     private final ModeCache<BlockPos, Data> cache = new ModeCache<>();
 
-    private CarpetMode() {
-        ModeSwitcherScreen.addButton(Text.of("Carpet Mode"), button -> {
+    private NumberMode() {
+        ModeSwitcherScreen.addButton(Text.of("Number Mode"), button -> {
             Lighty.mode = MODE;
             Compute.markDirty();
         });
@@ -62,14 +65,14 @@ public class CarpetMode extends LightyMode {
         }
 
         int blockLightLevel = world.getLightLevel(LightType.BLOCK, posUp);
-        int skyLightLevel = world.getLightLevel(LightType.SKY, posUp);
+        int skyLightLevel = world.getDimension().hasSkyLight() ? world.getLightLevel(LightType.SKY, posUp) : -1;
 
-        BlockState overlayState = Blocks.GREEN_OVERLAY.getDefaultState();
+        int color = LightyColors.GREEN;
         if (blockLightLevel == 0) {
             if (skyLightLevel == 0) {
-                overlayState = Blocks.RED_OVERLAY.getDefaultState();
+                color = LightyColors.RED;
             } else {
-                overlayState = Blocks.ORANGE_OVERLAY.getDefaultState();
+                color = LightyColors.ORANGE;
             }
         }
 
@@ -83,7 +86,7 @@ public class CarpetMode extends LightyMode {
             offset = 1f / 16f;
         }
 
-        cache.put(posUp, new Data(posUp, overlayState, offset));
+        cache.put(posUp, new Data(posUp, blockLightLevel, skyLightLevel, offset, color));
     }
 
     @Override
@@ -91,19 +94,16 @@ public class CarpetMode extends LightyMode {
         MatrixStack matrixStack = worldRenderContext.matrixStack();
         Camera camera = worldRenderContext.camera();
 
-        VertexConsumer buffer = provider.getBuffer(RenderLayer.getTranslucent());
-        BlockRenderManager blockRenderManager = client.getBlockRenderManager();
+        TextRenderer textRenderer = client.textRenderer;
         matrixStack.push();
         // Reset matrix position to 0,0,0
         matrixStack.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
         for (Data data : cache.getRenderBank().values()) {
-            double x = data.pos.getX(),
-                    y = data.pos.getY() + data.offset,
-                    z = data.pos.getZ();
-            boolean overlayVisible = frustum.isVisible(new Box(
-                    x, y, z,
-                    x + 1, y + 1f / 16f, z + 1
-            ));
+            double x = data.pos.getX() + 0.5,
+                    y = data.pos.getY() + data.offset + 0.5,
+                    z = data.pos.getZ() + 0.5;
+
+            boolean overlayVisible = frustum.isVisible(new Box(data.pos));
 
             if (!overlayVisible) {
                 continue;
@@ -111,16 +111,16 @@ public class CarpetMode extends LightyMode {
 
             matrixStack.push();
             matrixStack.translate(x, y, z);
+            matrixStack.scale(1f/32f, -1f/32f, 1f/32f);
 
-            blockRenderManager.renderBlock(
-                    data.state,
-                    data.pos,
-                    world,
-                    matrixStack,
-                    buffer,
-                    false,
-                    world.random
-            );
+            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotation((float) -(Math.PI + camera.getYaw() / 180f * Math.PI)));
+            matrixStack.multiply(RotationAxis.POSITIVE_X.rotation((float) (camera.getPitch() / 180f * Math.PI)));
+
+            String text = data.skyLightLevel >= 0 ? data.blockLightLevel + "|" + data.skyLightLevel : data.blockLightLevel + "";
+
+            int width = textRenderer.getWidth(text);
+
+            textRenderer.draw(text, -width / 2f, -textRenderer.fontHeight/2f, data.color, true, matrixStack.peek().getPositionMatrix(), provider, false, 0, 0xF000F0);
 
             matrixStack.pop();
         }

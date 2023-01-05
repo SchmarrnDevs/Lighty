@@ -16,6 +16,7 @@ package dev.schmarrn.lighty;
 
 import dev.schmarrn.lighty.mode.CarpetMode;
 import dev.schmarrn.lighty.mode.LightyMode;
+import dev.schmarrn.lighty.mode.NumberMode;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
@@ -53,5 +54,6 @@ public class Lighty implements ClientModInitializer {
         }, Blocks.GREEN_OVERLAY, Blocks.RED_OVERLAY, Blocks.ORANGE_OVERLAY);
 
         CarpetMode.init();
+        NumberMode.init();
     }
 }
