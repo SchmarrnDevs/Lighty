@@ -1,8 +1,8 @@
 package dev.schmarrn.lighty.ui;
 
-import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.ModeManager;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.GridWidget;
 import net.minecraft.client.gui.widget.SimplePositioningWidget;
@@ -16,7 +16,7 @@ import java.util.List;
 public class ModeSwitcherScreen extends Screen {
     private static final List<ButtonWidget> BUTTONS = Lists.newArrayList();
     public ModeSwitcherScreen() {
-        super(Text.of("Mode Switcher"));
+        super(Text.translatable("modeSwitcher.lighty.title"));
     }
 
     @Override
@@ -49,7 +49,7 @@ public class ModeSwitcherScreen extends Screen {
         return false;
     }
 
-    public static void addButton(Text message, ButtonWidget.PressAction onPress) {
-        BUTTONS.add(ButtonWidget.builder(message, onPress).build());
+    public static void addButton(Text message, Text tooltip, ButtonWidget.PressAction onPress) {
+        BUTTONS.add(ButtonWidget.builder(message, onPress).tooltip(Tooltip.of(tooltip)).build());
     }
 }
