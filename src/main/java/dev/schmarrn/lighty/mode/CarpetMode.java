@@ -1,8 +1,7 @@
 package dev.schmarrn.lighty.mode;
 
 import dev.schmarrn.lighty.Blocks;
-import dev.schmarrn.lighty.Compute;
-import dev.schmarrn.lighty.Lighty;
+import dev.schmarrn.lighty.ModeManager;
 import dev.schmarrn.lighty.ui.ModeSwitcherScreen;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.block.*;
@@ -23,10 +22,12 @@ public class CarpetMode extends LightyMode {
     private final ModeCache<BlockPos, Data> cache = new ModeCache<>();
 
     private CarpetMode() {
-        ModeSwitcherScreen.addButton(Text.of("Carpet Mode"), button -> {
-            Lighty.mode = MODE;
-            Compute.markDirty();
-        });
+        ModeSwitcherScreen.addButton(Text.of("Carpet Mode"), button -> ModeManager.loadMode(MODE));
+    }
+
+    @Override
+    public void unload() {
+        cache.clear();
     }
 
     public static boolean isBlocked(BlockState block, BlockState up, ClientWorld world, BlockPos upPos) {

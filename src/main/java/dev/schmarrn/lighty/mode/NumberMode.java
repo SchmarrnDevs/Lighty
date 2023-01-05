@@ -1,7 +1,6 @@
 package dev.schmarrn.lighty.mode;
 
-import dev.schmarrn.lighty.Compute;
-import dev.schmarrn.lighty.Lighty;
+import dev.schmarrn.lighty.ModeManager;
 import dev.schmarrn.lighty.LightyColors;
 import dev.schmarrn.lighty.ui.ModeSwitcherScreen;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
@@ -26,10 +25,12 @@ public class NumberMode extends LightyMode {
     private final ModeCache<BlockPos, Data> cache = new ModeCache<>();
 
     private NumberMode() {
-        ModeSwitcherScreen.addButton(Text.of("Number Mode"), button -> {
-            Lighty.mode = MODE;
-            Compute.markDirty();
-        });
+        ModeSwitcherScreen.addButton(Text.of("Number Mode"), button -> ModeManager.loadMode(MODE));
+    }
+
+    @Override
+    public void unload() {
+        cache.clear();
     }
 
     public static boolean isBlocked(BlockState block, BlockState up, ClientWorld world, BlockPos upPos) {

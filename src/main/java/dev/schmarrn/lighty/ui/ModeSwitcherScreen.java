@@ -1,6 +1,7 @@
 package dev.schmarrn.lighty.ui;
 
 import dev.schmarrn.lighty.Lighty;
+import dev.schmarrn.lighty.ModeManager;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.GridWidget;
@@ -24,7 +25,7 @@ public class ModeSwitcherScreen extends Screen {
         gridWidget.getMainPositioner().marginBottom(4).alignHorizontalCenter().alignVerticalCenter();
         GridWidget.Adder adder = gridWidget.createAdder(1);
 
-        adder.add(ButtonWidget.builder(ScreenTexts.OFF, button -> Lighty.mode = null).build());
+        adder.add(ButtonWidget.builder(ScreenTexts.OFF, button -> ModeManager.loadMode(null)).build());
 
         for (ButtonWidget btn : BUTTONS) {
             adder.add(btn);
