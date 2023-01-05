@@ -25,7 +25,7 @@ public class NumberMode extends LightyMode {
     private final ModeCache<BlockPos, Data> cache = new ModeCache<>();
 
     private NumberMode() {
-        ModeSwitcherScreen.addButton(Text.of("Number Mode"), button -> ModeManager.loadMode(MODE));
+        ModeSwitcherScreen.addButton(Text.translatable("modeSwitcher.lighty.numberMode"), Text.translatable("modeSwitcher.lighty.numberMode.tooltip"), button -> ModeManager.loadMode(MODE));
     }
 
     @Override

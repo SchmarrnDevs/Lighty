@@ -1,6 +1,5 @@
 package dev.schmarrn.lighty.ui;
 
-import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.ModeManager;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -13,12 +12,13 @@ import java.util.List;
 
 public class ModeSwitcherScreen extends Screen {
     private static final List<ButtonWidget> BUTTONS = Lists.newArrayList();
+    private static ModeSwitcherScreen current = null;
 
     private static final int START_HEIGHT = 15;
     private static final int DELTA_HEIGHT = 24;
 
     public ModeSwitcherScreen() {
-        super(Text.of("Mode Switcher"));
+        super(Text.translatable("modeSwitcher.lighty.title"));
     }
 
     @Override
@@ -34,6 +34,7 @@ public class ModeSwitcherScreen extends Screen {
 
         height += DELTA_HEIGHT;
         this.addDrawableChild(new ButtonWidget(this.width/2 - 75, height + 6, 150, 20, ScreenTexts.DONE, button -> this.close()));
+        current = this;
     }
 
     @Override
@@ -48,7 +49,10 @@ public class ModeSwitcherScreen extends Screen {
         return false;
     }
 
-    public static void addButton(Text message, ButtonWidget.PressAction onPress) {
-        BUTTONS.add(new ButtonWidget(0, 0, 150, 20, message, onPress));
+    public static void addButton(Text message, Text tooltip, ButtonWidget.PressAction onPress) {
+        BUTTONS.add(new ButtonWidget(0, 0, 150, 20, message, onPress, (button, matrices, mouseX, mouseY) -> {
+            if (ModeSwitcherScreen.current == null) return;
+            ModeSwitcherScreen.drawCenteredText(matrices, ModeSwitcherScreen.current.textRenderer, tooltip, ModeSwitcherScreen.current.width/2, ModeSwitcherScreen.current.height - ModeSwitcherScreen.current.textRenderer.fontHeight - 5, 0xAAAAAA);
+        }));
     }
 }
