@@ -11,7 +11,7 @@ import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.tag.BlockTags;
-import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.LightType;
@@ -22,7 +22,7 @@ public class CarpetMode extends LightyMode {
     private final ModeCache<BlockPos, Data> cache = new ModeCache<>();
 
     private CarpetMode() {
-        ModeSwitcherScreen.addButton(Text.of("Carpet Mode"), button -> ModeManager.loadMode(MODE));
+        ModeSwitcherScreen.addButton(new TranslatableText("modeSwitcher.lighty.carpetMode"), new TranslatableText("modeSwitcher.lighty.carpetMode.tooltip"), button -> ModeManager.loadMode(MODE));
     }
 
     @Override

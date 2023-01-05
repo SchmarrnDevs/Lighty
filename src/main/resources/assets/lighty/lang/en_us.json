@@ -1,4 +1,9 @@
 {
   "key.lighty.enable": "Enable Light Overlay",
-  "category.lighty": "Lighty"
+  "category.lighty": "Lighty",
+  "modeSwitcher.lighty.title": "Lighty Mode Switcher",
+  "modeSwitcher.lighty.numberMode": "Number Mode",
+  "modeSwitcher.lighty.numberMode.tooltip": "Displays as: BlockLightLevel|SkyLightLevel",
+  "modeSwitcher.lighty.carpetMode": "Carpet Mode",
+  "modeSwitcher.lighty.carpetMode.tooltip": "Original, carpet like overlay"
 }
