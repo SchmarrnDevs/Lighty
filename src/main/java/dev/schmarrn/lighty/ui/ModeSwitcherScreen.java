@@ -32,9 +32,9 @@ public class ModeSwitcherScreen extends Screen {
         }
 
         adder.add(ButtonWidget.builder(ScreenTexts.DONE, button -> this.close()).build(), adder.copyPositioner().marginTop(6));
-        gridWidget.recalculateDimensions();
+        gridWidget.refreshPositions();
         SimplePositioningWidget.setPos(gridWidget, 0, this.height/6 - 12, this.width, this.height, 0.5f, 0f);
-        this.addDrawableChild(gridWidget);
+        gridWidget.forEachChild(this::addDrawableChild);
     }
 
     @Override
