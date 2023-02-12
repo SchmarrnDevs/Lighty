@@ -8,7 +8,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
 
 public abstract class LightyMode<K, V> {
-    final ModeCache<K, V> cache = new ModeCache<>();
+    protected final ModeCache<K, V> cache = new ModeCache<>();
 
     public void beforeCompute() {}
 

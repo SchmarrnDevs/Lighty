@@ -1,4 +1,4 @@
-/// Copyright 2022 Andreas Kohler
+/// Copyright 2022-2023 Andreas Kohler
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ public class Lighty implements ClientModInitializer {
     public static final String MOD_ID = "lighty";
     public static final String MOD_NAME = "Lighty";
 
-    public static Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
     @Override
     public void onInitializeClient() {
