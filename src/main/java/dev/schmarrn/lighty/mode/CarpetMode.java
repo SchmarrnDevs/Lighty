@@ -16,18 +16,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.LightType;
 
-public class CarpetMode extends LightyMode {
-    private record Data(BlockPos pos, BlockState state, double offset) {}
+public class CarpetMode extends LightyMode<BlockPos, CarpetMode.Data> {
+    record Data(BlockPos pos, BlockState state, double offset) {}
     public static final CarpetMode MODE = new CarpetMode();
-    private final ModeCache<BlockPos, Data> cache = new ModeCache<>();
 
     private CarpetMode() {
         ModeSwitcherScreen.addButton(new TranslatableText("modeSwitcher.lighty.carpetMode"), new TranslatableText("modeSwitcher.lighty.carpetMode.tooltip"), button -> ModeManager.loadMode(MODE));
-    }
-
-    @Override
-    public void unload() {
-        cache.clear();
     }
 
     public static boolean isBlocked(BlockState block, BlockState up, ClientWorld world, BlockPos upPos) {
@@ -39,11 +33,6 @@ public class CarpetMode extends LightyMode {
                 up.isIn(BlockTags.PREVENT_MOB_SPAWNING_INSIDE) ||
                 // MagmaBlocks caused a Crash - But Mobs can still spawn on them, I need to fix this
                 block.getBlock() instanceof MagmaBlock;
-    }
-
-    @Override
-    public void afterCompute() {
-        cache.swap();
     }
 
     @Override

@@ -19,18 +19,12 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Quaternion;
 import net.minecraft.world.LightType;
 
-public class NumberMode extends LightyMode {
-    private record Data(BlockPos pos, int blockLightLevel, int skyLightLevel, double offset, int color) {}
+public class NumberMode extends LightyMode<BlockPos, NumberMode.Data> {
+    record Data(BlockPos pos, int blockLightLevel, int skyLightLevel, double offset, int color) {}
     public static final NumberMode MODE = new NumberMode();
-    private final ModeCache<BlockPos, Data> cache = new ModeCache<>();
 
     private NumberMode() {
         ModeSwitcherScreen.addButton(new TranslatableText("modeSwitcher.lighty.numberMode"), new TranslatableText("modeSwitcher.lighty.numberMode.tooltip"), button -> ModeManager.loadMode(MODE));
-    }
-
-    @Override
-    public void unload() {
-        cache.clear();
     }
 
     public static boolean isBlocked(BlockState block, BlockState up, ClientWorld world, BlockPos upPos) {
@@ -42,11 +36,6 @@ public class NumberMode extends LightyMode {
                 up.isIn(BlockTags.PREVENT_MOB_SPAWNING_INSIDE) ||
                 // MagmaBlocks caused a Crash - But Mobs can still spawn on them, I need to fix this
                 block.getBlock() instanceof MagmaBlock;
-    }
-
-    @Override
-    public void afterCompute() {
-        cache.swap();
     }
 
     @Override

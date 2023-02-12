@@ -15,7 +15,6 @@ public class ModeManager {
     @Nullable
     private static LightyMode mode = null;
 
-
     public static void loadMode(LightyMode mode) {
         if (ModeManager.mode != null) {
             ModeManager.mode.unload();
