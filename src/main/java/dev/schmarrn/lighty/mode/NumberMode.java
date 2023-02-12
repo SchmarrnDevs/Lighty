@@ -1,8 +1,8 @@
 package dev.schmarrn.lighty.mode;
 
-import dev.schmarrn.lighty.ModeManager;
+import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.LightyColors;
-import dev.schmarrn.lighty.ui.ModeSwitcherScreen;
+import dev.schmarrn.lighty.ModeManager;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
@@ -13,19 +13,14 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.tag.BlockTags;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Quaternion;
 import net.minecraft.world.LightType;
 
 public class NumberMode extends LightyMode<BlockPos, NumberMode.Data> {
-    record Data(BlockPos pos, int blockLightLevel, int skyLightLevel, double offset, int color) {}
-    public static final NumberMode MODE = new NumberMode();
-
-    private NumberMode() {
-        ModeSwitcherScreen.addButton(new TranslatableText("modeSwitcher.lighty.numberMode"), new TranslatableText("modeSwitcher.lighty.numberMode.tooltip"), button -> ModeManager.loadMode(MODE));
-    }
+    record Data(int blockLightLevel, int skyLightLevel, double offset, int color) {}
 
     public static boolean isBlocked(BlockState block, BlockState up, ClientWorld world, BlockPos upPos) {
         // See SpawnHelper.isClearForSpawn
@@ -76,7 +71,7 @@ public class NumberMode extends LightyMode<BlockPos, NumberMode.Data> {
             offset = 1f / 16f;
         }
 
-        cache.put(posUp, new Data(posUp, blockLightLevel, skyLightLevel, offset, color));
+        cache.put(posUp, new Data(blockLightLevel, skyLightLevel, offset, color));
     }
 
     @Override
@@ -88,15 +83,15 @@ public class NumberMode extends LightyMode<BlockPos, NumberMode.Data> {
         matrixStack.push();
         // Reset matrix position to 0,0,0
         matrixStack.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
-        for (Data data : cache.getRenderBank().values()) {
-            double x = data.pos.getX() + 0.5,
-                    y = data.pos.getY() + data.offset + 0.5,
-                    z = data.pos.getZ() + 0.5;
+        cache.getRenderBank().forEach((pos, data) -> {
+            double x = pos.getX() + 0.5;
+            double y = pos.getY() + data.offset + 0.5;
+            double z = pos.getZ() + 0.5;
 
-            boolean overlayVisible = frustum.isVisible(new Box(data.pos));
+            boolean overlayVisible = frustum.isVisible(new Box(pos));
 
             if (!overlayVisible) {
-                continue;
+                return;
             }
 
             matrixStack.push();
@@ -113,13 +108,13 @@ public class NumberMode extends LightyMode<BlockPos, NumberMode.Data> {
             textRenderer.draw(text, -width / 2f, -textRenderer.fontHeight/2f, data.color, true, matrixStack.peek().getPositionMatrix(), provider, false, 0, 0xF000F0);
 
             matrixStack.pop();
-        }
+        });
 
         matrixStack.pop();
         provider.draw();
     }
 
     public static void init() {
-        // nothing to do other than loading the class
+        ModeManager.registerMode(new Identifier(Lighty.MOD_ID, "number_mode"), new NumberMode());
     }
 }
