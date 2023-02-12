@@ -1,13 +1,14 @@
 package dev.schmarrn.lighty.mode;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class ModeCache<K, V> {
     private final HashMap<K, V> bankOne = new HashMap<>();
     private final HashMap<K, V> bankTwo = new HashMap<>();
     private boolean firstActive = true; // if true: bankOne is the bank that can be modified
 
-    public HashMap<K, V> getRenderBank() {
+    public Map<K, V> getRenderBank() {
         return firstActive ? bankTwo : bankOne;
     }
 

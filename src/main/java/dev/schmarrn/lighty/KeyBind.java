@@ -15,15 +15,14 @@ public class KeyBind {
             "category.lighty"
     ));
     private static boolean oldKeyState = false;
-    private static boolean newKeyState = false;
 
-    public static void handleKeyBind(MinecraftClient ignoredClient) {
-        KeyBind.newKeyState = KeyBind.enableKeyBind.isPressed();
+    public static void handleKeyBind(MinecraftClient client) {
+        boolean newKeyState = KeyBind.enableKeyBind.isPressed();
         // Rising edge
-        if (KeyBind.newKeyState && !KeyBind.oldKeyState) {
-            MinecraftClient.getInstance().setScreen(new ModeSwitcherScreen());
+        if (newKeyState && !KeyBind.oldKeyState) {
+            client.setScreen(new ModeSwitcherScreen());
         }
-        KeyBind.oldKeyState = KeyBind.newKeyState;
+        KeyBind.oldKeyState = newKeyState;
     }
 
     public static void init() {

@@ -1,6 +1,7 @@
 package dev.schmarrn.lighty;
 
 import dev.schmarrn.lighty.mode.LightyMode;
+import dev.schmarrn.lighty.ui.ModeSwitcherScreen;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -8,20 +9,35 @@ import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+
 public class ModeManager {
     @Nullable
-    private static LightyMode mode = null;
+    private static LightyMode<?, ?> mode = null;
 
-    public static void loadMode(LightyMode mode) {
+    private static final HashMap<Identifier, LightyMode<?, ?>> MODES = new HashMap<>();
+
+    public static void loadMode(LightyMode<?, ?> mode) {
         if (ModeManager.mode != null) {
             ModeManager.mode.unload();
         }
 
         ModeManager.mode = mode;
         Compute.markDirty();
+    }
+
+    public static void registerMode(Identifier id, LightyMode<?, ?> mode) {
+        MODES.put(id, mode);
+
+        ModeSwitcherScreen.addButton(
+                Text.translatable("modeSwitcher." + id.getNamespace() + "." + id.getPath()),
+                Text.translatable("modeSwitcher." + id.getNamespace() + "." + id.getPath() + ".tooltip"), button -> ModeManager.loadMode(mode)
+        );
     }
 
     public static class Compute {

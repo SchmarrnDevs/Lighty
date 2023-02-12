@@ -1,8 +1,8 @@
 package dev.schmarrn.lighty.mode;
 
 import dev.schmarrn.lighty.Blocks;
+import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.ModeManager;
-import dev.schmarrn.lighty.ui.ModeSwitcherScreen;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
@@ -11,18 +11,13 @@ import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.tag.BlockTags;
-import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.LightType;
 
 public class CarpetMode extends LightyMode<BlockPos, CarpetMode.Data> {
-    record Data(BlockPos pos, BlockState state, double offset) {}
-    public static final CarpetMode MODE = new CarpetMode();
-
-    private CarpetMode() {
-        ModeSwitcherScreen.addButton(Text.translatable("modeSwitcher.lighty.carpetMode"), Text.translatable("modeSwitcher.lighty.carpetMode.tooltip"), button -> ModeManager.loadMode(MODE));
-    }
+    record Data(BlockState state, double offset) {}
 
     public static boolean isBlocked(BlockState block, BlockState up, ClientWorld world, BlockPos upPos) {
         // See SpawnHelper.isClearForSpawn
@@ -73,7 +68,7 @@ public class CarpetMode extends LightyMode<BlockPos, CarpetMode.Data> {
             offset = 1f / 16f;
         }
 
-        cache.put(posUp, new Data(posUp, overlayState, offset));
+        cache.put(posUp, new Data(overlayState, offset));
     }
 
     @Override
@@ -86,17 +81,18 @@ public class CarpetMode extends LightyMode<BlockPos, CarpetMode.Data> {
         matrixStack.push();
         // Reset matrix position to 0,0,0
         matrixStack.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
-        for (Data data : cache.getRenderBank().values()) {
-            double x = data.pos.getX(),
-                    y = data.pos.getY() + data.offset,
-                    z = data.pos.getZ();
+        cache.getRenderBank().forEach((pos, data) -> {
+            double x = pos.getX();
+            double y = pos.getY() + data.offset;
+            double z = pos.getZ();
+
             boolean overlayVisible = frustum.isVisible(new Box(
                     x, y, z,
                     x + 1, y + 1f / 16f, z + 1
             ));
 
             if (!overlayVisible) {
-                continue;
+                return;
             }
 
             matrixStack.push();
@@ -104,7 +100,7 @@ public class CarpetMode extends LightyMode<BlockPos, CarpetMode.Data> {
 
             blockRenderManager.renderBlock(
                     data.state,
-                    data.pos,
+                    pos,
                     world,
                     matrixStack,
                     buffer,
@@ -113,13 +109,13 @@ public class CarpetMode extends LightyMode<BlockPos, CarpetMode.Data> {
             );
 
             matrixStack.pop();
-        }
+        });
 
         matrixStack.pop();
         provider.draw();
     }
 
     public static void init() {
-        // nothing to do other than loading the class
+        ModeManager.registerMode(new Identifier(Lighty.MOD_ID, "carpet_mode"), new CarpetMode());
     }
 }
