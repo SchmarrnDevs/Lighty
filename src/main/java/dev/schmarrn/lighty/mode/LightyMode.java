@@ -7,12 +7,18 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
 
-public abstract class LightyMode {
+public abstract class LightyMode<K, V> {
+    final ModeCache<K, V> cache = new ModeCache<>();
+
     public void beforeCompute() {}
 
-    public void afterCompute() {}
+    public void afterCompute() {
+        cache.swap();
+    }
 
-    public void unload() {}
+    public void unload() {
+        cache.clear();
+    }
 
     public abstract void compute(ClientWorld world, BlockPos pos);
 
