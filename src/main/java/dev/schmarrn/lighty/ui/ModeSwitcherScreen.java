@@ -1,6 +1,6 @@
 package dev.schmarrn.lighty.ui;
 
-import dev.schmarrn.lighty.ModeManager;
+import dev.schmarrn.lighty.ModeLoader;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ScreenTexts;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -25,7 +25,7 @@ public class ModeSwitcherScreen extends Screen {
     @Override
     protected void init() {
         int height = START_HEIGHT + DELTA_HEIGHT;
-        this.addDrawableChild(new ButtonWidget(this.width/2 - 75, height, 150, 20, ScreenTexts.OFF, button -> ModeManager.loadMode(null)));
+        this.addDrawableChild(new ButtonWidget(this.width/2 - 75, height, 150, 20, ScreenTexts.OFF, button -> ModeLoader.loadMode(null)));
         for (ButtonWidget btn : BUTTONS) {
             height += DELTA_HEIGHT;
             btn.x = this.width / 2 - 75;
