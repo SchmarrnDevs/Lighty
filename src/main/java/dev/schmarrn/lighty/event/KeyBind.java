@@ -1,4 +1,4 @@
-package dev.schmarrn.lighty;
+package dev.schmarrn.lighty.event;
 
 import dev.schmarrn.lighty.ui.ModeSwitcherScreen;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -28,4 +28,6 @@ public class KeyBind {
     public static void init() {
         // Does nothing besides making sure the keybinds get registered
     }
+
+    private KeyBind() {}
 }

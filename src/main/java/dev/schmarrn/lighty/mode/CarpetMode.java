@@ -2,7 +2,8 @@ package dev.schmarrn.lighty.mode;
 
 import dev.schmarrn.lighty.Blocks;
 import dev.schmarrn.lighty.Lighty;
-import dev.schmarrn.lighty.ModeManager;
+import dev.schmarrn.lighty.api.ModeManager;
+import dev.schmarrn.lighty.api.LightyMode;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
@@ -81,7 +82,7 @@ public class CarpetMode extends LightyMode<BlockPos, CarpetMode.Data> {
         matrixStack.push();
         // Reset matrix position to 0,0,0
         matrixStack.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
-        cache.getRenderBank().forEach((pos, data) -> {
+        cache.forEach((pos, data) -> {
             double x = pos.getX();
             double y = pos.getY() + data.offset;
             double z = pos.getZ();
