@@ -2,7 +2,8 @@ package dev.schmarrn.lighty.mode;
 
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.LightyColors;
-import dev.schmarrn.lighty.ModeManager;
+import dev.schmarrn.lighty.api.ModeManager;
+import dev.schmarrn.lighty.api.LightyMode;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
@@ -83,7 +84,7 @@ public class NumberMode extends LightyMode<BlockPos, NumberMode.Data> {
         matrixStack.push();
         // Reset matrix position to 0,0,0
         matrixStack.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
-        cache.getRenderBank().forEach((pos, data) -> {
+        cache.forEach((pos, data) -> {
             double x = pos.getX() + 0.5;
             double y = pos.getY() + data.offset + 0.5;
             double z = pos.getZ() + 0.5;

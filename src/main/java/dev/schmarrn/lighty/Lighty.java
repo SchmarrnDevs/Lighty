@@ -14,6 +14,9 @@
 
 package dev.schmarrn.lighty;
 
+import dev.schmarrn.lighty.event.Compute;
+import dev.schmarrn.lighty.event.KeyBind;
+import dev.schmarrn.lighty.event.Render;
 import dev.schmarrn.lighty.mode.CarpetMode;
 import dev.schmarrn.lighty.mode.NumberMode;
 import net.fabricmc.api.ClientModInitializer;
@@ -37,8 +40,8 @@ public class Lighty implements ClientModInitializer {
         KeyBind.init();
 
         ClientTickEvents.END_CLIENT_TICK.register(KeyBind::handleKeyBind);
-        ClientTickEvents.END_CLIENT_TICK.register(ModeManager.Compute::computeCache);
-        WorldRenderEvents.AFTER_TRANSLUCENT.register(ModeManager.Render::renderOverlay);
+        ClientTickEvents.END_CLIENT_TICK.register(Compute::computeCache);
+        WorldRenderEvents.AFTER_TRANSLUCENT.register(Render::renderOverlay);
 
         ColorProviderRegistry.BLOCK.register((blockState, blockRenderView, blockPos, i) -> {
             if (blockState.getBlock() instanceof OverlayBlock block) {

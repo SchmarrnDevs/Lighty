@@ -21,4 +21,6 @@ public class Blocks {
     public static void init() {
         // Does nothing besides making sure the blocks get registered
     }
+
+    private Blocks() {}
 }
