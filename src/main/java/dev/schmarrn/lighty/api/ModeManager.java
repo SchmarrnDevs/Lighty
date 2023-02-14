@@ -2,7 +2,7 @@ package dev.schmarrn.lighty.api;
 
 import dev.schmarrn.lighty.ModeLoader;
 import dev.schmarrn.lighty.ui.ModeSwitcherScreen;
-import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 
 /**
@@ -22,8 +22,8 @@ public class ModeManager {
         ModeLoader.put(id, mode);
 
         ModeSwitcherScreen.addButton(
-                Text.translatable("modeSwitcher." + id.getNamespace() + "." + id.getPath()),
-                Text.translatable("modeSwitcher." + id.getNamespace() + "." + id.getPath() + ".tooltip"), button -> ModeLoader.loadMode(mode)
+                new TranslatableText("modeSwitcher." + id.getNamespace() + "." + id.getPath()),
+                new TranslatableText("modeSwitcher." + id.getNamespace() + "." + id.getPath() + ".tooltip"), button -> ModeLoader.loadMode(mode)
         );
     }
 
