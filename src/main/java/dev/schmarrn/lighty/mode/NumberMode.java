@@ -106,7 +106,7 @@ public class NumberMode extends LightyMode<BlockPos, NumberMode.Data> {
 
             int width = textRenderer.getWidth(text);
 
-            textRenderer.draw(text, -width / 2f, -textRenderer.fontHeight/2f, data.color, true, matrixStack.peek().getPositionMatrix(), provider, false, 0, 0xF000F0);
+            textRenderer.draw(text, -width / 2f, -textRenderer.fontHeight/2f, data.color, true, matrixStack.peek().getPositionMatrix(), provider, TextRenderer.TextLayerType.NORMAL, 0, 0xF000F0);
 
             matrixStack.pop();
         });
