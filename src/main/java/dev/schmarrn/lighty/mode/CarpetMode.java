@@ -1,9 +1,11 @@
 package dev.schmarrn.lighty.mode;
 
-import dev.schmarrn.lighty.Blocks;
+import dev.schmarrn.lighty.mode.carpet.Blocks;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.api.LightyMode;
+import dev.schmarrn.lighty.mode.carpet.OverlayBlock;
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
@@ -117,6 +119,16 @@ public class CarpetMode extends LightyMode<BlockPos, CarpetMode.Data> {
     }
 
     public static void init() {
+        Blocks.init();
+
+        ColorProviderRegistry.BLOCK.register((blockState, blockRenderView, blockPos, i) -> {
+            if (blockState.getBlock() instanceof OverlayBlock block) {
+                return block.color;
+            } else {
+                return 0xFFFFFF;
+            }
+        }, Blocks.GREEN_OVERLAY, Blocks.RED_OVERLAY, Blocks.ORANGE_OVERLAY);
+
         ModeManager.registerMode(new Identifier(Lighty.MOD_ID, "carpet_mode"), new CarpetMode());
     }
 }
