@@ -13,9 +13,9 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: Set up JDK 17
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
           java-version: 17
       - name: Setup Gradle
@@ -23,12 +23,8 @@ jobs:
       - name: Build
         run: rm -f build/libs/* && gradle remapJar
       - name: Publish
-        uses: Kir-Antipov/mc-publish@v3.1
+        uses: Kir-Antipov/mc-publish@v3
         with:
           modrinth-id: yjvKidNM
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-
-          # curseforge-id: XXXXX
-          # curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-
           github-token: ${{ secrets.GITHUB_TOKEN }}
