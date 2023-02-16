@@ -30,4 +30,6 @@ public class ModeLoader {
     public static LightyMode<?, ?> getCurrentMode() {
         return mode;
     }
+
+    private ModeLoader() {}
 }

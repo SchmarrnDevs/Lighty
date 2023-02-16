@@ -1,6 +1,7 @@
 package dev.schmarrn.lighty.event;
 
 import dev.schmarrn.lighty.ui.ModeSwitcherScreen;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
@@ -26,7 +27,7 @@ public class KeyBind {
     }
 
     public static void init() {
-        // Does nothing besides making sure the keybinds get registered
+        ClientTickEvents.END_CLIENT_TICK.register(KeyBind::handleKeyBind);
     }
 
     private KeyBind() {}

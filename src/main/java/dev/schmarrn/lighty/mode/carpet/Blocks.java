@@ -1,5 +1,7 @@
-package dev.schmarrn.lighty;
+package dev.schmarrn.lighty.mode.carpet;
 
+import dev.schmarrn.lighty.Lighty;
+import dev.schmarrn.lighty.LightyColors;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Material;
