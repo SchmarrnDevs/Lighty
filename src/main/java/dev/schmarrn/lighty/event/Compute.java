@@ -21,6 +21,9 @@ public class Compute {
     }
 
     public static void computeCache(MinecraftClient client) {
+        LightyMode<?, ?> mode = ModeLoader.getCurrentMode();
+        if (mode == null) return;
+
         ClientPlayerEntity player = client.player;
         ClientWorld world = client.world;
         if (player == null || world == null) {
@@ -28,9 +31,6 @@ public class Compute {
         }
         BlockPos playerPos = player.getBlockPos();
 
-        LightyMode<?, ?> mode = ModeLoader.getCurrentMode();
-
-        if (mode == null) return;
         if (!oldPlayerPos.equals(playerPos)) {
             markDirty();
             oldPlayerPos = playerPos;
