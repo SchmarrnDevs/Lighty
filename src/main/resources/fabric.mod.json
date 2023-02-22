@@ -3,17 +3,18 @@
   "id": "lighty",
   "version": "${version}",
   "name": "Lighty",
-  "description": "Another Light Overlay Mod",
+  "description": "The Light Overlay Mod with a twist!",
   "authors": [
-    "Andreas Kohler"
+    "andi_makes"
   ],
   "contact": {
     "email": "contact@schmarrn.dev",
-    "sources": "https://github.com/SchmarrnDevs/Lighty"
+    "sources": "https://github.com/SchmarrnDevs/Lighty",
+    "issues": "https://github.com/SchmarrnDevs/Lighty/issues"
   },
   "license": "Apache-2.0",
   "icon": "assets/lighty/icon.png",
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
     "client": [
       "dev.schmarrn.lighty.Lighty"
