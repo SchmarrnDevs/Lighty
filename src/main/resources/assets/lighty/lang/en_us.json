@@ -1,5 +1,6 @@
 {
-  "key.lighty.enable": "Enable Light Overlay",
+  "key.lighty.enable": "Open Light Overlay Menu",
+  "key.lighty.toggle": "Toggle Light Overlay",
   "category.lighty": "Lighty",
   "modeSwitcher.lighty.title": "Lighty Mode Switcher",
   "modeSwitcher.lighty.number_mode": "Number Mode",
