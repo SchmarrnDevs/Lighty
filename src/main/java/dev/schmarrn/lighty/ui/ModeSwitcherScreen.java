@@ -24,7 +24,7 @@ public class ModeSwitcherScreen extends Screen {
     @Override
     protected void init() {
         int height = START_HEIGHT + DELTA_HEIGHT;
-        this.addDrawableChild(new ButtonWidget(this.width/2 - 75, height, 150, 20, ScreenTexts.OFF, button -> ModeLoader.loadMode(null)));
+        this.addDrawableChild(new ButtonWidget(this.width/2 - 75, height, 150, 20, ScreenTexts.OFF, button -> ModeLoader.disable()));
         for (ButtonWidget btn : BUTTONS) {
             height += DELTA_HEIGHT;
             btn.x = this.width / 2 - 75;
