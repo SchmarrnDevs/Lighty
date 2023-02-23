@@ -25,7 +25,7 @@ public class ModeSwitcherScreen extends Screen {
         gridWidget.getMainPositioner().marginBottom(4).alignHorizontalCenter().alignVerticalCenter();
         GridWidget.Adder adder = gridWidget.createAdder(1);
 
-        adder.add(ButtonWidget.builder(ScreenTexts.OFF, button -> ModeLoader.loadMode(null)).build());
+        adder.add(ButtonWidget.builder(ScreenTexts.OFF, button -> ModeLoader.disable()).build());
 
         for (ButtonWidget btn : BUTTONS) {
             adder.add(btn);

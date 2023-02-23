@@ -23,7 +23,7 @@ public class ModeManager {
 
         ModeSwitcherScreen.addButton(
                 Text.translatable("modeSwitcher." + id.getNamespace() + "." + id.getPath()),
-                Text.translatable("modeSwitcher." + id.getNamespace() + "." + id.getPath() + ".tooltip"), button -> ModeLoader.loadMode(mode)
+                Text.translatable("modeSwitcher." + id.getNamespace() + "." + id.getPath() + ".tooltip"), button -> ModeLoader.loadMode(id)
         );
     }
 
