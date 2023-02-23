@@ -14,6 +14,8 @@
 
 package dev.schmarrn.lighty;
 
+import dev.schmarrn.lighty.api.LightyModesRegistration;
+import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.event.Compute;
 import dev.schmarrn.lighty.event.KeyBind;
 import dev.schmarrn.lighty.event.Render;
@@ -22,6 +24,7 @@ import dev.schmarrn.lighty.mode.NumberMode;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +38,17 @@ public class Lighty implements ClientModInitializer {
     public void onInitializeClient() {
         LOGGER.info("Let there be {}", MOD_NAME);
 
+        Config.init();
+
         KeyBind.init();
         ClientTickEvents.END_CLIENT_TICK.register(Compute::computeCache);
         WorldRenderEvents.AFTER_TRANSLUCENT.register(Render::renderOverlay);
 
         CarpetMode.init();
         NumberMode.init();
+
+        FabricLoader.getInstance().getEntrypoints("lightyModesRegistration", LightyModesRegistration.class).forEach(LightyModesRegistration::registerLightyModes);
+
+        ModeLoader.setLastUsedMode();
     }
 }
