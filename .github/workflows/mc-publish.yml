@@ -24,7 +24,7 @@ jobs:
       - name: Build
         run: rm -f build/libs/* && gradle remapJar
       - name: Publish
-        uses: Kir-Antipov/mc-publish@v3
+        uses: Kir-Antipov/mc-publish@v3.2
         with:
           modrinth-id: yjvKidNM
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
