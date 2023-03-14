@@ -28,4 +28,4 @@ jobs:
         with:
           modrinth-id: yjvKidNM
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-          # github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
