@@ -17,8 +17,9 @@ import net.minecraft.tag.BlockTags;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LightType;
+
+import java.util.Random;
 
 public class CarpetMode extends LightyMode<BlockPos, CarpetMode.Data> {
     record Data(BlockState state, double offset) {}
@@ -27,7 +28,7 @@ public class CarpetMode extends LightyMode<BlockPos, CarpetMode.Data> {
      * Used in render for the block renderer - DO NOT USE `world.random`, it breaks
      * at least campfires and probably other random rendering things
      */
-    private static Random random = Random.create();
+    private static Random random = new Random();
 
     public static boolean isBlocked(BlockState block, BlockState up, ClientWorld world, BlockPos upPos) {
         // See SpawnHelper.isClearForSpawn
