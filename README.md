@@ -6,12 +6,12 @@
 
 Currently, I try to actively support:
 
-- The most recent 1.19.4 snapshot
-- 1.19.3
+- 1.19.4
 - 1.19.2
 
-Versions I will support as long as it is easy enough to port the changes:
+Versions that I may port changes to if it is easy enough and if I have enough time:
 
+- 1.19.3
 - 1.19.1
 - 1.18.2
 
@@ -22,7 +22,7 @@ All of the above boils down to these rules:
 - I will support the current stable Minecraft version.
 - I will support the latest Minecraft version [Create Fabric](https://modrinth.com/mod/create-fabric) is on.
 - I will try to support the most recent snapshot. I will not backport any changes to snapshots.
-- Support for any other version may or may not be provided. As long as it is fairly easy to port the changes, there is a good chance I will still support it.
+- Support for any other version may or may not be provided. As long as it is fairly easy to port the changes and if I have enough time, there is a good chance I will still support it.
 
 ## Differences across Minecraft versions
 
