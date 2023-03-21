@@ -1,7 +1,7 @@
 package dev.schmarrn.lighty.mode;
 
 import dev.schmarrn.lighty.Lighty;
-import dev.schmarrn.lighty.LightyColors;
+import dev.schmarrn.lighty.api.LightyColors;
 import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.api.LightyMode;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
@@ -53,12 +53,12 @@ public class NumberMode extends LightyMode<BlockPos, NumberMode.Data> {
         int blockLightLevel = world.getLightLevel(LightType.BLOCK, posUp);
         int skyLightLevel = world.getDimension().hasSkyLight() ? world.getLightLevel(LightType.SKY, posUp) : -1;
 
-        int color = LightyColors.GREEN;
+        int color = LightyColors.getSafe();
         if (blockLightLevel == 0) {
             if (skyLightLevel == 0) {
-                color = LightyColors.RED;
+                color = LightyColors.getDanger();
             } else {
-                color = LightyColors.ORANGE;
+                color = LightyColors.getWarning();
             }
         }
 
