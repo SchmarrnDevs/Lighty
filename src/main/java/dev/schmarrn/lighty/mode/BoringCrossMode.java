@@ -16,7 +16,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.LightType;
 import org.joml.Matrix4f;
 
-public class TestMode extends LightyMode<BlockPos, Integer> {
+public class BoringCrossMode extends LightyMode<BlockPos, Integer> {
     private VertexBuffer cachedBuffer = null;
     private boolean reRender = true;
 
@@ -85,6 +85,6 @@ public class TestMode extends LightyMode<BlockPos, Integer> {
     }
 
     public static void init() {
-        ModeManager.registerMode(new Identifier(Lighty.MOD_ID, "test_mode"), new TestMode());
+        ModeManager.registerMode(new Identifier(Lighty.MOD_ID, "boring_cross_mode"), new BoringCrossMode());
     }
 }

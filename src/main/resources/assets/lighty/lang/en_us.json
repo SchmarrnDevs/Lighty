@@ -6,5 +6,7 @@
   "modeSwitcher.lighty.number_mode": "Number Mode",
   "modeSwitcher.lighty.number_mode.tooltip": "Displays as: BlockLightLevel|SkyLightLevel",
   "modeSwitcher.lighty.carpet_mode": "Carpet Mode",
-  "modeSwitcher.lighty.carpet_mode.tooltip": "Original, carpet like overlay"
+  "modeSwitcher.lighty.carpet_mode.tooltip": "Original, carpet like overlay",
+  "modeSwitcher.lighty.boring_cross_mode": "Boring Cross Mode",
+  "modeSwitcher.lighty.boring_cross_mode.tooltip": "It feels like every Light Overlay Mod has them"
 }
