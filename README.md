@@ -6,6 +6,7 @@
 
 Currently, I try to actively support:
 
+- 1.20.0 Snapshots
 - 1.19.4
 - 1.19.2
 
