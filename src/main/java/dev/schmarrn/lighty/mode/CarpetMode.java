@@ -20,7 +20,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LightType;
 
-public class CarpetMode extends LightyMode<BlockPos, CarpetMode.Data> {
+public class CarpetMode extends LightyMode {
     record Data(BlockState state, double offset) {}
 
     /**
@@ -41,7 +41,7 @@ public class CarpetMode extends LightyMode<BlockPos, CarpetMode.Data> {
     }
 
     @Override
-    public void compute(ClientWorld world, BlockPos pos) {
+    public void compute(ClientWorld world, BlockPos pos, BufferBuilder builder) {
         BlockPos posUp = pos.up();
         BlockState up = world.getBlockState(posUp);
         Block upBlock = up.getBlock();
@@ -78,52 +78,52 @@ public class CarpetMode extends LightyMode<BlockPos, CarpetMode.Data> {
             offset = 1f / 16f;
         }
 
-        cache.put(posUp, new Data(overlayState, offset));
+        //cache.put(posUp, new Data(overlayState, offset));
     }
 
-    @Override
-    public void render(WorldRenderContext worldRenderContext, ClientWorld world, Frustum frustum, VertexConsumerProvider.Immediate provider, MinecraftClient client) {
-        MatrixStack matrixStack = worldRenderContext.matrixStack();
-        Camera camera = worldRenderContext.camera();
-
-        VertexConsumer buffer = provider.getBuffer(RenderLayer.getTranslucent());
-        BlockRenderManager blockRenderManager = client.getBlockRenderManager();
-        matrixStack.push();
-        // Reset matrix position to 0,0,0
-        matrixStack.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
-        cache.forEach((pos, data) -> {
-            double x = pos.getX();
-            double y = pos.getY() + data.offset;
-            double z = pos.getZ();
-
-            boolean overlayVisible = frustum.isVisible(new Box(
-                    x, y, z,
-                    x + 1, y + 1f / 16f, z + 1
-            ));
-
-            if (!overlayVisible) {
-                return;
-            }
-
-            matrixStack.push();
-            matrixStack.translate(x, y, z);
-
-            blockRenderManager.renderBlock(
-                    data.state,
-                    pos,
-                    world,
-                    matrixStack,
-                    buffer,
-                    false,
-                    random
-            );
-
-            matrixStack.pop();
-        });
-
-        matrixStack.pop();
-        provider.draw();
-    }
+//    @Override
+//    public void render(WorldRenderContext worldRenderContext, ClientWorld world, Frustum frustum, VertexConsumerProvider.Immediate provider, MinecraftClient client) {
+//        MatrixStack matrixStack = worldRenderContext.matrixStack();
+//        Camera camera = worldRenderContext.camera();
+//
+//        VertexConsumer buffer = provider.getBuffer(RenderLayer.getTranslucent());
+//        BlockRenderManager blockRenderManager = client.getBlockRenderManager();
+//        matrixStack.push();
+//        // Reset matrix position to 0,0,0
+//        matrixStack.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
+//        cache.forEach((pos, data) -> {
+//            double x = pos.getX();
+//            double y = pos.getY() + data.offset;
+//            double z = pos.getZ();
+//
+//            boolean overlayVisible = frustum.isVisible(new Box(
+//                    x, y, z,
+//                    x + 1, y + 1f / 16f, z + 1
+//            ));
+//
+//            if (!overlayVisible) {
+//                return;
+//            }
+//
+//            matrixStack.push();
+//            matrixStack.translate(x, y, z);
+//
+//            blockRenderManager.renderBlock(
+//                    data.state,
+//                    pos,
+//                    world,
+//                    matrixStack,
+//                    buffer,
+//                    false,
+//                    random
+//            );
+//
+//            matrixStack.pop();
+//        });
+//
+//        matrixStack.pop();
+//        provider.draw();
+//    }
 
     public static void init() {
         Blocks.init();

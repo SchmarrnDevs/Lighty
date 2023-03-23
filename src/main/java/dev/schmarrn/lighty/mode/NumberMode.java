@@ -8,9 +8,11 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.chunk.ChunkBuilder;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.registry.tag.BlockTags;
@@ -20,7 +22,9 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.LightType;
 
-public class NumberMode extends LightyMode<BlockPos, NumberMode.Data> {
+import java.nio.Buffer;
+
+public class NumberMode extends LightyMode {
     record Data(int blockLightLevel, int skyLightLevel, double offset, int color) {}
 
     public static boolean isBlocked(BlockState block, BlockState up, ClientWorld world, BlockPos upPos) {
@@ -35,7 +39,7 @@ public class NumberMode extends LightyMode<BlockPos, NumberMode.Data> {
     }
 
     @Override
-    public void compute(ClientWorld world, BlockPos pos) {
+    public void compute(ClientWorld world, BlockPos pos, BufferBuilder builder) {
         BlockPos posUp = pos.up();
         BlockState up = world.getBlockState(posUp);
         Block upBlock = up.getBlock();
@@ -72,48 +76,48 @@ public class NumberMode extends LightyMode<BlockPos, NumberMode.Data> {
             offset = 1f / 16f;
         }
 
-        cache.put(posUp, new Data(blockLightLevel, skyLightLevel, offset, color));
+        //cache.put(posUp, new Data(blockLightLevel, skyLightLevel, offset, color));
     }
 
-    @Override
-    public void render(WorldRenderContext worldRenderContext, ClientWorld world, Frustum frustum, VertexConsumerProvider.Immediate provider, MinecraftClient client) {
-        MatrixStack matrixStack = worldRenderContext.matrixStack();
-        Camera camera = worldRenderContext.camera();
-
-        TextRenderer textRenderer = client.textRenderer;
-        matrixStack.push();
-        // Reset matrix position to 0,0,0
-        matrixStack.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
-        cache.forEach((pos, data) -> {
-            double x = pos.getX() + 0.5;
-            double y = pos.getY() + data.offset + 0.5;
-            double z = pos.getZ() + 0.5;
-
-            boolean overlayVisible = frustum.isVisible(new Box(pos));
-
-            if (!overlayVisible) {
-                return;
-            }
-
-            matrixStack.push();
-            matrixStack.translate(x, y, z);
-            matrixStack.scale(1f/32f, -1f/32f, 1f/32f);
-
-            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotation((float) -(Math.PI + camera.getYaw() / 180f * Math.PI)));
-            matrixStack.multiply(RotationAxis.POSITIVE_X.rotation((float) (camera.getPitch() / 180f * Math.PI)));
-
-            String text = data.skyLightLevel >= 0 ? data.blockLightLevel + "|" + data.skyLightLevel : data.blockLightLevel + "";
-
-            int width = textRenderer.getWidth(text);
-
-            textRenderer.draw(text, -width / 2f, -textRenderer.fontHeight/2f, data.color, true, matrixStack.peek().getPositionMatrix(), provider, TextRenderer.TextLayerType.NORMAL, 0, 0xF000F0);
-
-            matrixStack.pop();
-        });
-
-        matrixStack.pop();
-        provider.draw();
-    }
+//    @Override
+//    public void render(WorldRenderContext worldRenderContext, ClientWorld world, Frustum frustum, VertexConsumerProvider.Immediate provider, MinecraftClient client) {
+//        MatrixStack matrixStack = worldRenderContext.matrixStack();
+//        Camera camera = worldRenderContext.camera();
+//
+//        TextRenderer textRenderer = client.textRenderer;
+//        matrixStack.push();
+//        // Reset matrix position to 0,0,0
+//        matrixStack.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
+//        cache.forEach((pos, data) -> {
+//            double x = pos.getX() + 0.5;
+//            double y = pos.getY() + data.offset + 0.5;
+//            double z = pos.getZ() + 0.5;
+//
+//            boolean overlayVisible = frustum.isVisible(new Box(pos));
+//
+//            if (!overlayVisible) {
+//                return;
+//            }
+//
+//            matrixStack.push();
+//            matrixStack.translate(x, y, z);
+//            matrixStack.scale(1f/32f, -1f/32f, 1f/32f);
+//
+//            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotation((float) -(Math.PI + camera.getYaw() / 180f * Math.PI)));
+//            matrixStack.multiply(RotationAxis.POSITIVE_X.rotation((float) (camera.getPitch() / 180f * Math.PI)));
+//
+//            String text = data.skyLightLevel >= 0 ? data.blockLightLevel + "|" + data.skyLightLevel : data.blockLightLevel + "";
+//
+//            int width = textRenderer.getWidth(text);
+//
+//            textRenderer.draw(text, -width / 2f, -textRenderer.fontHeight/2f, data.color, true, matrixStack.peek().getPositionMatrix(), provider, TextRenderer.TextLayerType.NORMAL, 0, 0xF000F0);
+//
+//            matrixStack.pop();
+//        });
+//
+//        matrixStack.pop();
+//        provider.draw();
+//    }
 
     public static void init() {
         ModeManager.registerMode(new Identifier(Lighty.MOD_ID, "number_mode"), new NumberMode());

@@ -18,7 +18,7 @@ public class ModeManager {
      * @param id Used to generate the translatable text resource locations
      * @param mode Your LightyMode to be registered
      */
-    public static void registerMode(Identifier id, LightyMode<?, ?> mode) {
+    public static void registerMode(Identifier id, LightyMode mode) {
         ModeLoader.put(id, mode);
 
         ModeSwitcherScreen.addButton(

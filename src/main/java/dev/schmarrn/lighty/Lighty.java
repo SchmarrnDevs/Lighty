@@ -18,14 +18,13 @@ import dev.schmarrn.lighty.api.LightyModesRegistration;
 import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.event.Compute;
 import dev.schmarrn.lighty.event.KeyBind;
-import dev.schmarrn.lighty.event.Render;
-import dev.schmarrn.lighty.mode.CarpetMode;
-import dev.schmarrn.lighty.mode.NumberMode;
 import dev.schmarrn.lighty.mode.BoringCrossMode;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.math.ChunkSectionPos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,10 +42,16 @@ public class Lighty implements ClientModInitializer {
 
         KeyBind.init();
         ClientTickEvents.END_CLIENT_TICK.register(Compute::computeCache);
-        WorldRenderEvents.AFTER_TRANSLUCENT.register(Render::renderOverlay);
+        WorldRenderEvents.AFTER_TRANSLUCENT.register(Compute::render);
+        ClientChunkEvents.CHUNK_LOAD.register((world, chunk) -> {
+            Compute.addChunk(world, chunk.getPos());
+        });
+        ClientChunkEvents.CHUNK_UNLOAD.register((world, chunk) -> {
+            Compute.removeChunk(world, chunk.getPos());
+        });
 
-        CarpetMode.init();
-        NumberMode.init();
+        // CarpetMode.init();
+        // NumberMode.init();
         BoringCrossMode.init();
 
         FabricLoader.getInstance().getEntrypoints("lightyModesRegistration", LightyModesRegistration.class).forEach(LightyModesRegistration::registerLightyModes);

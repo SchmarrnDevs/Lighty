@@ -10,27 +10,23 @@ import java.util.HashMap;
 
 public class ModeLoader {
     @Nullable
-    private static LightyMode<?, ?> mode = null;
+    private static LightyMode mode = null;
 
     private static boolean enabled = false;
 
-    private static final HashMap<Identifier, LightyMode<?, ?>> MODES = new HashMap<>();
+    private static final HashMap<Identifier, LightyMode> MODES = new HashMap<>();
 
     public static void loadMode(Identifier id) {
-        LightyMode<?, ?> modeToLoad = MODES.get(id);
+        LightyMode modeToLoad = MODES.get(id);
 
         if (modeToLoad == null) {
             Lighty.LOGGER.error("Trying to load unregistered mode with id {}! Not changing mode.", id);
             return;
         }
 
-        if (ModeLoader.mode != null) {
-            ModeLoader.mode.unload();
-        }
-
         ModeLoader.mode = modeToLoad;
         Config.setLastUsedMode(id);
-        Compute.markDirty();
+        //Compute.markDirty();
         enable();
     }
 
@@ -46,12 +42,12 @@ public class ModeLoader {
         enabled = !enabled;
     }
 
-    public static void put(Identifier id, LightyMode<?, ?> mode) {
+    public static void put(Identifier id, LightyMode mode) {
         MODES.put(id, mode);
     }
 
     @Nullable
-    public static LightyMode<?, ?> getCurrentMode() {
+    public static LightyMode getCurrentMode() {
         if (!enabled) return null;
         return mode;
     }
