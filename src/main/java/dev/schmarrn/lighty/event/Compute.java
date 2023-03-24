@@ -134,6 +134,7 @@ public class Compute {
 
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
         RenderSystem.lineWidth(1.0f);
+        RenderSystem.enableDepthTest();
 
         Frustum frustum = worldRenderContext.frustum();
         if (frustum == null) {
@@ -157,6 +158,7 @@ public class Compute {
         }));
 
         matrixStack.pop();
+        RenderSystem.disableDepthTest();
         RenderSystem.lineWidth(1.0F);
     }
 
