@@ -26,7 +26,7 @@ public class ModeLoader {
 
         ModeLoader.mode = modeToLoad;
         Config.setLastUsedMode(id);
-        //Compute.markDirty();
+        Compute.clear();
         enable();
     }
 

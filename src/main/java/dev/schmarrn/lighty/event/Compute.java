@@ -21,6 +21,12 @@ public class Compute {
     private static final Queue<ChunkSectionPos> toBeComputed = new ArrayDeque<>();
     private static final Queue<ChunkSectionPos> toBeUpdated = new ArrayDeque<>();
 
+    public static void clear() {
+        toBeComputed.clear();
+        toBeUpdated.clear();
+        cachedBuffers.clear();
+    }
+
     public static void addChunk(ClientWorld world, ChunkPos pos) {
         for (int i = 0; i < world.countVerticalSections(); ++i) {
                 Compute.addSubChunk(ChunkSectionPos.from(pos, world.getBottomSectionCoord() + i));
@@ -34,6 +40,7 @@ public class Compute {
     }
 
     public static void addSubChunk(ChunkSectionPos pos) {
+        if (toBeComputed.contains(pos)) return;
         toBeComputed.add(pos);
     }
 
@@ -75,8 +82,7 @@ public class Compute {
     private static final Map<ChunkSectionPos, VertexBuffer> cachedBuffers = new HashMap<>();
 
     private static void buildChunk(LightyMode mode, ChunkSectionPos chunkPos, BufferBuilder builder, ClientWorld world) {
-        builder.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
-        mode.beforeCompute();
+        mode.beforeCompute(builder);
         for (int x = 0; x < 16; ++x) {
             for (int y = 0; y < 16; ++y) {
                 for (int z = 0; z < 16; ++z) {
@@ -117,12 +123,12 @@ public class Compute {
         while ((chunkPos = toBeUpdated.poll()) != null) {
             ++updatedChunks;
 
-            buildChunk(mode, chunkPos, tessellator.getBuffer(), world);
+            buildChunk(mode, chunkPos, new BufferBuilder(RenderLayer.getTranslucent().getExpectedBufferSize()), world);
         }
 
         int chunksPerTick = 50 - updatedChunks;
         while (chunksPerTick-- > 0 && (chunkPos = toBeComputed.poll()) != null){
-            buildChunk(mode, chunkPos, tessellator.getBuffer(), world);
+            buildChunk(mode, chunkPos, new BufferBuilder(RenderLayer.getTranslucent().getExpectedBufferSize()), world);
         }
 
         Lighty.LOGGER.info("Computed: {}", 50 - chunksPerTick);
@@ -132,14 +138,12 @@ public class Compute {
         LightyMode mode = ModeLoader.getCurrentMode();
         if (mode == null) return;
 
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-        RenderSystem.lineWidth(1.0f);
-        RenderSystem.enableDepthTest();
-
         Frustum frustum = worldRenderContext.frustum();
         if (frustum == null) {
             return;
         }
+
+        mode.beforeRendering();
 
         Camera camera = MinecraftClient.getInstance().gameRenderer.getCamera();
         MatrixStack matrixStack = worldRenderContext.matrixStack();
@@ -147,19 +151,17 @@ public class Compute {
         matrixStack.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
         Matrix4f positionMatrix = matrixStack.peek().getPositionMatrix();
         Matrix4f projectionMatrix = worldRenderContext.projectionMatrix();
-
-
         cachedBuffers.forEach(((chunkPos, cachedBuffer) -> {
             if (frustum.isVisible(new Box(chunkPos.getMinX(), chunkPos.getMinY(), chunkPos.getMinZ(), chunkPos.getMaxX(), chunkPos.getMaxY(), chunkPos.getMaxZ()))) {
                 cachedBuffer.bind();
-                cachedBuffer.draw(positionMatrix, projectionMatrix, GameRenderer.getPositionColorProgram());
-                VertexBuffer.unbind();
+                cachedBuffer.draw(positionMatrix, projectionMatrix, RenderSystem.getShader());
             }
         }));
+        VertexBuffer.unbind();
 
         matrixStack.pop();
-        RenderSystem.disableDepthTest();
-        RenderSystem.lineWidth(1.0F);
+
+        mode.afterRendering();
     }
 
     private Compute() {}

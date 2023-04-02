@@ -19,12 +19,15 @@ import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.event.Compute;
 import dev.schmarrn.lighty.event.KeyBind;
 import dev.schmarrn.lighty.mode.BoringCrossMode;
+import dev.schmarrn.lighty.mode.CarpetMode;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.math.ChunkSectionPos;
+import net.minecraft.client.util.telemetry.WorldUnloadedEvent;
+import net.minecraft.world.WorldEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +53,7 @@ public class Lighty implements ClientModInitializer {
             Compute.removeChunk(world, chunk.getPos());
         });
 
-        // CarpetMode.init();
+        CarpetMode.init();
         // NumberMode.init();
         BoringCrossMode.init();
 

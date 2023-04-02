@@ -19,6 +19,11 @@ import org.joml.Matrix4f;
 public class BoringCrossMode extends LightyMode {
 
     @Override
+    public void beforeCompute(BufferBuilder builder) {
+        builder.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
+    }
+
+    @Override
     public void compute(ClientWorld world, BlockPos pos, BufferBuilder builder) {
         if (world.getBlockState(pos).isAir() && !world.getBlockState(pos.down()).isAir()) {
             int blockLight = world.getLightLevel(LightType.BLOCK, pos);
@@ -46,7 +51,20 @@ public class BoringCrossMode extends LightyMode {
         }
     }
 
-//    @Override
+    @Override
+    public void beforeRendering() {
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.lineWidth(1.0f);
+        RenderSystem.enableDepthTest();
+    }
+
+    @Override
+    public void afterRendering() {
+        RenderSystem.disableDepthTest();
+        RenderSystem.lineWidth(1.0F);
+    }
+
+    //    @Override
 //    public void render(WorldRenderContext worldRenderContext, ClientWorld world, Frustum frustum, VertexConsumerProvider.Immediate provider, MinecraftClient client) {
 //        if (cachedBuffer == null) {
 //            cachedBuffer = new VertexBuffer();

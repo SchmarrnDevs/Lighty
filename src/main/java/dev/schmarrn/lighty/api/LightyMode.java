@@ -20,7 +20,10 @@ public abstract class LightyMode {
      * - a bunch of `compute()` calls<br/>
      * - exactly one call to `afterCompute()`
      */
-    public void beforeCompute() {}
+    public void beforeCompute(BufferBuilder builder) {}
+
+    public void beforeRendering() {}
+    public void afterRendering() {}
 
     /**
      * If you need to do stuff after each compute-cycle.<br/>

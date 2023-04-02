@@ -1,5 +1,6 @@
 package dev.schmarrn.lighty.mode;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import dev.schmarrn.lighty.mode.carpet.Blocks;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.ModeManager;
@@ -11,6 +12,8 @@ import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.BlockRenderManager;
+import net.minecraft.client.render.model.SpriteAtlasManager;
+import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.registry.tag.BlockTags;
@@ -28,6 +31,7 @@ public class CarpetMode extends LightyMode {
      * at least campfires and probably other random rendering things
      */
     private static Random random = Random.create();
+    private static MatrixStack matrixStack;
 
     public static boolean isBlocked(BlockState block, BlockState up, ClientWorld world, BlockPos upPos) {
         // See SpawnHelper.isClearForSpawn
@@ -38,6 +42,12 @@ public class CarpetMode extends LightyMode {
                 up.isIn(BlockTags.PREVENT_MOB_SPAWNING_INSIDE) ||
                 // MagmaBlocks caused a Crash - But Mobs can still spawn on them, I need to fix this
                 block.getBlock() instanceof MagmaBlock;
+    }
+
+    @Override
+    public void beforeCompute(BufferBuilder builder) {
+        matrixStack = new MatrixStack();
+        builder.begin(RenderLayer.getTranslucent().getDrawMode(), RenderLayer.getTranslucent().getVertexFormat());
     }
 
     @Override
@@ -78,10 +88,36 @@ public class CarpetMode extends LightyMode {
             offset = 1f / 16f;
         }
 
+        matrixStack.push();
+        matrixStack.translate(posUp.getX(), (posUp.getY()) + offset, posUp.getZ());
+        MinecraftClient.getInstance().getBlockRenderManager().renderBlock(
+                overlayState,
+                posUp,
+                world,
+                matrixStack,
+                builder,
+                false,
+                random
+        );
+        matrixStack.pop();
+
         //cache.put(posUp, new Data(overlayState, offset));
     }
 
-//    @Override
+    @Override
+    public void beforeRendering() {
+        RenderSystem.setShader(GameRenderer::getBlockProgram);
+        RenderSystem.enableDepthTest();
+        RenderSystem.enableBlend();
+    }
+
+    @Override
+    public void afterRendering() {
+        RenderSystem.disableDepthTest();
+        RenderSystem.disableBlend();
+    }
+
+    //    @Override
 //    public void render(WorldRenderContext worldRenderContext, ClientWorld world, Frustum frustum, VertexConsumerProvider.Immediate provider, MinecraftClient client) {
 //        MatrixStack matrixStack = worldRenderContext.matrixStack();
 //        Camera camera = worldRenderContext.camera();
