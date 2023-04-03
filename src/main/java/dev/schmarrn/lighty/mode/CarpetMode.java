@@ -1,27 +1,29 @@
 package dev.schmarrn.lighty.mode;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.mode.carpet.Blocks;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.api.LightyMode;
 import dev.schmarrn.lighty.mode.carpet.OverlayBlock;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.minecraft.block.*;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.model.SpriteAtlasManager;
-import net.minecraft.client.texture.SpriteAtlasTexture;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.LightType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CarpetBlock;
+import net.minecraft.world.level.block.MagmaBlock;
+import net.minecraft.world.level.block.SnowLayerBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class CarpetMode extends LightyMode {
     record Data(BlockState state, double offset) {}
@@ -30,57 +32,57 @@ public class CarpetMode extends LightyMode {
      * Used in render for the block renderer - DO NOT USE `world.random`, it breaks
      * at least campfires and probably other random rendering things
      */
-    private static Random random = Random.create();
-    private static MatrixStack matrixStack;
+    private static RandomSource random = RandomSource.create();
+    private static PoseStack matrixStack;
 
-    public static boolean isBlocked(BlockState block, BlockState up, ClientWorld world, BlockPos upPos) {
+    public static boolean isBlocked(BlockState block, BlockState up, ClientLevel world, BlockPos upPos) {
         // See SpawnHelper.isClearForSpawn
         // If block with FluidState (think Kelp, Seagrass, Glowlichen underwater), disable overlay
-        return (up.isFullCube(world, upPos) ||
-                up.emitsRedstonePower() ||
+        return (up.isCollisionShapeFullBlock(world, upPos) ||
+                up.hasAnalogOutputSignal() ||
                 !up.getFluidState().isEmpty()) ||
-                up.isIn(BlockTags.PREVENT_MOB_SPAWNING_INSIDE) ||
+                up.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE) ||
                 // MagmaBlocks caused a Crash - But Mobs can still spawn on them, I need to fix this
                 block.getBlock() instanceof MagmaBlock;
     }
 
     @Override
     public void beforeCompute(BufferBuilder builder) {
-        matrixStack = new MatrixStack();
-        builder.begin(RenderLayer.getTranslucent().getDrawMode(), RenderLayer.getTranslucent().getVertexFormat());
+        matrixStack = new PoseStack();
+        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
     }
 
     @Override
-    public void compute(ClientWorld world, BlockPos pos, BufferBuilder builder) {
-        BlockPos posUp = pos.up();
+    public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
+        BlockPos posUp = pos.above();
         BlockState up = world.getBlockState(posUp);
         Block upBlock = up.getBlock();
         BlockState block = world.getBlockState(pos);
-        boolean validSpawn = upBlock.canMobSpawnInside();
+        boolean validSpawn = upBlock.isPossibleToRespawnInThis();
         if (isBlocked(block, up, world, posUp)) {
             return;
         }
-        validSpawn = validSpawn && block.allowsSpawning(world, pos, null);
+        validSpawn = validSpawn && block.isValidSpawn(world, pos, null);
 
         if (!validSpawn) {
             return;
         }
 
-        int blockLightLevel = world.getLightLevel(LightType.BLOCK, posUp);
-        int skyLightLevel = world.getLightLevel(LightType.SKY, posUp);
+        int blockLightLevel = world.getBrightness(LightLayer.BLOCK, posUp);
+        int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
 
-        BlockState overlayState = Blocks.GREEN_OVERLAY.getDefaultState();
+        BlockState overlayState = Blocks.GREEN_OVERLAY.defaultBlockState();
         if (blockLightLevel == 0) {
             if (skyLightLevel == 0) {
-                overlayState = Blocks.RED_OVERLAY.getDefaultState();
+                overlayState = Blocks.RED_OVERLAY.defaultBlockState();
             } else {
-                overlayState = Blocks.ORANGE_OVERLAY.getDefaultState();
+                overlayState = Blocks.ORANGE_OVERLAY.defaultBlockState();
             }
         }
 
         double offset = 0;
-        if (upBlock instanceof SnowBlock) { // snow layers
-            int layer = world.getBlockState(posUp).get(SnowBlock.LAYERS);
+        if (upBlock instanceof SnowLayerBlock) { // snow layers
+            int layer = world.getBlockState(posUp).getValue(SnowLayerBlock.LAYERS);
             // One layer of snow is two pixels high, with one pixel being 1/16
             offset = 2f / 16f * layer;
         } else if (upBlock instanceof CarpetBlock) {
@@ -88,9 +90,9 @@ public class CarpetMode extends LightyMode {
             offset = 1f / 16f;
         }
 
-        matrixStack.push();
+        matrixStack.pushPose();
         matrixStack.translate(posUp.getX(), (posUp.getY()) + offset, posUp.getZ());
-        MinecraftClient.getInstance().getBlockRenderManager().renderBlock(
+        Minecraft.getInstance().getBlockRenderer().renderBatched(
                 overlayState,
                 posUp,
                 world,
@@ -99,14 +101,14 @@ public class CarpetMode extends LightyMode {
                 false,
                 random
         );
-        matrixStack.pop();
+        matrixStack.popPose();
 
         //cache.put(posUp, new Data(overlayState, offset));
     }
 
     @Override
     public void beforeRendering() {
-        RenderSystem.setShader(GameRenderer::getBlockProgram);
+        RenderSystem.setShader(GameRenderer::getBlockShader);
         RenderSystem.enableDepthTest();
         RenderSystem.enableBlend();
     }
@@ -172,6 +174,6 @@ public class CarpetMode extends LightyMode {
             }
         }, Blocks.GREEN_OVERLAY, Blocks.RED_OVERLAY, Blocks.ORANGE_OVERLAY);
 
-        ModeManager.registerMode(new Identifier(Lighty.MOD_ID, "carpet_mode"), new CarpetMode());
+        ModeManager.registerMode(new ResourceLocation(Lighty.MOD_ID, "carpet_mode"), new CarpetMode());
     }
 }

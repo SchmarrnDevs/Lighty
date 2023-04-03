@@ -3,7 +3,7 @@ package dev.schmarrn.lighty;
 import dev.schmarrn.lighty.api.LightyMode;
 import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.event.Compute;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -14,9 +14,9 @@ public class ModeLoader {
 
     private static boolean enabled = false;
 
-    private static final HashMap<Identifier, LightyMode> MODES = new HashMap<>();
+    private static final HashMap<ResourceLocation, LightyMode> MODES = new HashMap<>();
 
-    public static void loadMode(Identifier id) {
+    public static void loadMode(ResourceLocation id) {
         LightyMode modeToLoad = MODES.get(id);
 
         if (modeToLoad == null) {
@@ -42,7 +42,7 @@ public class ModeLoader {
         enabled = !enabled;
     }
 
-    public static void put(Identifier id, LightyMode mode) {
+    public static void put(ResourceLocation id, LightyMode mode) {
         MODES.put(id, mode);
     }
 

@@ -1,61 +1,53 @@
 package dev.schmarrn.lighty.mode;
 
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.LightyColors;
 import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.api.LightyMode;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.minecraft.block.*;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.Frustum;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.chunk.ChunkBuilder;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.world.LightType;
-
-import java.nio.Buffer;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CarpetBlock;
+import net.minecraft.world.level.block.MagmaBlock;
+import net.minecraft.world.level.block.SnowLayerBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class NumberMode extends LightyMode {
     record Data(int blockLightLevel, int skyLightLevel, double offset, int color) {}
 
-    public static boolean isBlocked(BlockState block, BlockState up, ClientWorld world, BlockPos upPos) {
+    public static boolean isBlocked(BlockState block, BlockState up, ClientLevel world, BlockPos upPos) {
         // See SpawnHelper.isClearForSpawn
         // If block with FluidState (think Kelp, Seagrass, Glowlichen underwater), disable overlay
-        return (up.isFullCube(world, upPos) ||
-                up.emitsRedstonePower() ||
+        return (up.isCollisionShapeFullBlock(world, upPos) ||
+                up.hasAnalogOutputSignal() ||
                 !up.getFluidState().isEmpty()) ||
-                up.isIn(BlockTags.PREVENT_MOB_SPAWNING_INSIDE) ||
+                up.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE) ||
                 // MagmaBlocks caused a Crash - But Mobs can still spawn on them, I need to fix this
                 block.getBlock() instanceof MagmaBlock;
     }
 
     @Override
-    public void compute(ClientWorld world, BlockPos pos, BufferBuilder builder) {
-        BlockPos posUp = pos.up();
+    public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
+        BlockPos posUp = pos.above();
         BlockState up = world.getBlockState(posUp);
         Block upBlock = up.getBlock();
         BlockState block = world.getBlockState(pos);
-        boolean validSpawn = upBlock.canMobSpawnInside();
+        boolean validSpawn = upBlock.isPossibleToRespawnInThis();
         if (isBlocked(block, up, world, posUp)) {
             return;
         }
-        validSpawn = validSpawn && block.allowsSpawning(world, pos, null);
+        validSpawn = validSpawn && block.isValidSpawn(world, pos, null);
 
         if (!validSpawn) {
             return;
         }
 
-        int blockLightLevel = world.getLightLevel(LightType.BLOCK, posUp);
-        int skyLightLevel = world.getDimension().hasSkyLight() ? world.getLightLevel(LightType.SKY, posUp) : -1;
+        int blockLightLevel = world.getBrightness(LightLayer.BLOCK, posUp);
+        int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
 
         int color = LightyColors.getSafe();
         if (blockLightLevel == 0) {
@@ -67,8 +59,8 @@ public class NumberMode extends LightyMode {
         }
 
         double offset = 0;
-        if (upBlock instanceof SnowBlock) { // snow layers
-            int layer = world.getBlockState(posUp).get(SnowBlock.LAYERS);
+        if (upBlock instanceof SnowLayerBlock) { // snow layers
+            int layer = world.getBlockState(posUp).getValue(SnowLayerBlock.LAYERS);
             // One layer of snow is two pixels high, with one pixel being 1/16
             offset = 2f / 16f * layer;
         } else if (upBlock instanceof CarpetBlock) {
@@ -120,6 +112,6 @@ public class NumberMode extends LightyMode {
 //    }
 
     public static void init() {
-        ModeManager.registerMode(new Identifier(Lighty.MOD_ID, "number_mode"), new NumberMode());
+        ModeManager.registerMode(new ResourceLocation(Lighty.MOD_ID, "number_mode"), new NumberMode());
     }
 }

@@ -1,33 +1,31 @@
 package dev.schmarrn.lighty.mode;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.LightyColors;
 import dev.schmarrn.lighty.api.LightyMode;
 import dev.schmarrn.lighty.api.ModeManager;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.VertexBuffer;
-import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.LightType;
-import org.joml.Matrix4f;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.LightLayer;
 
 public class BoringCrossMode extends LightyMode {
 
     @Override
     public void beforeCompute(BufferBuilder builder) {
-        builder.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
+        builder.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
     }
 
     @Override
-    public void compute(ClientWorld world, BlockPos pos, BufferBuilder builder) {
-        if (world.getBlockState(pos).isAir() && !world.getBlockState(pos.down()).isAir()) {
-            int blockLight = world.getLightLevel(LightType.BLOCK, pos);
-            int skyLight = world.getLightLevel(LightType.SKY, pos);
+    public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
+        if (world.getBlockState(pos).isAir() && !world.getBlockState(pos.below()).isAir()) {
+            int blockLight = world.getBrightness(LightLayer.BLOCK, pos);
+            int skyLight = world.getBrightness(LightLayer.SKY, pos);
 
             int data = LightyColors.getSafeARGB();
 
@@ -44,16 +42,16 @@ public class BoringCrossMode extends LightyMode {
             float z1 = pos.getZ();
             float z2 = pos.getZ() + 1f;
 
-            builder.vertex(x1, y, z1).color(data).next();
-            builder.vertex(x2, y, z2).color(data).next();
-            builder.vertex(x2, y, z1).color(data).next();
-            builder.vertex(x1, y, z2).color(data).next();
+            builder.vertex(x1, y, z1).color(data).endVertex();
+            builder.vertex(x2, y, z2).color(data).endVertex();
+            builder.vertex(x2, y, z1).color(data).endVertex();
+            builder.vertex(x1, y, z2).color(data).endVertex();
         }
     }
 
     @Override
     public void beforeRendering() {
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         RenderSystem.lineWidth(1.0f);
         RenderSystem.enableDepthTest();
     }
@@ -109,6 +107,6 @@ public class BoringCrossMode extends LightyMode {
 //    }
 
     public static void init() {
-        ModeManager.registerMode(new Identifier(Lighty.MOD_ID, "boring_cross_mode"), new BoringCrossMode());
+        ModeManager.registerMode(new ResourceLocation(Lighty.MOD_ID, "boring_cross_mode"), new BoringCrossMode());
     }
 }

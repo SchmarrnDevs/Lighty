@@ -1,30 +1,30 @@
 package dev.schmarrn.lighty.mode.carpet;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class OverlayBlock extends Block {
     public final int color;
 
-    public OverlayBlock(Settings settings, int color) {
-        super(settings.noCollision().nonOpaque());
+    public OverlayBlock(BlockBehaviour.Properties settings, int color) {
+        super(settings.noCollission().noOcclusion());
 
         this.color = color;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return Blocks.RED_CARPET.getCollisionShape(state, world, pos, context);
+    public boolean isOcclusionShapeFullBlock(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+        return false;
     }
 
     @Override
-    public boolean isTransparent(BlockState state, BlockView world, BlockPos pos) {
-        return true;
+    public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+        return Blocks.RED_CARPET.getCollisionShape(blockState, blockGetter, blockPos, collisionContext);
     }
 }

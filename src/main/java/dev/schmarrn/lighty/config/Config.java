@@ -2,7 +2,7 @@ package dev.schmarrn.lighty.config;
 
 import dev.schmarrn.lighty.Lighty;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 import java.io.*;
 import java.util.Properties;
@@ -41,11 +41,11 @@ public class Config {
         }
     }
 
-    public static Identifier getLastUsedMode() {
-        return new Identifier(config.properties.getProperty(LAST_USED_MODE));
+    public static ResourceLocation getLastUsedMode() {
+        return new ResourceLocation(config.properties.getProperty(LAST_USED_MODE));
     }
 
-    public static void setLastUsedMode(Identifier id) {
+    public static void setLastUsedMode(ResourceLocation id) {
         config.properties.setProperty(LAST_USED_MODE, id.toString());
         config.write();
     }
