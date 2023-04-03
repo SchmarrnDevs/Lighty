@@ -23,7 +23,6 @@
   "mixins": [
     "lighty.mixins.json"
   ],
-  "accessWidener": "lighty.accesswidener",
   "depends": {
     "fabricloader": ">=0.14.18",
     "minecraft": ">=1.20.0-alpha.23.12.a",

@@ -1,2 +1,0 @@
-accessWidener	v1	named
-accessible field net/minecraft/network/packet/s2c/play/ChunkDeltaUpdateS2CPacket sectionPos Lnet/minecraft/util/math/ChunkSectionPos;
