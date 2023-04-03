@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -102,66 +103,18 @@ public class CarpetMode extends LightyMode {
                 random
         );
         matrixStack.popPose();
-
-        //cache.put(posUp, new Data(overlayState, offset));
     }
 
     @Override
     public void beforeRendering() {
+        RenderType.translucent().setupRenderState();
         RenderSystem.setShader(GameRenderer::getBlockShader);
-        RenderSystem.enableDepthTest();
-        RenderSystem.enableBlend();
     }
 
     @Override
     public void afterRendering() {
-        RenderSystem.disableDepthTest();
-        RenderSystem.disableBlend();
+        RenderType.translucent().clearRenderState();
     }
-
-    //    @Override
-//    public void render(WorldRenderContext worldRenderContext, ClientWorld world, Frustum frustum, VertexConsumerProvider.Immediate provider, MinecraftClient client) {
-//        MatrixStack matrixStack = worldRenderContext.matrixStack();
-//        Camera camera = worldRenderContext.camera();
-//
-//        VertexConsumer buffer = provider.getBuffer(RenderLayer.getTranslucent());
-//        BlockRenderManager blockRenderManager = client.getBlockRenderManager();
-//        matrixStack.push();
-//        // Reset matrix position to 0,0,0
-//        matrixStack.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
-//        cache.forEach((pos, data) -> {
-//            double x = pos.getX();
-//            double y = pos.getY() + data.offset;
-//            double z = pos.getZ();
-//
-//            boolean overlayVisible = frustum.isVisible(new Box(
-//                    x, y, z,
-//                    x + 1, y + 1f / 16f, z + 1
-//            ));
-//
-//            if (!overlayVisible) {
-//                return;
-//            }
-//
-//            matrixStack.push();
-//            matrixStack.translate(x, y, z);
-//
-//            blockRenderManager.renderBlock(
-//                    data.state,
-//                    pos,
-//                    world,
-//                    matrixStack,
-//                    buffer,
-//                    false,
-//                    random
-//            );
-//
-//            matrixStack.pop();
-//        });
-//
-//        matrixStack.pop();
-//        provider.draw();
-//    }
 
     public static void init() {
         Blocks.init();

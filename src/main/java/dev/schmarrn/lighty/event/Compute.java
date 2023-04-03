@@ -1,6 +1,5 @@
 package dev.schmarrn.lighty.event;
 
-import com.mojang.authlib.minecraft.client.MinecraftClient;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -14,9 +13,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
@@ -41,7 +38,7 @@ public class Compute {
 
     public static void addChunk(ClientLevel world, ChunkPos pos) {
         for (int i = 0; i < world.getSectionsCount(); ++i) {
-                Compute.addSubChunk(SectionPos.of(pos, world.getMinSection() + i));
+            Compute.addSubChunk(SectionPos.of(pos, world.getMinSection() + i));
         }
     }
 
@@ -129,18 +126,18 @@ public class Compute {
         }
 
         SectionPos chunkPos;
-        Tesselator tessellator = Tesselator.getInstance();
+        Tesselator tesselator = Tesselator.getInstance();
 
         int updatedChunks = 0;
         while ((chunkPos = toBeUpdated.poll()) != null) {
             ++updatedChunks;
 
-            buildChunk(mode, chunkPos, new BufferBuilder(RenderType.translucent().bufferSize()), world);
+            buildChunk(mode, chunkPos, tesselator.getBuilder(), world);
         }
 
         int chunksPerTick = 50 - updatedChunks;
         while (chunksPerTick-- > 0 && (chunkPos = toBeComputed.poll()) != null){
-            buildChunk(mode, chunkPos, new BufferBuilder(RenderType.translucent().bufferSize()), world);
+            buildChunk(mode, chunkPos, tesselator.getBuilder(), world);
         }
 
         Lighty.LOGGER.info("Computed: {}", 50 - chunksPerTick);
