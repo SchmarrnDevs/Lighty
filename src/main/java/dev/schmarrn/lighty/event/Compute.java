@@ -21,28 +21,34 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
 import org.joml.Matrix4f;
 
-import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 public class Compute {
     private static final Queue<SectionPos> toBeComputed = new ArrayDeque<>();
     private static final Queue<SectionPos> toBeUpdated = new ArrayDeque<>();
+    private static final Set<ChunkPos> loadedChunks = new HashSet<>();
 
     public static void clear() {
         toBeComputed.clear();
         toBeUpdated.clear();
         cachedBuffers.clear();
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) return;
+
+        for (ChunkPos pos : loadedChunks) {
+            addChunk(level, pos);
+        }
     }
 
     public static void addChunk(ClientLevel world, ChunkPos pos) {
+        loadedChunks.add(pos);
         for (int i = 0; i < world.getSectionsCount(); ++i) {
             Compute.addSubChunk(SectionPos.of(pos, world.getMinSection() + i));
         }
     }
 
     public static void removeChunk(ClientLevel world, ChunkPos pos) {
+        loadedChunks.remove(pos);
         for (int i = 0; i < world.getSectionsCount(); ++i) {
             Compute.removeSubChunk(SectionPos.of(pos, world.getMinSection() + i));
         }
