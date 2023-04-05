@@ -36,7 +36,7 @@ public class NumberMode extends LightyMode {
         BlockState up = world.getBlockState(posUp);
         Block upBlock = up.getBlock();
         BlockState block = world.getBlockState(pos);
-        boolean validSpawn = upBlock.isPossibleToRespawnInThis();
+        boolean validSpawn = upBlock.isPossibleToRespawnInThis(up);
         if (isBlocked(block, up, world, posUp)) {
             return;
         }

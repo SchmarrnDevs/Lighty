@@ -15,7 +15,7 @@ public class Blocks {
     public static final Block RED_OVERLAY = registerOverlayBlock("red_overlay", LightyColors.getDanger());
 
     private static Block registerOverlayBlock(String name, int color) {
-        Block overlay = new OverlayBlock(BlockBehaviour.Properties.of(Material.WOOL), color);
+        Block overlay = new OverlayBlock(BlockBehaviour.Properties.of(Material.GLASS), color);
         Registry.register(BuiltInRegistries.BLOCK, new ResourceLocation(Lighty.MOD_ID, name), overlay);
         return overlay;
     }
