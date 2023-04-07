@@ -88,6 +88,7 @@ public class Compute {
 
     public static void removeSubChunk(SectionPos pos) {
         toBeComputed.remove(pos);
+        toBeUpdated.remove(pos);
         VertexBuffer buffer = cachedBuffers.remove(pos);
         if (buffer != null) {
             buffer.close();
