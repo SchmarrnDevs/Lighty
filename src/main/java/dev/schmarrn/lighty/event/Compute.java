@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexBuffer;
-import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.ModeLoader;
 import dev.schmarrn.lighty.api.LightyMode;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
@@ -27,6 +26,12 @@ public class Compute {
     private static final Queue<SectionPos> toBeComputed = new ArrayDeque<>();
     private static final Queue<SectionPos> toBeUpdated = new ArrayDeque<>();
     private static final Set<ChunkPos> loadedChunks = new HashSet<>();
+
+    private static int computedChunks = 0;
+
+    public static int getComputedChunks() {
+        return computedChunks;
+    }
 
     public static void clear() {
         toBeComputed.clear();
@@ -61,6 +66,7 @@ public class Compute {
 
     public static void updateSubChunk(SectionPos pos) {
         toBeComputed.remove(pos);
+        if (toBeUpdated.contains(pos)) return;
         toBeUpdated.add(pos);
     }
 
@@ -147,7 +153,7 @@ public class Compute {
             buildChunk(mode, chunkPos, tesselator.getBuilder(), world);
         }
 
-        Lighty.LOGGER.info("Computed: {}", 50 - chunksPerTick);
+        computedChunks = 50 - chunksPerTick - 1;
     }
 
     public static void render(WorldRenderContext worldRenderContext) {
