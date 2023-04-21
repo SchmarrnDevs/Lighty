@@ -2,6 +2,7 @@ package dev.schmarrn.lighty.ui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.schmarrn.lighty.ModeLoader;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.layouts.FrameLayout;
@@ -39,10 +40,10 @@ public class ModeSwitcherScreen extends Screen {
     }
 
     @Override
-    public void render(@NotNull PoseStack matrices, int mouseX, int mouseY, float delta) {
-        renderBackground(matrices);
-        drawCenteredString(matrices, this.font, this.title, this.width/2, 15, 0xFFFFFF);
-        super.render(matrices, mouseX, mouseY, delta);
+    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+        renderBackground(guiGraphics);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width/2, 15, 0xFFFFFF);
+        super.render(guiGraphics, mouseX, mouseY, delta);
     }
 
 
