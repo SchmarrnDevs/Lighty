@@ -7,7 +7,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
 
 public class Blocks {
     public static final Block GREEN_OVERLAY = registerOverlayBlock("green_overlay", LightyColors.getSafe());
@@ -15,7 +14,7 @@ public class Blocks {
     public static final Block RED_OVERLAY = registerOverlayBlock("red_overlay", LightyColors.getDanger());
 
     private static Block registerOverlayBlock(String name, int color) {
-        Block overlay = new OverlayBlock(BlockBehaviour.Properties.of(Material.DEPRECATED), color);
+        Block overlay = new OverlayBlock(BlockBehaviour.Properties.of(), color);
         Registry.register(BuiltInRegistries.BLOCK, new ResourceLocation(Lighty.MOD_ID, name), overlay);
         return overlay;
     }
