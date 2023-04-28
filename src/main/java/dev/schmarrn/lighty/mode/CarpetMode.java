@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.mode.carpet.Blocks;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.ModeManager;
@@ -73,8 +74,8 @@ public class CarpetMode extends LightyMode {
         int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
 
         BlockState overlayState = Blocks.GREEN_OVERLAY.defaultBlockState();
-        if (blockLightLevel == 0) {
-            if (skyLightLevel == 0) {
+        if (blockLightLevel <= Config.getBlockThreshold()) {
+            if (skyLightLevel <= Config.getSkyThreshold()) {
                 overlayState = Blocks.RED_OVERLAY.defaultBlockState();
             } else {
                 overlayState = Blocks.ORANGE_OVERLAY.defaultBlockState();

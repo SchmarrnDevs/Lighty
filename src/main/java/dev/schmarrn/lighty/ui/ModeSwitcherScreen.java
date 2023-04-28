@@ -1,7 +1,7 @@
 package dev.schmarrn.lighty.ui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.schmarrn.lighty.ModeLoader;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
@@ -33,7 +33,8 @@ public class ModeSwitcherScreen extends Screen {
             adder.addChild(btn);
         }
 
-        adder.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).build(), adder.newCellSettings().paddingTop(6));
+        adder.addChild(Button.builder(Component.translatable("modeSwitcher.lighty.settings"), button -> Minecraft.getInstance().setScreen(new SettingsScreen())).build(), adder.newCellSettings().paddingTop(6));
+        adder.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).build());
         gridWidget.arrangeElements();
         FrameLayout.alignInRectangle(gridWidget, 0, this.height/6 - 12, this.width, this.height, 0.5f, 0f);
         gridWidget.visitWidgets(this::addRenderableWidget);
