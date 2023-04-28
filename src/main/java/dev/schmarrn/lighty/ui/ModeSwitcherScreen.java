@@ -1,6 +1,7 @@
 package dev.schmarrn.lighty.ui;
 
 import dev.schmarrn.lighty.ModeLoader;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -33,7 +34,9 @@ public class ModeSwitcherScreen extends Screen {
         }
 
         height += DELTA_HEIGHT;
-        this.addDrawableChild(new ButtonWidget(this.width/2 - 75, height + 6, 150, 20, ScreenTexts.DONE, button -> this.close()));
+        this.addDrawableChild(new ButtonWidget(this.width/2-75, height + 6, 150, 20, Text.translatable("modeSwitcher.lighty.settings"), button -> MinecraftClient.getInstance().setScreen(new SettingsScreen())));
+        height += DELTA_HEIGHT;
+        this.addDrawableChild(new ButtonWidget(this.width/2 - 75, height+6, 150, 20, ScreenTexts.DONE, button -> this.close()));
         current = this;
     }
 

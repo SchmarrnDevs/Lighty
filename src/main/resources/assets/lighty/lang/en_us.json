@@ -6,5 +6,13 @@
   "modeSwitcher.lighty.number_mode": "Number Mode",
   "modeSwitcher.lighty.number_mode.tooltip": "Displays as: BlockLightLevel|SkyLightLevel",
   "modeSwitcher.lighty.carpet_mode": "Carpet Mode",
-  "modeSwitcher.lighty.carpet_mode.tooltip": "Original, carpet like overlay"
+  "modeSwitcher.lighty.carpet_mode.tooltip": "Original, carpet like overlay",
+  "modeSwitcher.lighty.boring_cross_mode": "Boring Cross Mode",
+  "modeSwitcher.lighty.boring_cross_mode.tooltip": "It feels like every Light Overlay Mod has them",
+  "modeSwitcher.lighty.settings": "Overlay Settings",
+  "settings.lighty.title": "Lighty Settings",
+  "lighty.options.block_threshold": "Block Threshold",
+  "lighty.options.block_threshold.tooltip": "If the block light level is less than or equal to %d, the overlay is red or orange, depending on the sky light level. Otherwise, it is green.",
+  "lighty.options.sky_threshold": "Sky Threshold",
+  "lighty.options.sky_threshold.tooltip": "If the block light level is below the value specified in 'Block Threshold' and the sky light level is less than or equal to %d, the overlay is red. Otherwise, it is orange."
 }
