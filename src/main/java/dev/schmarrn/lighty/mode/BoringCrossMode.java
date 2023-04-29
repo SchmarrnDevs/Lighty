@@ -15,6 +15,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.LightType;
 import org.joml.Matrix4f;
+import dev.schmarrn.lighty.config.Config;
 
 public class BoringCrossMode extends LightyMode<BlockPos, Integer> {
     private VertexBuffer cachedBuffer = null;
@@ -29,8 +30,8 @@ public class BoringCrossMode extends LightyMode<BlockPos, Integer> {
         if (world.getBlockState(pos).isAir() && !world.getBlockState(pos.down()).isAir()) {
             int data = LightyColors.getSafeARGB();
 
-            if (blockLight == 0) {
-                if (skyLight == 0) {
+            if (blockLight <= Config.getBlockThreshold()) {
+                if (skyLight <= Config.getSkyThreshold()) {
                     data = LightyColors.getDangerARGB();
                 } else {
                     data = LightyColors.getWarningARGB();
