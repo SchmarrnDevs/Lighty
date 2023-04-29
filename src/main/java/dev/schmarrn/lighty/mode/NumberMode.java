@@ -5,6 +5,7 @@ import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.LightyColors;
 import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.api.LightyMode;
+import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -50,8 +51,8 @@ public class NumberMode extends LightyMode {
         int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
 
         int color = LightyColors.getSafe();
-        if (blockLightLevel == 0) {
-            if (skyLightLevel == 0) {
+        if (blockLightLevel <= Config.getBlockThreshold()) {
+            if (skyLightLevel <= Config.getSkyThreshold()) {
                 color = LightyColors.getDanger();
             } else {
                 color = LightyColors.getWarning();

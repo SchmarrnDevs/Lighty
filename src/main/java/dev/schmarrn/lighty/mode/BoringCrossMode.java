@@ -8,6 +8,7 @@ import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.LightyColors;
 import dev.schmarrn.lighty.api.LightyMode;
 import dev.schmarrn.lighty.api.ModeManager;
+import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
@@ -29,8 +30,8 @@ public class BoringCrossMode extends LightyMode {
 
             int data = LightyColors.getSafeARGB();
 
-            if (blockLight == 0) {
-                if (skyLight == 0) {
+            if (blockLight <= Config.getBlockThreshold()) {
+                if (skyLight <= Config.getSkyThreshold()) {
                     data = LightyColors.getDangerARGB();
                 } else {
                     data = LightyColors.getWarningARGB();
