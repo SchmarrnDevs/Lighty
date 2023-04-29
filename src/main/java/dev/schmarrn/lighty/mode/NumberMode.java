@@ -19,6 +19,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Quaternion;
 import net.minecraft.world.LightType;
+import dev.schmarrn.lighty.config.Config;
+
 
 public class NumberMode extends LightyMode<BlockPos, NumberMode.Data> {
     record Data(int blockLightLevel, int skyLightLevel, double offset, int color) {}
@@ -54,8 +56,8 @@ public class NumberMode extends LightyMode<BlockPos, NumberMode.Data> {
         int skyLightLevel = world.getDimension().hasSkyLight() ? world.getLightLevel(LightType.SKY, posUp) : -1;
 
         int color = LightyColors.GREEN;
-        if (blockLightLevel == 0) {
-            if (skyLightLevel == 0) {
+        if (blockLightLevel <= Config.getBlockThreshold()) {
+            if (skyLightLevel <= Config.getSkyThreshold()) {
                 color = LightyColors.RED;
             } else {
                 color = LightyColors.ORANGE;
