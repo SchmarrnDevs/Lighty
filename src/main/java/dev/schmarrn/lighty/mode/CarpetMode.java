@@ -109,7 +109,7 @@ public class CarpetMode extends LightyMode {
     @Override
     public void beforeRendering() {
         RenderType.translucent().setupRenderState();
-        RenderSystem.setShader(GameRenderer::getBlockShader);
+        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
     }
 
     @Override

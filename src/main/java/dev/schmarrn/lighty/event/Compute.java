@@ -119,7 +119,7 @@ public class Compute {
         if (vertexBuffer != null) {
             vertexBuffer.close();
         }
-        vertexBuffer = new VertexBuffer();
+        vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
         vertexBuffer.bind();
         vertexBuffer.upload(builder.end());
         VertexBuffer.unbind();
