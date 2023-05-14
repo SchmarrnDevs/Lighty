@@ -44,12 +44,6 @@ public class BoringCrossMode extends LightyMode<BlockPos, Integer> {
 
     @Override
     public void render(WorldRenderContext worldRenderContext, ClientWorld world, Frustum frustum, VertexConsumerProvider.Immediate provider, MinecraftClient client) {
-        if (cachedBuffer == null) {
-            cachedBuffer = new VertexBuffer();
-        }
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-        RenderSystem.lineWidth(1.0f);
-
         Camera camera = client.gameRenderer.getCamera();
         MatrixStack matrixStack = worldRenderContext.matrixStack();
         matrixStack.push();
@@ -76,13 +70,27 @@ public class BoringCrossMode extends LightyMode<BlockPos, Integer> {
                 builder.vertex(x2, y, z1).color(color).next();
                 builder.vertex(x1, y, z2).color(color).next();
             });
+            if (cachedBuffer != null) {
+                cachedBuffer.close();
+            }
+            cachedBuffer = new VertexBuffer();
+            cachedBuffer.bind();
             cachedBuffer.upload(builder.end());
+            VertexBuffer.unbind();
         }
 
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.lineWidth(1.0f);
+        RenderSystem.enableDepthTest();
+
+        cachedBuffer.bind();
         cachedBuffer.draw(positionMatrix, projectionMatrix, GameRenderer.getPositionColorProgram());
+        VertexBuffer.unbind();
+
+        RenderSystem.disableDepthTest();
+        RenderSystem.lineWidth(1.0F);
 
         matrixStack.pop();
-        RenderSystem.lineWidth(1.0F);
     }
 
     public static void init() {
