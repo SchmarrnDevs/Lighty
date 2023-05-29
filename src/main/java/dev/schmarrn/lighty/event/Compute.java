@@ -97,7 +97,7 @@ public class Compute {
 
         Tesselator tesselator = Tesselator.getInstance();
         if (!toBeUpdated.isEmpty()) {
-            Lighty.LOGGER.info("To be computed: {}", toBeUpdated.size());
+            // Lighty.LOGGER.info("To be computed: {}", toBeUpdated.size());
         }
 
         playerPos = new ChunkPos(player.blockPosition());
@@ -114,6 +114,7 @@ public class Compute {
             for (int i = 0; i < world.getSectionsCount(); ++i) {
                 var chunkSection = SectionPos.of(chunkPos, world.getMinSection() + i);
                 if (!cachedBuffers.containsKey(chunkSection) || toBeUpdated.contains(chunkSection)) {
+                    toBeUpdated.remove(chunkSection);
                     cachedBuffers.compute(chunkSection, (pos, vertexBuffer) -> {
                         if (vertexBuffer != null) {
                             vertexBuffer.close();
