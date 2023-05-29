@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexBuffer;
+import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.ModeLoader;
 import dev.schmarrn.lighty.api.LightyMode;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
@@ -23,50 +24,17 @@ import org.joml.Matrix4f;
 import java.util.*;
 
 public class Compute {
-    private static final Queue<SectionPos> toBeComputed = new ArrayDeque<>();
-    private static final Queue<SectionPos> toBeUpdated = new ArrayDeque<>();
-    private static final Set<ChunkPos> loadedChunks = new HashSet<>();
-
-    private static int computedChunks = 0;
-
-    public static int getComputedChunks() {
-        return computedChunks;
-    }
+    private static final HashSet<SectionPos> toBeUpdated = new HashSet<>();
+    private static final HashSet<SectionPos> toBeRemoved = new HashSet<>();
+    private static final Map<SectionPos, VertexBuffer> cachedBuffers = new LinkedHashMap<>();
+    private static ChunkPos playerPos = null;
 
     public static void clear() {
-        toBeComputed.clear();
         toBeUpdated.clear();
         cachedBuffers.clear();
-        ClientLevel level = Minecraft.getInstance().level;
-        if (level == null) return;
-
-        for (ChunkPos pos : loadedChunks) {
-            addChunk(level, pos);
-        }
-    }
-
-    public static void addChunk(ClientLevel world, ChunkPos pos) {
-        loadedChunks.add(pos);
-        for (int i = 0; i < world.getSectionsCount(); ++i) {
-            Compute.addSubChunk(SectionPos.of(pos, world.getMinSection() + i));
-        }
-    }
-
-    public static void removeChunk(ClientLevel world, ChunkPos pos) {
-        loadedChunks.remove(pos);
-        for (int i = 0; i < world.getSectionsCount(); ++i) {
-            Compute.removeSubChunk(SectionPos.of(pos, world.getMinSection() + i));
-        }
-    }
-
-    public static void addSubChunk(SectionPos pos) {
-        if (toBeComputed.contains(pos)) return;
-        toBeComputed.add(pos);
     }
 
     public static void updateSubChunk(SectionPos pos) {
-        toBeComputed.remove(pos);
-        if (toBeUpdated.contains(pos)) return;
         toBeUpdated.add(pos);
     }
 
@@ -92,18 +60,7 @@ public class Compute {
         updateUpDown(fromVec3i(pos.west().south()));
     }
 
-    public static void removeSubChunk(SectionPos pos) {
-        toBeComputed.remove(pos);
-        toBeUpdated.remove(pos);
-        VertexBuffer buffer = cachedBuffers.remove(pos);
-        if (buffer != null) {
-            buffer.close();
-        }
-    }
-
-    private static final Map<SectionPos, VertexBuffer> cachedBuffers = new HashMap<>();
-
-    private static void buildChunk(LightyMode mode, SectionPos chunkPos, BufferBuilder builder, ClientLevel world) {
+    private static VertexBuffer buildChunk(LightyMode mode, SectionPos chunkPos, BufferBuilder builder, ClientLevel world) {
         mode.beforeCompute(builder);
         for (int x = 0; x < 16; ++x) {
             for (int y = 0; y < 16; ++y) {
@@ -124,8 +81,8 @@ public class Compute {
         vertexBuffer.upload(builder.end());
         VertexBuffer.unbind();
 
-        cachedBuffers.put(chunkPos, vertexBuffer);
         mode.afterCompute();
+        return vertexBuffer;
     }
 
     public static void computeCache(Minecraft client) {
@@ -138,22 +95,34 @@ public class Compute {
             return;
         }
 
-        SectionPos chunkPos;
         Tesselator tesselator = Tesselator.getInstance();
-
-        int updatedChunks = 0;
-        while ((chunkPos = toBeUpdated.poll()) != null) {
-            ++updatedChunks;
-
-            buildChunk(mode, chunkPos, tesselator.getBuilder(), world);
+        if (!toBeUpdated.isEmpty()) {
+            Lighty.LOGGER.info("To be computed: {}", toBeUpdated.size());
         }
 
-        int chunksPerTick = 50 - updatedChunks;
-        while (chunksPerTick-- > 0 && (chunkPos = toBeComputed.poll()) != null){
-            buildChunk(mode, chunkPos, tesselator.getBuilder(), world);
-        }
+        playerPos = new ChunkPos(player.blockPosition());
 
-        computedChunks = 50 - chunksPerTick - 1;
+        for (SectionPos sectionPos : toBeRemoved) {
+            var buf = cachedBuffers.remove(sectionPos);
+            if (buf != null) {
+                buf.close();
+            }
+        }
+        toBeRemoved.clear();
+
+        ChunkPos.rangeClosed(playerPos, 2).forEach(chunkPos -> {
+            for (int i = 0; i < world.getSectionsCount(); ++i) {
+                var chunkSection = SectionPos.of(chunkPos, world.getMinSection() + i);
+                if (!cachedBuffers.containsKey(chunkSection) || toBeUpdated.contains(chunkSection)) {
+                    cachedBuffers.compute(chunkSection, (pos, vertexBuffer) -> {
+                        if (vertexBuffer != null) {
+                            vertexBuffer.close();
+                        }
+                        return buildChunk(mode, pos, tesselator.getBuilder(), world);
+                    });
+                }
+            }
+        });
     }
 
     public static void render(WorldRenderContext worldRenderContext) {
@@ -162,6 +131,10 @@ public class Compute {
 
         Frustum frustum = worldRenderContext.frustum();
         if (frustum == null) {
+            return;
+        }
+
+        if (playerPos == null) {
             return;
         }
 
@@ -174,7 +147,11 @@ public class Compute {
         Matrix4f positionMatrix = matrixStack.last().pose();
         Matrix4f projectionMatrix = worldRenderContext.projectionMatrix();
         cachedBuffers.forEach(((chunkPos, cachedBuffer) -> {
-            if (frustum.isVisible(new AABB(chunkPos.minBlockX(), chunkPos.minBlockY(), chunkPos.minBlockZ(), chunkPos.maxBlockX(), chunkPos.maxBlockY(), chunkPos.maxBlockZ()))) {
+            int sqX = (chunkPos.x() - playerPos.x) * (chunkPos.x() - playerPos.x);
+            int sqZ =  (chunkPos.z() - playerPos.z) * (chunkPos.z() - playerPos.z);
+            if (sqX > 4 || sqZ > 4) {
+                toBeRemoved.add(chunkPos);
+            } else if (frustum.isVisible(new AABB(chunkPos.minBlockX(), chunkPos.minBlockY(), chunkPos.minBlockZ(), chunkPos.maxBlockX(), chunkPos.maxBlockY(), chunkPos.maxBlockZ()))) {
                 cachedBuffer.bind();
                 cachedBuffer.drawWithShader(positionMatrix, projectionMatrix, RenderSystem.getShader());
             }

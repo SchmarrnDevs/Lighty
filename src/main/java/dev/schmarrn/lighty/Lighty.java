@@ -43,12 +43,12 @@ public class Lighty implements ClientModInitializer {
         KeyBind.init();
         ClientTickEvents.END_CLIENT_TICK.register(Compute::computeCache);
         WorldRenderEvents.AFTER_TRANSLUCENT.register(Compute::render);
-        ClientChunkEvents.CHUNK_LOAD.register((world, chunk) -> {
+        /*ClientChunkEvents.CHUNK_LOAD.register((world, chunk) -> {
             Compute.addChunk(world, chunk.getPos());
         });
         ClientChunkEvents.CHUNK_UNLOAD.register((world, chunk) -> {
             Compute.removeChunk(world, chunk.getPos());
-        });
+        });*/
 
         CarpetMode.init();
         // NumberMode.init();
