@@ -29,12 +29,26 @@ public class Compute {
     private static final Map<SectionPos, VertexBuffer> cachedBuffers = new LinkedHashMap<>();
     private static ChunkPos playerPos = null;
 
+    private static boolean outOfRange(SectionPos pos) {
+        if (playerPos == null) {
+            return true;
+        }
+        int sqX = (pos.x() - playerPos.x) * (pos.x() - playerPos.x);
+        int sqZ =  (pos.z() - playerPos.z) * (pos.z() - playerPos.z);
+
+        return sqX > 4 || sqZ > 4;
+    }
+
     public static void clear() {
         toBeUpdated.clear();
         cachedBuffers.clear();
     }
 
     public static void updateSubChunk(SectionPos pos) {
+        if (outOfRange(pos)) {
+            return;
+        }
+
         toBeUpdated.add(pos);
     }
 
@@ -96,13 +110,20 @@ public class Compute {
         }
 
         Tesselator tesselator = Tesselator.getInstance();
-        if (!toBeUpdated.isEmpty()) {
+        //if (!toBeUpdated.isEmpty()) {
             // Lighty.LOGGER.info("To be computed: {}", toBeUpdated.size());
-        }
+        //}
 
         playerPos = new ChunkPos(player.blockPosition());
 
+        for (SectionPos sectionPos : toBeUpdated) {
+            if (outOfRange(sectionPos)) {
+                toBeRemoved.add(sectionPos);
+            }
+        }
+
         for (SectionPos sectionPos : toBeRemoved) {
+            toBeUpdated.remove(sectionPos);
             var buf = cachedBuffers.remove(sectionPos);
             if (buf != null) {
                 buf.close();
@@ -148,9 +169,7 @@ public class Compute {
         Matrix4f positionMatrix = matrixStack.last().pose();
         Matrix4f projectionMatrix = worldRenderContext.projectionMatrix();
         cachedBuffers.forEach(((chunkPos, cachedBuffer) -> {
-            int sqX = (chunkPos.x() - playerPos.x) * (chunkPos.x() - playerPos.x);
-            int sqZ =  (chunkPos.z() - playerPos.z) * (chunkPos.z() - playerPos.z);
-            if (sqX > 4 || sqZ > 4) {
+            if (outOfRange(chunkPos)) {
                 toBeRemoved.add(chunkPos);
             } else if (frustum.isVisible(new AABB(chunkPos.minBlockX(), chunkPos.minBlockY(), chunkPos.minBlockZ(), chunkPos.maxBlockX(), chunkPos.maxBlockY(), chunkPos.maxBlockZ()))) {
                 cachedBuffer.bind();
