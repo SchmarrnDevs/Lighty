@@ -1,12 +1,16 @@
 package dev.schmarrn.lighty.mode;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.LightyColors;
-import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.api.LightyMode;
+import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -32,6 +36,37 @@ public class NumberMode extends LightyMode {
     }
 
     @Override
+    public void beforeCompute(BufferBuilder builder) {
+        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+    }
+
+    private static final float PXL = 1/16f;
+    private static final float dx = 0.25f;
+    private static final float dz = 0.25f;
+
+    private static void renderDigit(BufferBuilder builder, int digit, float x, float y, float z, int color) {
+        float startU = (0b11 & digit) / 4f;
+        float startV = ((digit >> 2) & 0b11) / 4f;
+
+        builder.vertex(x, y, z).uv(startU,startV).color(color).endVertex();
+        builder.vertex(x, y, z + dz).uv(startU, startV + 0.25f).color(color).endVertex();
+        builder.vertex(x + dx, y, z + dz).uv(startU + 0.25f, startV + 0.25f).color(color).endVertex();
+        builder.vertex(x + dx, y, z).uv(startU + 0.25f, startV).color(color).endVertex();
+    }
+
+    private static void renderNumber(BufferBuilder builder, int number, float x, float y, float z, int color) {
+        int oneDigit = number % 10;
+        int tenDigit = number / 10;
+
+        if (tenDigit > 0) {
+            renderDigit(builder, tenDigit, x, y, z, color);
+            renderDigit(builder, oneDigit, x + dx - PXL, y, z, color);
+        } else {
+            renderDigit(builder, oneDigit, x + (dx - PXL)/2f, y, z, color);
+        }
+    }
+
+    @Override
     public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
         BlockPos posUp = pos.above();
         BlockState up = world.getBlockState(posUp);
@@ -50,67 +85,39 @@ public class NumberMode extends LightyMode {
         int blockLightLevel = world.getBrightness(LightLayer.BLOCK, posUp);
         int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
 
-        int color = LightyColors.getSafe();
+        int color = LightyColors.getSafeARGB();
         if (blockLightLevel <= Config.getBlockThreshold()) {
             if (skyLightLevel <= Config.getSkyThreshold()) {
-                color = LightyColors.getDanger();
+                color = LightyColors.getDangerARGB();
             } else {
-                color = LightyColors.getWarning();
+                color = LightyColors.getWarningARGB();
             }
         }
 
-        double offset = 0;
+        float offset = 0;
         if (upBlock instanceof SnowLayerBlock) { // snow layers
             int layer = world.getBlockState(posUp).getValue(SnowLayerBlock.LAYERS);
-            // One layer of snow is two pixels high, with one pixel being 1/16
-            offset = 2f / 16f * layer;
+            // One layer of snow is two pixels high
+            offset = 2 * PXL * layer;
         } else if (upBlock instanceof CarpetBlock) {
             // Carpet is just one pixel high
-            offset = 1f / 16f;
+            offset = PXL;
         }
 
-        //cache.put(posUp, new Data(blockLightLevel, skyLightLevel, offset, color));
+        float x1 = pos.getX() + PXL * 5.25f;
+        float y = pos.getY() + 1f + 0.005f + offset;
+        float z1 = pos.getZ() + PXL * 4f;
+
+        renderNumber(builder, blockLightLevel, x1, y, z1, color);
+        renderNumber(builder, skyLightLevel, x1, y, z1 + 0.3f, color);
     }
 
-//    @Override
-//    public void render(WorldRenderContext worldRenderContext, ClientWorld world, Frustum frustum, VertexConsumerProvider.Immediate provider, MinecraftClient client) {
-//        MatrixStack matrixStack = worldRenderContext.matrixStack();
-//        Camera camera = worldRenderContext.camera();
-//
-//        TextRenderer textRenderer = client.textRenderer;
-//        matrixStack.push();
-//        // Reset matrix position to 0,0,0
-//        matrixStack.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
-//        cache.forEach((pos, data) -> {
-//            double x = pos.getX() + 0.5;
-//            double y = pos.getY() + data.offset + 0.5;
-//            double z = pos.getZ() + 0.5;
-//
-//            boolean overlayVisible = frustum.isVisible(new Box(pos));
-//
-//            if (!overlayVisible) {
-//                return;
-//            }
-//
-//            matrixStack.push();
-//            matrixStack.translate(x, y, z);
-//            matrixStack.scale(1f/32f, -1f/32f, 1f/32f);
-//
-//            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotation((float) -(Math.PI + camera.getYaw() / 180f * Math.PI)));
-//            matrixStack.multiply(RotationAxis.POSITIVE_X.rotation((float) (camera.getPitch() / 180f * Math.PI)));
-//
-//            String text = data.skyLightLevel >= 0 ? data.blockLightLevel + "|" + data.skyLightLevel : data.blockLightLevel + "";
-//
-//            int width = textRenderer.getWidth(text);
-//
-//            textRenderer.draw(text, -width / 2f, -textRenderer.fontHeight/2f, data.color, true, matrixStack.peek().getPositionMatrix(), provider, TextRenderer.TextLayerType.NORMAL, 0, 0xF000F0);
-//
-//            matrixStack.pop();
-//        });
-//
-//        matrixStack.pop();
-//        provider.draw();
-//    }
+    @Override
+    public void beforeRendering() {
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.enableDepthTest();
+        RenderSystem.setShaderTexture(0, new ResourceLocation(Lighty.MOD_ID, "textures/block/numbers.png"));
+    }
 
     public static void init() {
         ModeManager.registerMode(new ResourceLocation(Lighty.MOD_ID, "number_mode"), new NumberMode());

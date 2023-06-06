@@ -4,7 +4,7 @@
   "category.lighty": "Lighty",
   "modeSwitcher.lighty.title": "Lighty Mode Switcher",
   "modeSwitcher.lighty.number_mode": "Number Mode",
-  "modeSwitcher.lighty.number_mode.tooltip": "Displays as: BlockLightLevel|SkyLightLevel",
+  "modeSwitcher.lighty.number_mode.tooltip": "The upper value is the BlockLightLevel, the lower value is the SkyLightLevel",
   "modeSwitcher.lighty.carpet_mode": "Carpet Mode",
   "modeSwitcher.lighty.carpet_mode.tooltip": "Original, carpet like overlay",
   "modeSwitcher.lighty.boring_cross_mode": "Boring Cross Mode",
