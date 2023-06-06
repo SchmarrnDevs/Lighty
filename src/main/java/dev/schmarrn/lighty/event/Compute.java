@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import dev.schmarrn.lighty.ModeLoader;
 import dev.schmarrn.lighty.api.LightyMode;
+import dev.schmarrn.lighty.config.Config;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -26,25 +27,32 @@ public class Compute {
     // when spectating through your world at max speed at an overlay distance of 2 chunks.
     // That's why I chose 550 as a reasonable default - not too big (a section pos is just 3 ints after all),
     // but it should be enough to avoid rehashing at a reasonable overlay distance
-    private static final int INITIAL_HASHSET_CAPACITY = 100;
+    private static final int INITIAL_HASHSET_CAPACITY = 550;
     private static final HashSet<SectionPos> toBeUpdated = new HashSet<>(INITIAL_HASHSET_CAPACITY);
     private static HashSet<SectionPos> toBeRemoved = new HashSet<>(INITIAL_HASHSET_CAPACITY);
     private static final Map<SectionPos, VertexBuffer> cachedBuffers = new HashMap<>();
     private static ChunkPos playerPos = null;
 
+    private static int overlayDistance = Config.getOverlayDistance();
+
     private static boolean outOfRange(SectionPos pos) {
+        int renderDistance = Minecraft.getInstance().options.renderDistance().get();
+        int renderDistanceSquared = renderDistance * renderDistance;
+        int distanceSquared = overlayDistance * overlayDistance;
         if (playerPos == null) {
             return true;
         }
+        // squared X and Z
         int sqX = (pos.x() - playerPos.x) * (pos.x() - playerPos.x);
         int sqZ =  (pos.z() - playerPos.z) * (pos.z() - playerPos.z);
 
-        return sqX > 4 || sqZ > 4;
+        return sqX > distanceSquared || sqZ > distanceSquared || sqX > renderDistanceSquared || sqZ > renderDistanceSquared;
     }
 
     public static void clear() {
         toBeUpdated.clear();
         cachedBuffers.clear();
+        overlayDistance = Config.getOverlayDistance(); // only update on clear
     }
 
     public static void updateSubChunk(SectionPos pos) {
@@ -109,7 +117,9 @@ public class Compute {
         // old hashset - should be faster in theory
         toBeRemoved = new HashSet<>(INITIAL_HASHSET_CAPACITY);
 
-        ChunkPos.rangeClosed(playerPos, 2).forEach(chunkPos -> {
+        // Do not compute stuff outside the render distance
+        int computationDistance = Math.min(overlayDistance, client.options.renderDistance().get());
+        ChunkPos.rangeClosed(playerPos, computationDistance).forEach(chunkPos -> {
             for (int i = 0; i < world.getSectionsCount(); ++i) {
                 var chunkSection = SectionPos.of(chunkPos, world.getMinSection() + i);
                 if (!cachedBuffers.containsKey(chunkSection) || toBeUpdated.contains(chunkSection)) {

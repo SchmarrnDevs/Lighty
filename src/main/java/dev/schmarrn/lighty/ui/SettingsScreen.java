@@ -27,6 +27,16 @@ public class SettingsScreen extends Screen {
         assert this.minecraft != null;
         this.list = new OptionsList(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
 
+        list.addBig(new OptionInstance<>(
+                "lighty.options.overlay_distance",
+                object -> Tooltip.create(Component.translatable("lighty.options.overlay_distance.tooltip", object)),
+                (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
+                new OptionInstance.IntRange(1, 32),
+                Codec.intRange(1, 32),
+                Config.getOverlayDistance(),
+                Config::setOverlayDistance
+        ));
+
         list.addSmall(
                 new OptionInstance<>(
                         "lighty.options.block_threshold",
@@ -46,6 +56,7 @@ public class SettingsScreen extends Screen {
                         Config.getSkyThreshold(),
                         Config::setSkyThreshold
                 )
+
         );
 
         this.addWidget(list);
