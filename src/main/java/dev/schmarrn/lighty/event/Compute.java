@@ -3,30 +3,33 @@ package dev.schmarrn.lighty.event;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexBuffer;
-import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.ModeLoader;
 import dev.schmarrn.lighty.api.LightyMode;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
 import org.joml.Matrix4f;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 public class Compute {
-    private static final HashSet<SectionPos> toBeUpdated = new HashSet<>();
-    private static final HashSet<SectionPos> toBeRemoved = new HashSet<>();
-    private static final Map<SectionPos, VertexBuffer> cachedBuffers = new LinkedHashMap<>();
+    // Based on some observations, the hashset size only exceeds around 400 elements
+    // when spectating through your world at max speed at an overlay distance of 2 chunks.
+    // That's why I chose 550 as a reasonable default - not too big (a section pos is just 3 ints after all),
+    // but it should be enough to avoid rehashing at a reasonable overlay distance
+    private static final int INITIAL_HASHSET_CAPACITY = 100;
+    private static final HashSet<SectionPos> toBeUpdated = new HashSet<>(INITIAL_HASHSET_CAPACITY);
+    private static HashSet<SectionPos> toBeRemoved = new HashSet<>(INITIAL_HASHSET_CAPACITY);
+    private static final Map<SectionPos, VertexBuffer> cachedBuffers = new HashMap<>();
     private static ChunkPos playerPos = null;
 
     private static boolean outOfRange(SectionPos pos) {
@@ -50,28 +53,6 @@ public class Compute {
         }
 
         toBeUpdated.add(pos);
-    }
-
-    private static SectionPos fromVec3i(Vec3i vec) {
-        return SectionPos.of(vec.getX(), vec.getY(), vec.getZ());
-    }
-
-    private static void updateUpDown(SectionPos pos) {
-        updateSubChunk(pos);
-        updateSubChunk(fromVec3i(pos.above()));
-        updateSubChunk(fromVec3i(pos.below()));
-    }
-
-    public static void updateSubChunkAndSurrounding(SectionPos pos) {
-        updateUpDown(pos);
-        updateUpDown(fromVec3i(pos.south()));
-        updateUpDown(fromVec3i(pos.north()));
-        updateUpDown(fromVec3i(pos.east()));
-        updateUpDown(fromVec3i(pos.east().north()));
-        updateUpDown(fromVec3i(pos.east().south()));
-        updateUpDown(fromVec3i(pos.west()));
-        updateUpDown(fromVec3i(pos.west().north()));
-        updateUpDown(fromVec3i(pos.west().south()));
     }
 
     private static VertexBuffer buildChunk(LightyMode mode, SectionPos chunkPos, BufferBuilder builder, ClientLevel world) {
@@ -103,18 +84,13 @@ public class Compute {
         LightyMode mode = ModeLoader.getCurrentMode();
         if (mode == null) return;
 
-        LocalPlayer player = client.player;
         ClientLevel world = client.level;
-        if (player == null || world == null) {
+
+        if (client.player == null || world == null) {
             return;
         }
 
-        Tesselator tesselator = Tesselator.getInstance();
-        //if (!toBeUpdated.isEmpty()) {
-            // Lighty.LOGGER.info("To be computed: {}", toBeUpdated.size());
-        //}
-
-        playerPos = new ChunkPos(player.blockPosition());
+        playerPos = new ChunkPos(client.player.blockPosition());
 
         for (SectionPos sectionPos : toBeUpdated) {
             if (outOfRange(sectionPos)) {
@@ -129,7 +105,9 @@ public class Compute {
                 buf.close();
             }
         }
-        toBeRemoved.clear();
+        // Instead of clear (which goes through every element, setting it null), just throw away the whole
+        // old hashset - should be faster in theory
+        toBeRemoved = new HashSet<>(INITIAL_HASHSET_CAPACITY);
 
         ChunkPos.rangeClosed(playerPos, 2).forEach(chunkPos -> {
             for (int i = 0; i < world.getSectionsCount(); ++i) {
@@ -140,7 +118,7 @@ public class Compute {
                         if (vertexBuffer != null) {
                             vertexBuffer.close();
                         }
-                        return buildChunk(mode, pos, tesselator.getBuilder(), world);
+                        return buildChunk(mode, pos, new BufferBuilder(0x200000), world);
                     });
                 }
             }
@@ -171,7 +149,7 @@ public class Compute {
         cachedBuffers.forEach(((chunkPos, cachedBuffer) -> {
             if (outOfRange(chunkPos)) {
                 toBeRemoved.add(chunkPos);
-            } else if (frustum.isVisible(new AABB(chunkPos.minBlockX(), chunkPos.minBlockY(), chunkPos.minBlockZ(), chunkPos.maxBlockX(), chunkPos.maxBlockY(), chunkPos.maxBlockZ()))) {
+            } else if (frustum.isVisible(new AABB(chunkPos.minBlockX()-1, chunkPos.minBlockY()-1, chunkPos.minBlockZ()-1, chunkPos.maxBlockX()+1, chunkPos.maxBlockY()+1, chunkPos.maxBlockZ()+1))) {
                 cachedBuffer.bind();
                 cachedBuffer.drawWithShader(positionMatrix, projectionMatrix, RenderSystem.getShader());
             }
