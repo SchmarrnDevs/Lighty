@@ -11,8 +11,6 @@ Currently, I try to actively bring features to:
 If you come across any bugs in other versions, just open an issue and I will look into fixing it. I will not port
 features to any Minecraft version other than those mentioned above.
 
-Support for those versions may be dropped any time.
-
 All of the above boils down to these rules:
 
 - I will support the current stable Minecraft version.
