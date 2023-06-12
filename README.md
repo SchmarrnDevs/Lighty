@@ -6,7 +6,7 @@
 
 Currently, I try to actively bring features to:
 
-- 1.20.0
+- 1.20.1
 
 If you come across any bugs in other versions, just open an issue and I will look into fixing it. I will not port
 features to any Minecraft version other than those mentioned above.
