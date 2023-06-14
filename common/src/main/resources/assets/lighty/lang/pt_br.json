@@ -4,7 +4,6 @@
   "category.lighty": "Lighty",
   "modeSwitcher.lighty.title": "Menu de modos do Lighty",
   "modeSwitcher.lighty.number_mode": "Modo Numero",
-  "modeSwitcher.lighty.number_mode.tooltip": "Mostra o nivel de luz como: BlockLightLevel|SkyLightLevel",
   "modeSwitcher.lighty.carpet_mode": "Modo Carpete",
   "modeSwitcher.lighty.carpet_mode.tooltip": "Original, uma sobreposição de carpete",
   "modeSwitcher.lighty.boring_cross_mode": "Cruz entediante",
