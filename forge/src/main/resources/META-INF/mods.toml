@@ -1,0 +1,28 @@
+modLoader = "javafml"
+loaderVersion = "[46,)"
+issueTrackerURL = "https://github.com/SchmarrnDevs/Lighty/issues"
+license = "Apache-2.0"
+
+[[mods]]
+modId = "lighty"
+version = "${version}"
+displayName = "Lighty"
+authors = "andi_makes, agnor99"
+description = '''
+The Light Overlay Mod with a twist!
+'''
+logoFile = "assets/lighty/icon.png"
+
+[[dependencies.lighty]]
+modId = "forge"
+mandatory = true
+versionRange = "[47,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.lighty]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.1,)"
+ordering = "NONE"
+side = "CLIENT"
