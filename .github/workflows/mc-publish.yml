@@ -22,7 +22,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
       - name: Build
-        run: rm -f fabric/build/libs/* forge/build/libs/* && gradle remapJar
+        run: rm -f fabric/build/libs/* forge/build/libs/* && ./gradlew remapJar
       - name: Publish
         uses: Kir-Antipov/mc-publish@v3.2
         with:
