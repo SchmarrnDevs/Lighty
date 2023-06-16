@@ -20,6 +20,11 @@ public class LightyForge {
         Lighty.init();
     }
 
+
+    /**
+     * This is an inner class to prevent server crashes if this mod is installed on a dedicated server.
+     * It's also an EventListener for all events that are {@linkplain net.minecraftforge.fml.event.IModBusEvent ModBusEvents}. ModBusEvents are events that are gameload events (fired during game loading or resource reload) and don't have game context.
+     */
     @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     private static class ClassLoadingProtection {
 
@@ -29,6 +34,10 @@ public class LightyForge {
         }
     }
 
+    /**
+     * This is an inner class to prevent server crashes if this mod is installed on a dedicated server.
+     * It's also an EventListener for all events that are not {@linkplain net.minecraftforge.fml.event.IModBusEvent ModBusEvents}.
+     */
     @Mod.EventBusSubscriber(Dist.CLIENT)
     private static class ClassLoadingProtection2 {
 
@@ -45,11 +54,6 @@ public class LightyForge {
             if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
                 Compute.render(event.getFrustum(), event.getPoseStack(), event.getProjectionMatrix());
             }
-        }
-
-        public static boolean release() {
-            Minecraft.getInstance().mouseHandler.releaseMouse();
-            return true;
         }
     }
 }

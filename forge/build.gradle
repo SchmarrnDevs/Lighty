@@ -73,10 +73,11 @@ components.java {
 repositories {
     mavenLocal()
 }
+archivesBaseName = archivesBaseName + "-forge"
 publishing {
     publications {
         mavenForge(MavenPublication) {
-            artifactId = rootProject.archives_base_name + "-" + project.name
+            artifactId = rootProject.archives_base_name + "-" + project.name + "-Forge"
             from components.java
         }
     }

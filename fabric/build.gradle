@@ -64,6 +64,7 @@ components.java {
     }
 }
 
+archivesBaseName = archivesBaseName + "-fabric"
 publishing {
     publications {
         mavenFabric(MavenPublication) {

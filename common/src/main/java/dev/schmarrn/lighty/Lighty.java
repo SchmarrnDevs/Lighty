@@ -26,6 +26,9 @@ public class Lighty {
         KeyBind.init();
     }
 
+    /**
+     * Called after Lighty Modes are registered
+     */
     public static void postLoad() {
         ModeLoader.setLastUsedMode();
     }

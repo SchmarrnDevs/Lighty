@@ -4,10 +4,12 @@ import net.minecraft.client.KeyMapping;
 import java.nio.file.Path;
 import java.util.ServiceLoader;
 
+/**
+ * A service for methods that have to be called from common code but are different across ModLoaders and APIs
+ */
 public interface UtilDefinition {
     UtilDefinition INSTANCE = load();
     KeyMapping registerKeyBinding(KeyMapping mapping);
-
 
     Path getConfigDir();
 

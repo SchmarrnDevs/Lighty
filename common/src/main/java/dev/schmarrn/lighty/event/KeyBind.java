@@ -43,7 +43,9 @@ public class KeyBind {
         KeyBind.oldToggleState = newToggleState;
     }
 
-    public static void init() {}
+    public static void init() {
+        //Register keybinds through static classloading
+    }
 
     private KeyBind() {}
 }

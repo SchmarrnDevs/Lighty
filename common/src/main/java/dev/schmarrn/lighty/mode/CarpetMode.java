@@ -90,8 +90,10 @@ public class CarpetMode extends LightyMode {
         builder.vertex(x, y + 1 / 16f, z + 1).uv(0, 1).color(color).endVertex();
         builder.vertex(x + 1, y + 1 / 16f, z + 1).uv(1, 1).color(color).endVertex();
         builder.vertex(x + 1, y + 1 / 16f, z).uv(1, 0).color(color).endVertex();
-        if (offset > 0.001f)
+        if (offset > 0.001f) {
+            //if it renders above it should check if the block above culls the faces
             pos = pos.above();
+        }
         //NORTH
         if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), world, pos, Direction.SOUTH, pos.relative(Direction.SOUTH))) {
             builder.vertex(x, y + 1 / 16f, z + 1).uv(0, 1f / 16).color(color).endVertex();

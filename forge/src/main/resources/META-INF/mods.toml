@@ -7,7 +7,7 @@ license = "Apache-2.0"
 modId = "lighty"
 version = "${version}"
 displayName = "Lighty"
-authors = "andi_makes"
+authors = "andi_makes, agnor99"
 description = '''
 The Light Overlay Mod with a twist!
 '''
