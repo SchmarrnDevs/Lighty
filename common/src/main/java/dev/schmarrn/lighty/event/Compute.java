@@ -3,6 +3,7 @@ package dev.schmarrn.lighty.event;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import dev.schmarrn.lighty.ModeLoader;
 import dev.schmarrn.lighty.api.LightyMode;
@@ -28,7 +29,7 @@ public class Compute {
     // That's why I chose 550 as a reasonable default - not too big (a section pos is just 3 ints after all),
     // but it should be enough to avoid rehashing at a reasonable overlay distance
     private static final int INITIAL_HASHSET_CAPACITY = 550;
-    private static final HashSet<SectionPos> toBeUpdated = new HashSet<>(INITIAL_HASHSET_CAPACITY);
+    private static HashSet<SectionPos> toBeUpdated = new HashSet<>(INITIAL_HASHSET_CAPACITY);
     private static HashSet<SectionPos> toBeRemoved = new HashSet<>(INITIAL_HASHSET_CAPACITY);
     private static final Map<SectionPos, VertexBuffer> cachedBuffers = new HashMap<>();
     private static ChunkPos playerPos = null;
@@ -50,7 +51,11 @@ public class Compute {
     }
 
     public static void clear() {
-        toBeUpdated.clear();
+        toBeUpdated = new HashSet<>(INITIAL_HASHSET_CAPACITY);
+        cachedBuffers.forEach((sectionPos, vertexBuffer) -> {
+            // Important to avoid a Memory leak!
+            vertexBuffer.close();
+        });
         cachedBuffers.clear();
         overlayDistance = Config.getOverlayDistance(); // only update on clear
     }
@@ -128,7 +133,7 @@ public class Compute {
                         if (vertexBuffer != null) {
                             vertexBuffer.close();
                         }
-                        return buildChunk(mode, pos, new BufferBuilder(0x200000), world);
+                        return buildChunk(mode, pos, Tesselator.getInstance().getBuilder(), world);
                     });
                 }
             }
