@@ -27,7 +27,9 @@ jobs:
           modrinth-id: yjvKidNM
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          files: fabric/build/libs/lighty-+([0-9]).+([0-9]).+([0-9])++([0-9]).+([0-9]).+([0-9]).jar
+          files: |
+            fabric/build/libs/!(*-@(dev|sources|javadoc)).jar
+            fabric/build/libs/*-@(dev|sources|javadoc).jar
           loaders: |
             fabric
             quilt
@@ -37,4 +39,6 @@ jobs:
           modrinth-id: yjvKidNM
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          files: forge/build/libs/lighty-+([0-9]).+([0-9]).+([0-9])++([0-9]).+([0-9]).+([0-9]).jar
+          files: |
+            forge/build/libs/!(*-@(dev|sources|javadoc)).jar
+            forge/build/libs/*-@(dev|sources|javadoc).jar
