@@ -25,4 +25,4 @@ jobs:
       - name: Build
         run: rm -f fabric/build/libs/* forge/build/libs/* && ./gradlew remapJar
       - name: Where do the artifacts go?
-        run: ls -la build/libs && ls -la fabric/build/libs && forge/build/libs
+        run: ls -la fabric/build/libs && forge/build/libs
