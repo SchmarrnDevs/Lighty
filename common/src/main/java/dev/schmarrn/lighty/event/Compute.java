@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexBuffer;
 import dev.schmarrn.lighty.ModeLoader;
 import dev.schmarrn.lighty.api.LightyMode;
 import dev.schmarrn.lighty.config.Config;
@@ -31,10 +30,12 @@ public class Compute {
     private static final int INITIAL_HASHSET_CAPACITY = 550;
     private static HashSet<SectionPos> toBeUpdated = new HashSet<>(INITIAL_HASHSET_CAPACITY);
     private static HashSet<SectionPos> toBeRemoved = new HashSet<>(INITIAL_HASHSET_CAPACITY);
-    private static final Map<SectionPos, VertexBuffer> cachedBuffers = new HashMap<>();
+    private static final Map<SectionPos, BufferHolder> cachedBuffers = new HashMap<>();
     private static ChunkPos playerPos = null;
 
     private static int overlayDistance = Config.getOverlayDistance();
+    private static int computationDistance = 0;
+
 
     private static boolean outOfRange(SectionPos pos) {
         int renderDistance = Minecraft.getInstance().options.renderDistance().get();
@@ -58,6 +59,7 @@ public class Compute {
         });
         cachedBuffers.clear();
         overlayDistance = Config.getOverlayDistance(); // only update on clear
+        computationDistance = Math.min(overlayDistance, Minecraft.getInstance().options.renderDistance().get());
     }
 
     public static void updateSubChunk(SectionPos pos) {
@@ -68,7 +70,7 @@ public class Compute {
         toBeUpdated.add(pos);
     }
 
-    private static VertexBuffer buildChunk(LightyMode mode, SectionPos chunkPos, BufferBuilder builder, ClientLevel world) {
+    private static BufferHolder buildChunk(LightyMode mode, SectionPos chunkPos, BufferBuilder builder, ClientLevel world) {
         mode.beforeCompute(builder);
         for (int x = 0; x < 16; ++x) {
             for (int y = 0; y < 16; ++y) {
@@ -80,17 +82,14 @@ public class Compute {
             }
         }
 
-        VertexBuffer vertexBuffer = cachedBuffers.get(chunkPos);
-        if (vertexBuffer != null) {
-            vertexBuffer.close();
+        BufferHolder buffer = cachedBuffers.get(chunkPos);
+        if (buffer == null) {
+            buffer = new BufferHolder();
         }
-        vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
-        vertexBuffer.bind();
-        vertexBuffer.upload(builder.end());
-        VertexBuffer.unbind();
+        buffer.upload(builder.end());
 
         mode.afterCompute();
-        return vertexBuffer;
+        return buffer;
     }
 
     public static void computeCache(Minecraft client) {
@@ -105,10 +104,24 @@ public class Compute {
 
         playerPos = new ChunkPos(client.player.blockPosition());
 
+        HashSet<SectionPos> removeFromToBeUpdated = new HashSet<>(INITIAL_HASHSET_CAPACITY);
         for (SectionPos sectionPos : toBeUpdated) {
             if (outOfRange(sectionPos)) {
                 toBeRemoved.add(sectionPos);
+            } else {
+                removeFromToBeUpdated.add(sectionPos);
+                cachedBuffers.compute(sectionPos, (pos, vertexBuffer) -> {
+                    if (vertexBuffer != null) {
+                        vertexBuffer.close();
+                    }
+                    return buildChunk(mode, pos, Tesselator.getInstance().getBuilder(), world);
+                });
             }
+        }
+
+        // Don't know how to remove stuff while iterating over it in java, so this has to suffice.
+        for (SectionPos pos : removeFromToBeUpdated) {
+            toBeUpdated.remove(pos);
         }
 
         for (SectionPos sectionPos : toBeRemoved) {
@@ -118,26 +131,10 @@ public class Compute {
                 buf.close();
             }
         }
+
         // Instead of clear (which goes through every element, setting it null), just throw away the whole
         // old hashset - should be faster in theory
         toBeRemoved = new HashSet<>(INITIAL_HASHSET_CAPACITY);
-
-        // Do not compute stuff outside the render distance
-        int computationDistance = Math.min(overlayDistance, client.options.renderDistance().get());
-        ChunkPos.rangeClosed(playerPos, computationDistance).forEach(chunkPos -> {
-            for (int i = 0; i < world.getSectionsCount(); ++i) {
-                var chunkSection = SectionPos.of(chunkPos, world.getMinSection() + i);
-                if (!cachedBuffers.containsKey(chunkSection) || toBeUpdated.contains(chunkSection)) {
-                    toBeUpdated.remove(chunkSection);
-                    cachedBuffers.compute(chunkSection, (pos, vertexBuffer) -> {
-                        if (vertexBuffer != null) {
-                            vertexBuffer.close();
-                        }
-                        return buildChunk(mode, pos, Tesselator.getInstance().getBuilder(), world);
-                    });
-                }
-            }
-        });
     }
 
     public static void render(@Nullable Frustum frustum, PoseStack matrixStack, Matrix4f projectionMatrix) {
@@ -152,21 +149,44 @@ public class Compute {
             return;
         }
 
+        ClientLevel world = Minecraft.getInstance().level;
+        if (world == null) {
+            return;
+        }
+
         mode.beforeRendering();
 
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
         matrixStack.pushPose();
         matrixStack.translate(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z);
         Matrix4f positionMatrix = matrixStack.last().pose();
-        cachedBuffers.forEach(((chunkPos, cachedBuffer) -> {
-            if (outOfRange(chunkPos)) {
-                toBeRemoved.add(chunkPos);
-            } else if (frustum.isVisible(new AABB(chunkPos.minBlockX()-1, chunkPos.minBlockY()-1, chunkPos.minBlockZ()-1, chunkPos.maxBlockX()+1, chunkPos.maxBlockY()+1, chunkPos.maxBlockZ()+1))) {
-                cachedBuffer.bind();
-                cachedBuffer.drawWithShader(positionMatrix, projectionMatrix, RenderSystem.getShader());
+        // Do not compute stuff outside the render distance
+
+        for (int x = -computationDistance + 1; x < computationDistance; ++x) {
+            for (int z = -computationDistance + 1; z < computationDistance; ++z) {
+                ChunkPos chunkPos = new ChunkPos(playerPos.x + x, playerPos.z + z);
+                if (!frustum.isVisible(new AABB(chunkPos.getMinBlockX(), -64, chunkPos.getMinBlockZ(), chunkPos.getMaxBlockX(), 320, chunkPos.getMaxBlockZ()))) {
+                    continue;
+                }
+                for (int i = 0; i < world.getSectionsCount(); ++i) {
+                    var chunkSection = SectionPos.of(chunkPos, world.getMinSection() + i);
+                    if (outOfRange(chunkSection)) {
+                        toBeRemoved.add(chunkSection);
+                    } else if (frustum.isVisible(new AABB(chunkSection.minBlockX()-1, chunkSection.minBlockY()-1, chunkSection.minBlockZ()-1, chunkSection.maxBlockX()+1, chunkSection.maxBlockY()+1, chunkSection.maxBlockZ()+1))) {
+                        if (cachedBuffers.containsKey(chunkSection)) {
+                            BufferHolder cachedBuffer = cachedBuffers.get(chunkSection);
+                            if (!cachedBuffer.isValid()) {
+                                toBeUpdated.add(chunkSection);
+                            } else {
+                                cachedBuffer.draw(positionMatrix, projectionMatrix, RenderSystem.getShader());
+                            }
+                        } else {
+                            toBeUpdated.add(chunkSection);
+                        }
+                    }
+                }
             }
-        }));
-        VertexBuffer.unbind();
+        }
 
         matrixStack.popPose();
 
