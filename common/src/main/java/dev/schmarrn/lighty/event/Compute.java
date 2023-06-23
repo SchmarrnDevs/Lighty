@@ -179,8 +179,6 @@ public class Compute {
                         } else {
                             toBeUpdated.add(chunkSection);
                         }
-                    } else {
-                        toBeRemoved.add(chunkSection);
                     }
                 }
             }
