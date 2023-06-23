@@ -14,9 +14,10 @@ import org.apache.commons.compress.utils.Lists;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 public class ModeSwitcherScreen extends Screen {
-    private static final List<Button> BUTTONS = Lists.newArrayList();
+    private static final List<ButtonHolder> BUTTONS = Lists.newArrayList();
     public ModeSwitcherScreen() {
         super(Component.translatable("modeSwitcher.lighty.title"));
     }
@@ -29,8 +30,8 @@ public class ModeSwitcherScreen extends Screen {
 
         adder.addChild(Button.builder(CommonComponents.OPTION_OFF, button -> ModeLoader.disable()).build());
 
-        for (Button btn : BUTTONS) {
-            adder.addChild(btn);
+        for (ButtonHolder btn : BUTTONS) {
+            adder.addChild(btn.get());
         }
 
         adder.addChild(Button.builder(Component.translatable("modeSwitcher.lighty.settings"), button -> Minecraft.getInstance().setScreen(new SettingsScreen())).build(), adder.newCellSettings().paddingTop(6));
@@ -54,6 +55,22 @@ public class ModeSwitcherScreen extends Screen {
     }
 
     public static void addButton(Component message, Component tooltip, Button.OnPress onPress) {
-        BUTTONS.add(Button.builder(message, onPress).tooltip(Tooltip.create(tooltip)).build());
+        BUTTONS.add(new ButtonHolder(Button.builder(message, onPress).tooltip(Tooltip.create(tooltip))));
+    }
+
+    private static class ButtonHolder implements Supplier<Button> {
+        private final Button.Builder builder;
+        private Button button = null;
+        ButtonHolder(Button.Builder builder) {
+            this.builder = builder;
+        }
+
+        @Override
+        public Button get() {
+            if (button == null) {
+                button = builder.build();
+            }
+            return button;
+        }
     }
 }
