@@ -34,7 +34,7 @@ public class Compute {
     private static ChunkPos playerPos = null;
 
     private static int overlayDistance = Config.getOverlayDistance();
-    private static int computationDistance = 0;
+    private static int computationDistance = Math.min(overlayDistance, Minecraft.getInstance().options.renderDistance().get());
 
 
     private static boolean outOfRange(SectionPos pos) {
@@ -160,19 +160,15 @@ public class Compute {
         matrixStack.pushPose();
         matrixStack.translate(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z);
         Matrix4f positionMatrix = matrixStack.last().pose();
-        // Do not compute stuff outside the render distance
 
         for (int x = -computationDistance + 1; x < computationDistance; ++x) {
             for (int z = -computationDistance + 1; z < computationDistance; ++z) {
                 ChunkPos chunkPos = new ChunkPos(playerPos.x + x, playerPos.z + z);
-                if (!frustum.isVisible(new AABB(chunkPos.getMinBlockX(), -64, chunkPos.getMinBlockZ(), chunkPos.getMaxBlockX(), 320, chunkPos.getMaxBlockZ()))) {
-                    continue;
-                }
                 for (int i = 0; i < world.getSectionsCount(); ++i) {
                     var chunkSection = SectionPos.of(chunkPos, world.getMinSection() + i);
                     if (outOfRange(chunkSection)) {
                         toBeRemoved.add(chunkSection);
-                    } else if (frustum.isVisible(new AABB(chunkSection.minBlockX()-1, chunkSection.minBlockY()-1, chunkSection.minBlockZ()-1, chunkSection.maxBlockX()+1, chunkSection.maxBlockY()+1, chunkSection.maxBlockZ()+1))) {
+                    } else if (frustum.isVisible(new AABB(chunkSection.origin(), chunkSection.origin().offset(15,15,15)))) {
                         if (cachedBuffers.containsKey(chunkSection)) {
                             BufferHolder cachedBuffer = cachedBuffers.get(chunkSection);
                             if (!cachedBuffer.isValid()) {
@@ -183,6 +179,8 @@ public class Compute {
                         } else {
                             toBeUpdated.add(chunkSection);
                         }
+                    } else {
+                        toBeRemoved.add(chunkSection);
                     }
                 }
             }

@@ -9,22 +9,19 @@ import org.joml.Matrix4f;
 public class BufferHolder {
     @Nullable
     private VertexBuffer vertexBuffer;
-    private boolean valid;
 
     BufferHolder() {
         vertexBuffer = null;
-        valid = false;
     }
 
     boolean isValid() {
-        return vertexBuffer != null && valid;
+        return vertexBuffer != null;
     }
 
     void close() {
         if (vertexBuffer != null) {
             vertexBuffer.close();
             vertexBuffer = null;
-            valid = false;
         }
     }
 
@@ -36,7 +33,6 @@ public class BufferHolder {
         vertexBuffer.bind();
         vertexBuffer.upload(buffer);
         VertexBuffer.unbind();
-        valid = true;
     }
 
     void draw(Matrix4f positionMatrix, Matrix4f projectionMatrix, ShaderInstance shader) {
