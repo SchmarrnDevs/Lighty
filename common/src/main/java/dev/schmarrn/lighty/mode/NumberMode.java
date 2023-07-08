@@ -20,35 +20,17 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.LightyColors;
+import dev.schmarrn.lighty.api.LightyHelper;
 import dev.schmarrn.lighty.api.LightyMode;
 import dev.schmarrn.lighty.api.ModeManager;
-import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.CarpetBlock;
-import net.minecraft.world.level.block.MagmaBlock;
-import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class NumberMode extends LightyMode {
-    record Data(int blockLightLevel, int skyLightLevel, double offset, int color) {}
-
-    public static boolean isBlocked(BlockState block, BlockState up, ClientLevel world, BlockPos upPos) {
-        // See SpawnHelper.isClearForSpawn
-        // If block with FluidState (think Kelp, Seagrass, Glowlichen underwater), disable overlay
-        return (up.isCollisionShapeFullBlock(world, upPos) ||
-                up.hasAnalogOutputSignal() ||
-                !up.getFluidState().isEmpty()) ||
-                up.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE) ||
-                // MagmaBlocks caused a Crash - But Mobs can still spawn on them, I need to fix this
-                block.getBlock() instanceof MagmaBlock;
-    }
-
     @Override
     public void beforeCompute(BufferBuilder builder) {
         builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
@@ -84,38 +66,19 @@ public class NumberMode extends LightyMode {
     public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
         BlockPos posUp = pos.above();
         BlockState up = world.getBlockState(posUp);
-        Block upBlock = up.getBlock();
         BlockState block = world.getBlockState(pos);
-        boolean validSpawn = upBlock.isPossibleToRespawnInThis(up);
-        if (isBlocked(block, up, world, posUp)) {
-            return;
-        }
-        validSpawn = validSpawn && block.isValidSpawn(world, pos, null);
-
-        if (!validSpawn) {
+        if (LightyHelper.isBlocked(block, up, world, pos, posUp)) {
             return;
         }
 
         int blockLightLevel = world.getBrightness(LightLayer.BLOCK, posUp);
         int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
 
-        int color = LightyColors.getSafeARGB();
-        if (blockLightLevel <= Config.getBlockThreshold()) {
-            if (skyLightLevel <= Config.getSkyThreshold()) {
-                color = LightyColors.getDangerARGB();
-            } else {
-                color = LightyColors.getWarningARGB();
-            }
-        }
+        int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
-        float offset = 0;
-        if (upBlock instanceof SnowLayerBlock) { // snow layers
-            int layer = world.getBlockState(posUp).getValue(SnowLayerBlock.LAYERS);
-            // One layer of snow is two pixels high
-            offset = 2 * PXL * layer;
-        } else if (upBlock instanceof CarpetBlock) {
-            // Carpet is just one pixel high
-            offset = PXL;
+        float offset = LightyHelper.getOffset(up, posUp, world);
+        if (offset == -1f) {
+            return;
         }
 
         float x1 = pos.getX() + PXL * 5.25f;

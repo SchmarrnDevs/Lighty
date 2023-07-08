@@ -14,6 +14,8 @@
 
 package dev.schmarrn.lighty.api;
 
+import dev.schmarrn.lighty.config.Config;
+
 public class LightyColors {
     private static final int GREEN = 0x00FF00;
     private static final int ORANGE = 0xFF6600;
@@ -41,6 +43,20 @@ public class LightyColors {
 
     public static int getDangerARGB() {
         return RED  | 0xFF000000;
+    }
+
+    public static int getARGB(int blockLightLevel, int skyLightLevel) {
+        int color = LightyColors.getSafeARGB();
+
+        if (blockLightLevel <= Config.getBlockThreshold()) {
+            if (skyLightLevel <= Config.getSkyThreshold()) {
+                color = LightyColors.getDangerARGB();
+            } else {
+                color = LightyColors.getWarningARGB();
+            }
+        }
+
+        return color;
     }
 
     private LightyColors() {}

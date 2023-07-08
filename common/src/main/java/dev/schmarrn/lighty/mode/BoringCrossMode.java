@@ -20,9 +20,9 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.LightyColors;
+import dev.schmarrn.lighty.api.LightyHelper;
 import dev.schmarrn.lighty.api.LightyMode;
 import dev.schmarrn.lighty.api.ModeManager;
-import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
@@ -38,29 +38,27 @@ public class BoringCrossMode extends LightyMode {
 
     @Override
     public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
-        if (world.getBlockState(pos).isAir() && !world.getBlockState(pos.below()).isAir()) {
-            int blockLight = world.getBrightness(LightLayer.BLOCK, pos);
-            int skyLight = world.getBrightness(LightLayer.SKY, pos);
+        if (!LightyHelper.isBlocked(world.getBlockState(pos.below()), world.getBlockState(pos), world, pos.below(), pos)) {
+            int blockLightLevel = world.getBrightness(LightLayer.BLOCK, pos);
+            int skyLightLevel = world.getBrightness(LightLayer.SKY, pos);
 
-            int data = LightyColors.getSafeARGB();
+            int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
-            if (blockLight <= Config.getBlockThreshold()) {
-                if (skyLight <= Config.getSkyThreshold()) {
-                    data = LightyColors.getDangerARGB();
-                } else {
-                    data = LightyColors.getWarningARGB();
-                }
+            float offset = LightyHelper.getOffset(world.getBlockState(pos), pos, world);
+            if (offset == -1f) {
+                return;
             }
+
             float x1 = pos.getX();
             float x2 = pos.getX() + 1f;
-            float y = pos.getY() + 0.005f;
+            float y = pos.getY() + 0.005f + offset;
             float z1 = pos.getZ();
             float z2 = pos.getZ() + 1f;
 
-            builder.vertex(x1, y, z1).color(data).endVertex();
-            builder.vertex(x2, y, z2).color(data).endVertex();
-            builder.vertex(x2, y, z1).color(data).endVertex();
-            builder.vertex(x1, y, z2).color(data).endVertex();
+            builder.vertex(x1, y, z1).color(color).endVertex();
+            builder.vertex(x2, y, z2).color(color).endVertex();
+            builder.vertex(x2, y, z1).color(color).endVertex();
+            builder.vertex(x1, y, z2).color(color).endVertex();
         }
     }
 
