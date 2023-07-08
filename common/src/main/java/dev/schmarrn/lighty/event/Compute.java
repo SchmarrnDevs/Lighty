@@ -182,7 +182,7 @@ public class Compute {
                     var chunkSection = SectionPos.of(chunkPos, world.getMinSection() + i);
                     if (outOfRange(chunkSection)) {
                         toBeRemoved.add(chunkSection);
-                    } else if (frustum.isVisible(new AABB(chunkSection.origin(), chunkSection.origin().offset(15,15,15)))) {
+                    } else if (frustum.isVisible(new AABB(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16,16,16)))) {
                         if (cachedBuffers.containsKey(chunkSection)) {
                             BufferHolder cachedBuffer = cachedBuffers.get(chunkSection);
                             if (!cachedBuffer.isValid()) {
