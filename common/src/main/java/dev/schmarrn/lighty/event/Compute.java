@@ -114,6 +114,12 @@ public class Compute {
 
         playerPos = new ChunkPos(client.player.blockPosition());
 
+        cachedBuffers.forEach(((sectionPos, bufferHolder) -> {
+            if (outOfRange(sectionPos)) {
+                toBeRemoved.add(sectionPos);
+            }
+        }));
+
         HashSet<SectionPos> removeFromToBeUpdated = new HashSet<>(INITIAL_HASHSET_CAPACITY);
         for (SectionPos sectionPos : toBeUpdated) {
             if (outOfRange(sectionPos)) {
@@ -176,9 +182,7 @@ public class Compute {
                 ChunkPos chunkPos = new ChunkPos(playerPos.x + x, playerPos.z + z);
                 for (int i = 0; i < world.getSectionsCount(); ++i) {
                     var chunkSection = SectionPos.of(chunkPos, world.getMinSection() + i);
-                    if (outOfRange(chunkSection)) {
-                        toBeRemoved.add(chunkSection);
-                    } else if (frustum.isVisible(new AABB(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16,16,16)))) {
+                    if (frustum.isVisible(new AABB(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16,16,16)))) {
                         if (cachedBuffers.containsKey(chunkSection)) {
                             BufferHolder cachedBuffer = cachedBuffers.get(chunkSection);
                             if (!cachedBuffer.isValid()) {
