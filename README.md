@@ -1,4 +1,4 @@
-# Lighty - Another Light Overlay Mod - With a twist!
+# Lighty - The Light Overlay Mod with a twist!
 
 [Please visit Modrinth for an overview about the mod!](https://modrinth.com/mod/lighty)
 
