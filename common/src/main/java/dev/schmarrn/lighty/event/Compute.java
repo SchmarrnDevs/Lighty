@@ -24,6 +24,7 @@ import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -177,6 +178,8 @@ public class Compute {
         matrixStack.translate(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z);
         Matrix4f positionMatrix = matrixStack.last().pose();
 
+        ShaderInstance shader = RenderSystem.getShader();
+
         for (int x = -computationDistance + 1; x < computationDistance; ++x) {
             for (int z = -computationDistance + 1; z < computationDistance; ++z) {
                 ChunkPos chunkPos = new ChunkPos(playerPos.x + x, playerPos.z + z);
@@ -188,7 +191,7 @@ public class Compute {
                             if (!cachedBuffer.isValid()) {
                                 toBeUpdated.add(chunkSection);
                             } else {
-                                cachedBuffer.draw(positionMatrix, projectionMatrix, RenderSystem.getShader());
+                                cachedBuffer.draw(positionMatrix, projectionMatrix, shader);
                             }
                         } else {
                             toBeUpdated.add(chunkSection);
