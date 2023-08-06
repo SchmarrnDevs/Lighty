@@ -43,10 +43,15 @@ public class BufferHolder {
         if (vertexBuffer != null) {
             vertexBuffer.close();
         }
-        vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
-        vertexBuffer.bind();
-        vertexBuffer.upload(buffer);
-        VertexBuffer.unbind();
+        if (buffer.isEmpty()) {
+            // Don't upload
+            vertexBuffer = null;
+        } else {
+            vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+            vertexBuffer.bind();
+            vertexBuffer.upload(buffer);
+            VertexBuffer.unbind();
+        }
     }
 
     void draw(Matrix4f positionMatrix, Matrix4f projectionMatrix, ShaderInstance shader) {
