@@ -46,6 +46,7 @@ public class BufferHolder {
         if (buffer.isEmpty()) {
             // Don't upload
             vertexBuffer = null;
+            buffer.release();
         } else {
             vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
             vertexBuffer.bind();
