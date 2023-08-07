@@ -23,19 +23,22 @@ import org.joml.Matrix4f;
 public class BufferHolder {
     @Nullable
     private VertexBuffer vertexBuffer;
+    private boolean isEmpty;
 
     BufferHolder() {
         vertexBuffer = null;
+        isEmpty = false;
     }
 
     boolean isValid() {
-        return vertexBuffer != null;
+        return isEmpty || vertexBuffer != null;
     }
 
     void close() {
         if (vertexBuffer != null) {
             vertexBuffer.close();
             vertexBuffer = null;
+            isEmpty = false;
         }
     }
 
@@ -45,9 +48,11 @@ public class BufferHolder {
         }
         if (buffer.isEmpty()) {
             // Don't upload
+            isEmpty = true;
             vertexBuffer = null;
             buffer.release();
         } else {
+            isEmpty = false;
             vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
             vertexBuffer.bind();
             vertexBuffer.upload(buffer);
