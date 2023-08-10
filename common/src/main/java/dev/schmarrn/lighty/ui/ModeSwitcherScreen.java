@@ -57,7 +57,7 @@ public class ModeSwitcherScreen extends Screen {
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        renderBackground(guiGraphics);
+        renderBackground(guiGraphics, mouseX, mouseY, delta);
         guiGraphics.drawCenteredString(this.font, this.title, this.width/2, 15, 0xFFFFFF);
         super.render(guiGraphics, mouseX, mouseY, delta);
     }
