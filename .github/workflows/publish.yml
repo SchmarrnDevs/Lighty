@@ -31,6 +31,7 @@ jobs:
           loaders: |
             fabric
             quilt
+          fail-mode: warn
       - name: Publish Forge
         uses: Kir-Antipov/mc-publish@v3.2
         with:
@@ -38,3 +39,4 @@ jobs:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           files: forge/build/libs/lighty-forge-*([0-9]?(.))\+*([0-9]?(.)).jar
+          fail-mode: warn

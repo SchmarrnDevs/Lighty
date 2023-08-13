@@ -1,5 +1,11 @@
 architectury {
-    common(rootProject.enabled_platforms.split(","))
+    if (rootProject.forge_enabled.toBoolean() && rootProject.fabric_enabled.toBoolean()) {
+        common("forge,fabric".split(","))
+    } else if (rootProject.forge_enabled.toBoolean()) {
+        common("forge")
+    } else if (rootProject.fabric_enabled.toBoolean()) {
+        common("fabric")
+    }
 }
 
 loom {
