@@ -4,19 +4,18 @@
 
 ## About Supported Minecraft Versions
 
-Currently, I try to actively bring features to:
+Because of time restraints I am only able to bring features to *the most recent Minecraft version*.
 
-- 1.20.1
-
-If you come across any bugs in other versions, just open an issue and I will look into fixing it. I will not port
-features to any Minecraft version other than those mentioned above.
+If you come across any bugs in other versions, just open an issue and I will look into fixing it.
 
 All of the above boils down to these rules:
 
 - I will support the current stable Minecraft version.
-- I will support the latest Minecraft version [Create Fabric](https://modrinth.com/mod/create-fabric) is on.
+- If there is demand for a feature to be backported **AND** the backport is straightforward (read: easy to do), I may consider backporting that feature. Just open an issue about it.
 - I will try to support the most recent snapshot. I will not backport any changes to snapshots.
 - Support for any other version may or may not be provided.
+
+That said, PRs of any kind are more than welcome! If it is anything big, consider opening an issue first or contacting me.               
 
 ## Differences across Minecraft versions
 
