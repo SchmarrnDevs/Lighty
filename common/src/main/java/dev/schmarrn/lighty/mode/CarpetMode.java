@@ -25,6 +25,7 @@ import dev.schmarrn.lighty.api.LightyMode;
 import dev.schmarrn.lighty.api.ModeManager;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -37,7 +38,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class CarpetMode extends LightyMode {
     @Override
     public void beforeCompute(BufferBuilder builder) {
-        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
     }
 
     @Override
@@ -64,49 +65,50 @@ public class CarpetMode extends LightyMode {
         double x = pos.getX();
         double y = pos.getY() + 1 + offset;
         double z = pos.getZ();
+        int lightmap = LightTexture.pack( blockLightLevel, skyLightLevel);
         //TOP
-        builder.vertex(x, y + 1 / 16f, z).uv(0, 0).color(color).endVertex();
-        builder.vertex(x, y + 1 / 16f, z + 1).uv(0, 1).color(color).endVertex();
-        builder.vertex(x + 1, y + 1 / 16f, z + 1).uv(1, 1).color(color).endVertex();
-        builder.vertex(x + 1, y + 1 / 16f, z).uv(1, 0).color(color).endVertex();
+        builder.vertex(x, y + 1 / 16f, z).color(color).uv(0, 0).uv2(lightmap).endVertex();
+        builder.vertex(x, y + 1 / 16f, z + 1).color(color).uv(0, 1).uv2(lightmap).endVertex();
+        builder.vertex(x + 1, y + 1 / 16f, z + 1).color(color).uv(1, 1).uv2(lightmap).endVertex();
+        builder.vertex(x + 1, y + 1 / 16f, z).color(color).uv(1, 0).uv2(lightmap).endVertex();
         if (offset > 0.001f) {
             //if it renders above it should check if the block above culls the faces
             pos = pos.above();
         }
         //NORTH
         if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), world, pos, Direction.SOUTH, pos.relative(Direction.SOUTH))) {
-            builder.vertex(x, y + 1 / 16f, z + 1).uv(0, 1f / 16).color(color).endVertex();
-            builder.vertex(x, y, z + 1).uv(0, 0).color(color).endVertex();
-            builder.vertex(x + 1, y, z + 1).uv(1, 0).color(color).endVertex();
-            builder.vertex(x + 1, y + 1 / 16f, z + 1).uv(1, 1f / 16).color(color).endVertex();
+            builder.vertex(x, y + 1 / 16f, z + 1).color(color).uv(0, 1f / 16).uv2(lightmap).endVertex();
+            builder.vertex(x, y, z + 1).color(color).uv(0, 0).uv2(lightmap).endVertex();
+            builder.vertex(x + 1, y, z + 1).color(color).uv(1, 0).uv2(lightmap).endVertex();
+            builder.vertex(x + 1, y + 1 / 16f, z + 1).color(color).uv(1, 1f / 16).uv2(lightmap).endVertex();
         }
         //EAST
         if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), world, pos, Direction.WEST, pos.relative(Direction.WEST))) {
-            builder.vertex(x, y + 1/16f, z).uv(0,1f/16).color(color).endVertex();
-            builder.vertex(x, y, z).uv(0, 0).color(color).endVertex();
-            builder.vertex(x, y, z + 1).uv(1, 0).color(color).endVertex();
-            builder.vertex(x, y + 1/16f, z + 1).uv(1, 1f/16).color(color).endVertex();
+            builder.vertex(x, y + 1/16f, z).color(color).uv(0,1f/16).uv2(lightmap).endVertex();
+            builder.vertex(x, y, z).color(color).uv(0, 0).uv2(lightmap).endVertex();
+            builder.vertex(x, y, z + 1).color(color).uv(1, 0).uv2(lightmap).endVertex();
+            builder.vertex(x, y + 1/16f, z + 1).color(color).uv(1, 1f/16).uv2(lightmap).endVertex();
         }
         //SOUTH
         if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), world, pos, Direction.NORTH, pos.relative(Direction.NORTH))) {
-            builder.vertex(x+1, y + 1/16f, z).uv(0,1f/16).color(color).endVertex();
-            builder.vertex(x+1, y, z).uv(0, 0).color(color).endVertex();
-            builder.vertex(x, y, z).uv(1, 0).color(color).endVertex();
-            builder.vertex(x, y + 1/16f, z).uv(1, 1f/16).color(color).endVertex();
+            builder.vertex(x+1, y + 1/16f, z).color(color).uv(0,1f/16).uv2(lightmap).color(color).endVertex();
+            builder.vertex(x+1, y, z).color(color).uv(0, 0).uv2(lightmap).endVertex();
+            builder.vertex(x, y, z).color(color).uv(1, 0).uv2(lightmap).endVertex();
+            builder.vertex(x, y + 1/16f, z).color(color).uv(1, 1f/16).uv2(lightmap).endVertex();
         }
         //WEST
         if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), world, pos, Direction.EAST, pos.relative(Direction.EAST))) {
-            builder.vertex(x+1, y + 1/16f, z+1).uv(0,1f/16).color(color).endVertex();
-            builder.vertex(x+1, y, z+1).uv(0, 0).color(color).endVertex();
-            builder.vertex(x+1, y, z).uv(1, 0).color(color).endVertex();
-            builder.vertex(x+1, y + 1/16f, z).uv(1, 1f/16).color(color).endVertex();
+            builder.vertex(x+1, y + 1/16f, z+1).color(color).uv(0,1f/16).uv2(lightmap).endVertex();
+            builder.vertex(x+1, y, z+1).color(color).uv(0, 0).uv2(lightmap).endVertex();
+            builder.vertex(x+1, y, z).color(color).uv(1, 0).uv2(lightmap).endVertex();
+            builder.vertex(x+1, y + 1/16f, z).color(color).uv(1, 1f/16).uv2(lightmap).endVertex();
         }
     }
 
     @Override
     public void beforeRendering() {
         RenderType.translucent().setupRenderState();
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
         RenderSystem.setShaderTexture(0, new ResourceLocation(Lighty.MOD_ID, "textures/block/transparent.png"));
         RenderSystem.enableDepthTest();
     }
