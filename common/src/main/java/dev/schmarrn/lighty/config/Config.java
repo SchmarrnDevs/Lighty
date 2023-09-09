@@ -16,7 +16,6 @@ package dev.schmarrn.lighty.config;
 
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.UtilDefinition;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.ResourceLocation;
 
 import java.io.*;
@@ -33,6 +32,7 @@ public class Config {
     private static final String SKY_THRESHOLD = "lighty.sky_threshold";
     private static final String BLOCK_THRESHOLD = "lighty.block_threshold";
     private static final String OVERLAY_DISTANCE = "lighty.overlay_distance";
+    private static final String OVERLAY_BRIGHTNESS = "lighty.overlay_brightness";
 
     private Config() {
         properties = new Properties();
@@ -45,6 +45,7 @@ public class Config {
             properties.putIfAbsent(SKY_THRESHOLD, "0");
             properties.putIfAbsent(BLOCK_THRESHOLD, "0");
             properties.putIfAbsent(OVERLAY_DISTANCE, "2");
+            properties.putIfAbsent(OVERLAY_BRIGHTNESS, "10");
         } catch (FileNotFoundException e) {
             Lighty.LOGGER.warn("No Lighty config found at {}, loading defaults and saving config file.", PATH);
 
@@ -52,7 +53,8 @@ public class Config {
             properties.setProperty(LAST_USED_MODE, "lighty:carpet_mode");
             properties.setProperty(SKY_THRESHOLD, "0");
             properties.setProperty(BLOCK_THRESHOLD, "0");
-            properties.putIfAbsent(OVERLAY_DISTANCE, "2");
+            properties.setProperty(OVERLAY_DISTANCE, "2");
+            properties.setProperty(OVERLAY_BRIGHTNESS, "10");
 
             this.write();
         } catch (IOException e) {
@@ -80,6 +82,10 @@ public class Config {
         return Integer.parseInt(config.properties.getProperty(OVERLAY_DISTANCE, "2"));
     }
 
+    public static int getOverlayBrightness() {
+        return Integer.parseInt(config.properties.getProperty(OVERLAY_BRIGHTNESS, "10"));
+    }
+
     public static ResourceLocation getLastUsedMode() {
         return new ResourceLocation(config.properties.getProperty(LAST_USED_MODE, "lighty:carpet_mode"));
     }
@@ -101,6 +107,11 @@ public class Config {
 
     public static void setOverlayDistance(int i) {
         config.properties.setProperty(OVERLAY_DISTANCE, String.valueOf(i));
+        config.write();
+    }
+
+    public static void setOverlayBrightness(int i) {
+        config.properties.setProperty(OVERLAY_BRIGHTNESS, String.valueOf(i));
         config.write();
     }
 
