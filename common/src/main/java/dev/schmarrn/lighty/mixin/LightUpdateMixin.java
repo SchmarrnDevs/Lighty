@@ -29,4 +29,9 @@ public class LightUpdateMixin {
     private void lighty$onBlockUpdate(LightLayer lightLayer, SectionPos sectionPos, CallbackInfo ci) {
         Compute.updateSubChunk(sectionPos);
     }
+
+    @Inject(method = "updateViewRadius", at = @At("TAIL"))
+    private void lighty$onUpdateViewRadius(int i, CallbackInfo ci) {
+        Compute.clear();
+    }
 }
