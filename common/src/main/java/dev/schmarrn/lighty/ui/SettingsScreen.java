@@ -50,6 +50,16 @@ public class SettingsScreen extends Screen {
                 Config::setOverlayDistance
         ));
 
+        list.addBig(new OptionInstance<>(
+                "lighty.options.overlay_brightness",
+                object -> Tooltip.create(Component.translatable("lighty.options.overlay_brightness.tooltip", object)),
+                (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
+                new OptionInstance.IntRange(0, 15),
+                Codec.intRange(0, 15),
+                Config.getOverlayBrightness(),
+                Config::setOverlayBrightness
+        ));
+
         list.addSmall(
                 new OptionInstance<>(
                         "lighty.options.block_threshold",

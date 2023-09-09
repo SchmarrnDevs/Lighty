@@ -16,5 +16,7 @@
   "lighty.options.sky_threshold": "Sky Threshold",
   "lighty.options.sky_threshold.tooltip": "If the block light level is below the value specified in 'Block Threshold' and the sky light level is less than or equal to %d, the overlay is red. Otherwise, it is orange.",
   "lighty.options.overlay_distance": "Overlay Distance",
-  "lighty.options.overlay_distance.tooltip": "The radius of the area covered by the light overlay, in chunks. Defaults to 2. High overlay distance may impact performance severally."
+  "lighty.options.overlay_distance.tooltip": "The radius of the area covered by the light overlay, in chunks. Defaults to 2. High overlay distance may impact performance severally.",
+  "lighty.options.overlay_brightness": "Overlay Brightness",
+  "lighty.options.overlay_brightness.tooltip": "The brightness of the rendered overlay. Defaults to 10. Especially useful when using shaders."
 }
