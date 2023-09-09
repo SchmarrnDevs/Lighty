@@ -33,6 +33,7 @@ public class Config {
     private static final String BLOCK_THRESHOLD = "lighty.block_threshold";
     private static final String OVERLAY_DISTANCE = "lighty.overlay_distance";
     private static final String OVERLAY_BRIGHTNESS = "lighty.overlay_brightness";
+    private static final String SHOW_SAFE = "lighty.show_safe";
 
     private Config() {
         properties = new Properties();
@@ -46,6 +47,7 @@ public class Config {
             properties.putIfAbsent(BLOCK_THRESHOLD, "0");
             properties.putIfAbsent(OVERLAY_DISTANCE, "2");
             properties.putIfAbsent(OVERLAY_BRIGHTNESS, "10");
+            properties.putIfAbsent(SHOW_SAFE, String.valueOf(true));
         } catch (FileNotFoundException e) {
             Lighty.LOGGER.warn("No Lighty config found at {}, loading defaults and saving config file.", PATH);
 
@@ -55,6 +57,8 @@ public class Config {
             properties.setProperty(BLOCK_THRESHOLD, "0");
             properties.setProperty(OVERLAY_DISTANCE, "2");
             properties.setProperty(OVERLAY_BRIGHTNESS, "10");
+            properties.setProperty(SHOW_SAFE, String.valueOf(true));
+
 
             this.write();
         } catch (IOException e) {
@@ -85,6 +89,9 @@ public class Config {
     public static int getOverlayBrightness() {
         return Integer.parseInt(config.properties.getProperty(OVERLAY_BRIGHTNESS, "10"));
     }
+    public static boolean getShowSafe() {
+        return Boolean.parseBoolean(config.properties.getProperty(SHOW_SAFE, String.valueOf(true)));
+    }
 
     public static ResourceLocation getLastUsedMode() {
         return new ResourceLocation(config.properties.getProperty(LAST_USED_MODE, "lighty:carpet_mode"));
@@ -112,6 +119,11 @@ public class Config {
 
     public static void setOverlayBrightness(int i) {
         config.properties.setProperty(OVERLAY_BRIGHTNESS, String.valueOf(i));
+        config.write();
+    }
+
+    public static void setShowSafe(boolean b) {
+        config.properties.setProperty(SHOW_SAFE, String.valueOf(b));
         config.write();
     }
 

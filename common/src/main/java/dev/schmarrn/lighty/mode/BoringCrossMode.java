@@ -45,6 +45,10 @@ public class BoringCrossMode extends LightyMode {
             int blockLightLevel = world.getBrightness(LightLayer.BLOCK, pos);
             int skyLightLevel = world.getBrightness(LightLayer.SKY, pos);
 
+            if (LightyColors.isSafe(blockLightLevel) && !Config.getShowSafe()) {
+                return;
+            }
+
             int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
             float offset = LightyHelper.getOffset(world.getBlockState(pos), pos, world);

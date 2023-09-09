@@ -54,6 +54,10 @@ public class CarpetMode extends LightyMode {
         int blockLightLevel = world.getBrightness(LightLayer.BLOCK, posUp);
         int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
 
+        if (LightyColors.isSafe(blockLightLevel) && !Config.getShowSafe()) {
+            return;
+        }
+
         int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
         double offset = LightyHelper.getOffset(up, posUp, world);
