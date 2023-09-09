@@ -23,42 +23,68 @@ import dev.schmarrn.lighty.api.LightyColors;
 import dev.schmarrn.lighty.api.LightyHelper;
 import dev.schmarrn.lighty.api.LightyMode;
 import dev.schmarrn.lighty.api.ModeManager;
+import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.Dictionary;
+
 public class NumberMode extends LightyMode {
     @Override
     public void beforeCompute(BufferBuilder builder) {
-        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
     }
 
     private static final float PXL = 1/16f;
     private static final float dx = 0.25f;
     private static final float dz = 0.25f;
 
-    private static void renderDigit(BufferBuilder builder, int digit, float x, float y, float z, int color) {
+    private static void renderDigit(BufferBuilder builder, int digit, float x, float y, float z, int color, int lightmap) {
         float startU = (0b11 & digit) / 4f;
         float startV = ((digit >> 2) & 0b11) / 4f;
 
-        builder.vertex(x, y, z).uv(startU,startV).color(color).endVertex();
-        builder.vertex(x, y, z + dz).uv(startU, startV + 0.25f).color(color).endVertex();
-        builder.vertex(x + dx, y, z + dz).uv(startU + 0.25f, startV + 0.25f).color(color).endVertex();
-        builder.vertex(x + dx, y, z).uv(startU + 0.25f, startV).color(color).endVertex();
+        builder.vertex(x, y, z)
+                .color(color)
+                .uv(startU,startV)
+                .uv2(lightmap)
+                .normal(0f, 1f, 0f)
+                .endVertex();
+        builder.vertex(x, y, z + dz)
+                .color(color)
+                .uv(startU, startV + 0.25f)
+                .uv2(lightmap)
+                .normal(0f, 1f, 0f)
+                .endVertex();
+        builder.vertex(x + dx, y, z + dz)
+                .color(color)
+                .uv(startU + 0.25f, startV + 0.25f)
+                .uv2(lightmap)
+                .normal(0f, 1f, 0f)
+                .endVertex();
+        builder.vertex(x + dx, y, z)
+                .color(color)
+                .uv(startU + 0.25f, startV)
+                .uv2(lightmap)
+                .normal(0f, 1f, 0f)
+                .endVertex();
     }
 
-    private static void renderNumber(BufferBuilder builder, int number, float x, float y, float z, int color) {
+    private static void renderNumber(BufferBuilder builder, int number, float x, float y, float z, int color, int lightmap) {
         int oneDigit = number % 10;
         int tenDigit = number / 10;
 
         if (tenDigit > 0) {
-            renderDigit(builder, tenDigit, x, y, z, color);
-            renderDigit(builder, oneDigit, x + dx - PXL, y, z, color);
+            renderDigit(builder, tenDigit, x, y, z, color, lightmap);
+            renderDigit(builder, oneDigit, x + dx - PXL, y, z, color, lightmap);
         } else {
-            renderDigit(builder, oneDigit, x + (dx - PXL)/2f, y, z, color);
+            renderDigit(builder, oneDigit, x + (dx - PXL)/2f, y, z, color, lightmap);
         }
     }
 
@@ -85,13 +111,16 @@ public class NumberMode extends LightyMode {
         float y = pos.getY() + 1f + 0.005f + offset;
         float z1 = pos.getZ() + PXL * 4f;
 
-        renderNumber(builder, blockLightLevel, x1, y, z1, color);
-        renderNumber(builder, skyLightLevel, x1, y, z1 + 0.3f, color);
+        int overlayBrightness = Config.getOverlayBrightness();
+        int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
+
+        renderNumber(builder, blockLightLevel, x1, y, z1, color, lightmap);
+        renderNumber(builder, skyLightLevel, x1, y, z1 + 0.3f, color, lightmap);
     }
 
     @Override
     public void beforeRendering() {
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderType.cutout().setupRenderState();
         RenderSystem.enableDepthTest();
         RenderSystem.setShaderTexture(0, new ResourceLocation(Lighty.MOD_ID, "textures/block/numbers.png"));
     }
