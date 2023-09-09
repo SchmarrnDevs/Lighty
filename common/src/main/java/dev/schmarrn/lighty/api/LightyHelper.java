@@ -1,5 +1,6 @@
 package dev.schmarrn.lighty.api;
 
+import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -52,5 +53,9 @@ public class LightyHelper {
                 !up.getFluidState().isEmpty()) || // don't spawn in fluidlogged stuff (Kelp, Seagrass, Growlichen)
                 !up.getBlock().isPossibleToRespawnInThis(up) ||
                 up.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE); // As of 1.20.1, only contains rails, don't know if it is even really available on the client
+    }
+
+    public static boolean isSafe(int blockLightLevel) {
+        return !(blockLightLevel <= Config.getBlockThreshold());
     }
 }
