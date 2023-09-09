@@ -21,12 +21,15 @@ import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.OptionsList;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
 
 public class SettingsScreen extends Screen {
     public SettingsScreen() {
@@ -61,25 +64,32 @@ public class SettingsScreen extends Screen {
         ));
 
         list.addSmall(
-                new OptionInstance<>(
-                        "lighty.options.block_threshold",
-                        object -> Tooltip.create(Component.translatable("lighty.options.block_threshold.tooltip", object)),
-                        (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
-                        new OptionInstance.IntRange(0, 15),
-                        Codec.intRange(0, 15),
-                        Config.getBlockThreshold(),
-                        Config::setBlockThreshold
-                ),
-                new OptionInstance<>(
-                        "lighty.options.sky_threshold",
-                        object -> Tooltip.create(Component.translatable("lighty.options.sky_threshold.tooltip", object)),
-                        (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
-                        new OptionInstance.IntRange(0, 15),
-                        Codec.intRange(0, 15),
-                        Config.getSkyThreshold(),
-                        Config::setSkyThreshold
-                )
-
+                new OptionInstance[]{
+                        new OptionInstance<>(
+                                "lighty.options.block_threshold",
+                                object -> Tooltip.create(Component.translatable("lighty.options.block_threshold.tooltip", object)),
+                                (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
+                                new OptionInstance.IntRange(0, 15),
+                                Codec.intRange(0, 15),
+                                Config.getBlockThreshold(),
+                                Config::setBlockThreshold
+                        ),
+                        new OptionInstance<>(
+                                "lighty.options.sky_threshold",
+                                object -> Tooltip.create(Component.translatable("lighty.options.sky_threshold.tooltip", object)),
+                                (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
+                                new OptionInstance.IntRange(0, 15),
+                                Codec.intRange(0, 15),
+                                Config.getSkyThreshold(),
+                                Config::setSkyThreshold
+                        ),
+                        OptionInstance.createBoolean(
+                                "lighty.options.show_safe",
+                                object -> Tooltip.create(Component.translatable("lighty.options.show_safe.tooltip", object)),
+                                Config.getShowSafe(),
+                                Config::setShowSafe
+                        )
+                }
         );
 
         this.addWidget(list);
@@ -89,7 +99,7 @@ public class SettingsScreen extends Screen {
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
         this.renderBackground(guiGraphics);
-        list.render(guiGraphics, i, j , f);
+        list.render(guiGraphics, i, j, f);
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
         super.render(guiGraphics, i, j, f);
     }

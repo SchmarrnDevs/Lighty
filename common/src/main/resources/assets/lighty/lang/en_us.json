@@ -18,5 +18,7 @@
   "lighty.options.overlay_distance": "Overlay Distance",
   "lighty.options.overlay_distance.tooltip": "The radius of the area covered by the light overlay, in chunks. Defaults to 2. High overlay distance may impact performance severally.",
   "lighty.options.overlay_brightness": "Overlay Brightness",
-  "lighty.options.overlay_brightness.tooltip": "The brightness of the rendered overlay. Defaults to 10. Especially useful when using shaders."
+  "lighty.options.overlay_brightness.tooltip": "The brightness of the rendered overlay. Defaults to 10. Especially useful when using shaders.",
+  "lighty.options.show_safe": "Show Safe Spots",
+  "lighty.options.show_safe.tooltip": "If on, the overlay gets rendered on safe (green) spots."
 }

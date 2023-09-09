@@ -100,6 +100,10 @@ public class NumberMode extends LightyMode {
         int blockLightLevel = world.getBrightness(LightLayer.BLOCK, posUp);
         int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
 
+        if (LightyColors.isSafe(blockLightLevel) && !Config.getShowSafe()) {
+            return;
+        }
+
         int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
         float offset = LightyHelper.getOffset(up, posUp, world);
