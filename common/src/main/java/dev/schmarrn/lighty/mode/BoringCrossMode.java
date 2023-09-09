@@ -23,8 +23,11 @@ import dev.schmarrn.lighty.api.LightyColors;
 import dev.schmarrn.lighty.api.LightyHelper;
 import dev.schmarrn.lighty.api.LightyMode;
 import dev.schmarrn.lighty.api.ModeManager;
+import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LightLayer;
@@ -33,7 +36,7 @@ public class BoringCrossMode extends LightyMode {
 
     @Override
     public void beforeCompute(BufferBuilder builder) {
-        builder.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
+        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
     }
 
     @Override
@@ -55,24 +58,26 @@ public class BoringCrossMode extends LightyMode {
             float z1 = pos.getZ();
             float z2 = pos.getZ() + 1f;
 
-            builder.vertex(x1, y, z1).color(color).endVertex();
-            builder.vertex(x2, y, z2).color(color).endVertex();
-            builder.vertex(x2, y, z1).color(color).endVertex();
-            builder.vertex(x1, y, z2).color(color).endVertex();
+            int overlayBrightness = Config.getOverlayBrightness();
+            int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
+
+            builder.vertex(x1, y, z1).color(color).uv(0, 0).uv2(lightmap).normal(0f, 1f, 0f).endVertex();
+            builder.vertex(x1, y, z2).color(color).uv(0, 1).uv2(lightmap).normal(0f, 1f, 0f).endVertex();
+            builder.vertex(x2, y, z2).color(color).uv(1, 1).uv2(lightmap).normal(0f, 1f, 0f).endVertex();
+            builder.vertex(x2, y, z1).color(color).uv(1, 0).uv2(lightmap).normal(0f, 1f, 0f).endVertex();
         }
     }
 
     @Override
     public void beforeRendering() {
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        RenderSystem.lineWidth(1.0f);
+        RenderType.cutout().setupRenderState();
+        RenderSystem.setShaderTexture(0, new ResourceLocation(Lighty.MOD_ID, "textures/block/cross.png"));
         RenderSystem.enableDepthTest();
     }
 
     @Override
     public void afterRendering() {
         RenderSystem.disableDepthTest();
-        RenderSystem.lineWidth(1.0F);
     }
 
     public static void init() {
