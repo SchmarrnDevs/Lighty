@@ -25,16 +25,12 @@ import dev.schmarrn.lighty.api.LightyMode;
 import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
-
-import java.util.Dictionary;
 
 public class NumberMode extends LightyMode {
     @Override
@@ -100,7 +96,7 @@ public class NumberMode extends LightyMode {
         int blockLightLevel = world.getBrightness(LightLayer.BLOCK, posUp);
         int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
 
-        if (LightyColors.isSafe(blockLightLevel) && !Config.getShowSafe()) {
+        if (LightyHelper.isSafe(blockLightLevel) && !Config.getShowSafe()) {
             return;
         }
 

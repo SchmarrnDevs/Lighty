@@ -59,9 +59,5 @@ public class LightyColors {
         return color;
     }
 
-    public static boolean isSafe(int blockLightLevel) {
-        return !(blockLightLevel <= Config.getBlockThreshold());
-    }
-
     private LightyColors() {}
 }
