@@ -14,6 +14,7 @@
 
 package dev.schmarrn.lighty.event;
 
+import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -24,10 +25,12 @@ import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
@@ -180,6 +183,19 @@ public class Compute {
 
         ShaderInstance shader = RenderSystem.getShader();
 
+        // The times 16 is just a magic number, chosen by trial and error.
+        // The fog shenanigans should fix a really annoying issue: https://github.com/SchmarrnDevs/Lighty/issues/47
+        float renderDistance = Minecraft.getInstance().gameRenderer.getRenderDistance() * 16f;
+        float fogStart = renderDistance - Mth.clamp(renderDistance/10f, 4f, 64f);
+
+        float oldFogStart = RenderSystem.getShaderFogStart();
+        float oldFogEnd = RenderSystem.getShaderFogEnd();
+        FogShape oldFogShape = RenderSystem.getShaderFogShape();
+
+        RenderSystem.setShaderFogStart(fogStart);
+        RenderSystem.setShaderFogEnd(renderDistance);
+        RenderSystem.setShaderFogShape(FogShape.CYLINDER);
+
         for (int x = -computationDistance + 1; x < computationDistance; ++x) {
             for (int z = -computationDistance + 1; z < computationDistance; ++z) {
                 ChunkPos chunkPos = new ChunkPos(playerPos.x + x, playerPos.z + z);
@@ -200,6 +216,11 @@ public class Compute {
                 }
             }
         }
+
+        // Reset Fog stuff
+        RenderSystem.setShaderFogStart(oldFogStart);
+        RenderSystem.setShaderFogEnd(oldFogEnd);
+        RenderSystem.setShaderFogShape(oldFogShape);
 
         matrixStack.popPose();
 
