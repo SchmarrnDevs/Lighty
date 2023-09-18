@@ -185,7 +185,8 @@ public class Compute {
 
         // The times 16 is just a magic number, chosen by trial and error.
         // The fog shenanigans should fix a really annoying issue: https://github.com/SchmarrnDevs/Lighty/issues/47
-        float renderDistance = Minecraft.getInstance().gameRenderer.getRenderDistance() * 16f;
+        // I hate this issue, multiply by FAC. Number chosen because FUCK YOU FOG, NOW WORK FOR GOD'S SAKE
+        float renderDistance = Minecraft.getInstance().gameRenderer.getRenderDistance() * 16f * 0xFAC;
         float fogStart = renderDistance - Mth.clamp(renderDistance/10f, 4f, 64f);
 
         float oldFogStart = RenderSystem.getShaderFogStart();
