@@ -16,6 +16,7 @@ package dev.schmarrn.lighty.config;
 
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.UtilDefinition;
+import dev.schmarrn.lighty.api.LightyColors;
 import net.minecraft.resources.ResourceLocation;
 
 import java.io.*;
@@ -35,6 +36,10 @@ public class Config {
     private static final String OVERLAY_BRIGHTNESS = "lighty.overlay_brightness";
     private static final String SHOW_SAFE = "lighty.show_safe";
 
+    private static final String OVERLAY_GREEN = "lighty.overlay_green";
+    private static final String OVERLAY_ORANGE = "lighty.overlay_orange";
+    private static final String OVERLAY_RED = "lighty.overlay_red";
+
     private Config() {
         properties = new Properties();
 
@@ -48,6 +53,9 @@ public class Config {
             properties.putIfAbsent(OVERLAY_DISTANCE, "2");
             properties.putIfAbsent(OVERLAY_BRIGHTNESS, "10");
             properties.putIfAbsent(SHOW_SAFE, String.valueOf(true));
+            properties.putIfAbsent(OVERLAY_GREEN, Integer.toHexString(0x00FF00));
+            properties.putIfAbsent(OVERLAY_ORANGE, Integer.toHexString(0xFF6600));
+            properties.putIfAbsent(OVERLAY_RED, Integer.toHexString(0xFF0000));
         } catch (FileNotFoundException e) {
             Lighty.LOGGER.warn("No Lighty config found at {}, loading defaults and saving config file.", PATH);
 
@@ -59,11 +67,14 @@ public class Config {
             properties.setProperty(OVERLAY_BRIGHTNESS, "10");
             properties.setProperty(SHOW_SAFE, String.valueOf(true));
 
-
-            this.write();
+            properties.setProperty(OVERLAY_GREEN, Integer.toHexString(0x00FF00));
+            properties.setProperty(OVERLAY_ORANGE, Integer.toHexString(0xFF6600));
+            properties.setProperty(OVERLAY_RED, Integer.toHexString(0xFF0000));
         } catch (IOException e) {
             Lighty.LOGGER.error("Error while reading from Lighty config at {}: {}", PATH, e);
         }
+
+        this.write();
     }
 
     private void write() {
@@ -125,6 +136,32 @@ public class Config {
     public static void setShowSafe(boolean b) {
         config.properties.setProperty(SHOW_SAFE, String.valueOf(b));
         config.write();
+    }
+
+    public static void setOverlayGreen(int color) {
+        config.properties.setProperty(OVERLAY_GREEN, Integer.toHexString(color));
+        config.write();
+        LightyColors.onConfigUpdate();
+    }
+    public static void setOverlayOrange(int color) {
+        config.properties.setProperty(OVERLAY_ORANGE, Integer.toHexString(color));
+        config.write();
+        LightyColors.onConfigUpdate();
+    }
+    public static void setOverlayRed(int color) {
+        config.properties.setProperty(OVERLAY_RED, Integer.toHexString(color));
+        config.write();
+        LightyColors.onConfigUpdate();
+    }
+
+    public static int getOverlayGreen() {
+        return Integer.parseUnsignedInt(config.properties.getProperty(OVERLAY_GREEN, Integer.toHexString(0x00FF00)), 16);
+    }
+    public static int getOverlayOrange() {
+        return Integer.parseUnsignedInt(config.properties.getProperty(OVERLAY_ORANGE, Integer.toHexString(0xFF6600)), 16);
+    }
+    public static int getOverlayRed() {
+        return Integer.parseUnsignedInt(config.properties.getProperty(OVERLAY_RED, Integer.toHexString(0xFF0000)), 16);
     }
 
     public static void init() {
