@@ -17,9 +17,19 @@ package dev.schmarrn.lighty.api;
 import dev.schmarrn.lighty.config.Config;
 
 public class LightyColors {
-    private static final int GREEN = 0x00FF00;
-    private static final int ORANGE = 0xFF6600;
-    private static final int RED = 0xFF0000;
+    private static int GREEN = 0x00FF00;
+    private static int ORANGE = 0xFF6600;
+    private static int RED = 0xFF0000;
+
+    static {
+        onConfigUpdate();
+    }
+
+    public static void onConfigUpdate() {
+        GREEN = Config.getOverlayGreen();
+        ORANGE = Config.getOverlayOrange();
+        RED = Config.getOverlayRed();
+    }
 
     public static int getSafe() {
         return GREEN;
