@@ -22,7 +22,8 @@
     ]
   },
   "mixins": [
-    "lighty.mixins.json"
+    "lighty.mixins.json",
+    "lighty.fabric.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.14.21",
