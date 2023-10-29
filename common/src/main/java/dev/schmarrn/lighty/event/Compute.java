@@ -202,7 +202,7 @@ public class Compute {
                 ChunkPos chunkPos = new ChunkPos(playerPos.x + x, playerPos.z + z);
                 for (int i = 0; i < world.getSectionsCount(); ++i) {
                     var chunkSection = SectionPos.of(chunkPos, world.getMinSection() + i);
-                    if (frustum.isVisible(new AABB(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16,16,16)))) {
+                    if (frustum.isVisible(AABB.encapsulatingFullBlocks(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16,16,16)))) {
                         if (cachedBuffers.containsKey(chunkSection)) {
                             BufferHolder cachedBuffer = cachedBuffers.get(chunkSection);
                             if (!cachedBuffer.isValid()) {
