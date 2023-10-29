@@ -19,6 +19,6 @@
   "lighty.options.overlay_distance.tooltip": "O raio da área coberta pela sobreposição de luz, em chunks. O Padrão é 2. Uma distância de sobreposição alta pode afetar muito o desempenho."
   "lighty.options.overlay_brightness": "Brilho da Sobreposição",
   "lighty.options.overlay_brightness.tooltip": "O brilho da sobreposição renderizada. O valor padrão é 10. Muito útil quando se usa 'shaders'.",
-  "lighty.options.show_safe": "Mostrar também locais seguros.",
-  "lighty.options.show_safe.tooltip": "Se estiver ligado, a sobreposição é apresentada em também em pontos seguros (verdes)."
+  "lighty.options.show_safe": "Mostrar também os lugares seguros.",
+  "lighty.options.show_safe.tooltip": "Se estiver ligado, a sobreposição aparece nos lugares seguros (verdes)."
 }
