@@ -17,4 +17,8 @@
   "lighty.options.sky_threshold.tooltip": "Se o nível de luz do bloco for inferior ao valor especificado em \"Limiar de bloco\" e o nível de luz do céu for inferior ou igual a %d, a sobreposição é vermelha. Caso contrário, é laranja."
   "lighty.options.overlay_distance": "Distancia da Sobreposição",
   "lighty.options.overlay_distance.tooltip": "O raio da área coberta pela sobreposição de luz, em chunks. O Padrão é 2. Uma distância de sobreposição alta pode afetar muito o desempenho."
+  "lighty.options.overlay_brightness": "Brilho da Sobreposição",
+  "lighty.options.overlay_brightness.tooltip": "O brilho da sobreposição renderizada. O valor padrão é 10. Muito útil quando se usa 'shaders'.",
+  "lighty.options.show_safe": "Mostrar também os lugares seguros.",
+  "lighty.options.show_safe.tooltip": "Se estiver ligado, a sobreposição aparece nos lugares seguros (verdes)."
 }
