@@ -1,28 +1,26 @@
 modLoader = "javafml"
-loaderVersion = "[46,)"
+loaderVersion = "${loader_version_range}"
 issueTrackerURL = "https://github.com/SchmarrnDevs/Lighty/issues"
-license = "Apache-2.0"
+license = "${mod_license}"
 
 [[mods]]
-modId = "lighty"
-version = "${version}"
-displayName = "Lighty"
-authors = "andi_makes, agnor99"
-description = '''
-The Light Overlay Mod with a twist!
-'''
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+authors = "${mod_authors}"
+description = '''${mod_description}'''
 logoFile = "assets/lighty/icon.png"
 
-[[dependencies.lighty]]
-modId = "forge"
+[[dependencies.${mod_id}]]
+modId = "neoforge"
 mandatory = true
-versionRange = "[46,)"
+versionRange = "${neo_version_range}"
 ordering = "NONE"
 side = "CLIENT"
 
-[[dependencies.lighty]]
+[[dependencies.${mod_id}]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.20.1]"
+versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "CLIENT"
