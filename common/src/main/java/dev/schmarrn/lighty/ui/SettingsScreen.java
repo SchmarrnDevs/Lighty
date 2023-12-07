@@ -41,7 +41,7 @@ public class SettingsScreen extends Screen {
     @Override
     protected void init() {
         assert this.minecraft != null;
-        this.list = new OptionsList(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
+        this.list = new OptionsList(this.minecraft, this.width, this.height - 32, 32, 25);
 
         list.addBig(new OptionInstance<>(
                 "lighty.options.overlay_distance",
