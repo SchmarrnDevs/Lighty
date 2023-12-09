@@ -7,7 +7,7 @@ version = rootProject.findProperty("mod_version")
 group = rootProject.findProperty("maven_group")
 
 base {
-    archivesName = rootProject.findProperty("mod_name")
+    archivesName = rootProject.findProperty("mod_name") + "-fabric"
 }
 
 repositories {
@@ -19,6 +19,9 @@ repositories {
 }
 
 loom {
+    mixin {
+        defaultRefmapName.set("lighty.refmap.json")
+    }
 }
 
 dependencies {
