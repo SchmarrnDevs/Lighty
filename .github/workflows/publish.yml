@@ -20,7 +20,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
       - name: Build
-        run: rm -f fabric/build/libs/* forge/build/libs/* && ./gradlew remapJar
+        run: rm -f fabric/build/libs/* forge/build/libs/* && ./gradlew jar && ./gradlew remapJar
       - name: Publish Fabric
         uses: Kir-Antipov/mc-publish@v3.2
         with:
@@ -32,11 +32,11 @@ jobs:
             fabric
             quilt
           fail-mode: warn
-      - name: Publish Forge
+      - name: Publish Neoforge
         uses: Kir-Antipov/mc-publish@v3.2
         with:
           modrinth-id: yjvKidNM
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          files: forge/build/libs/lighty-forge-*([0-9]?(.))\+*([0-9wa]?(.))?(-pre*[0-9]).jar
+          files: forge/build/libs/lighty-neoforge-*([0-9]?(.))\+*([0-9wa]?(.))?(-pre*[0-9]).jar
           fail-mode: warn
