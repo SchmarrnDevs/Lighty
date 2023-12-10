@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
-version = rootProject.findProperty("mod_version")
+version = rootProject.findProperty("mod_version") + "+" + rootProject.findProperty("minecraft_version")
 group = rootProject.findProperty("maven_group")
 
 base {
