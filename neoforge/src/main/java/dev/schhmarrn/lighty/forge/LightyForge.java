@@ -18,12 +18,12 @@ import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.event.Compute;
 import dev.schmarrn.lighty.event.KeyBind;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.event.TickEvent;
 
 @Mod(Lighty.MOD_ID)
 public class LightyForge {
@@ -35,7 +35,7 @@ public class LightyForge {
 
     /**
      * This is an inner class to prevent server crashes if this mod is installed on a dedicated server.
-     * It's also an EventListener for all events that are {@linkplain net.minecraftforge.fml.event.IModBusEvent ModBusEvents}. ModBusEvents are events that are gameload events (fired during game loading or resource reload) and don't have game context.
+     * It's also an EventListener for all events that are {@linkplain net.neoforged.fml.event.IModBusEvent ModBusEvents}. ModBusEvents are events that are gameload events (fired during game loading or resource reload) and don't have game context.
      */
     @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     private static class ClassLoadingProtection {
@@ -48,7 +48,7 @@ public class LightyForge {
 
     /**
      * This is an inner class to prevent server crashes if this mod is installed on a dedicated server.
-     * It's also an EventListener for all events that are not {@linkplain net.minecraftforge.fml.event.IModBusEvent ModBusEvents}.
+     * It's also an EventListener for all events that are not {@linkplain net.neoforged.fml.event.IModBusEvent ModBusEvents}.
      */
     @Mod.EventBusSubscriber(Dist.CLIENT)
     private static class ClassLoadingProtection2 {
