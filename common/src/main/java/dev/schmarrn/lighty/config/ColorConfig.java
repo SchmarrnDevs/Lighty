@@ -3,8 +3,6 @@ package dev.schmarrn.lighty.config;
 public class ColorConfig extends ConfigType<Integer> {
     public ColorConfig(String key, Integer defaultValue) {
         super(key, defaultValue);
-
-        Config.register(key, this);
     }
 
     @Override

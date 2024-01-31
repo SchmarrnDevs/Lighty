@@ -30,5 +30,7 @@ abstract class ConfigType<T> extends ConfigSerDe{
         this.KEY = key;
         this.DEFAULT_VALUE = defaultValue;
         this.value = defaultValue;
+
+        Config.register(key, this);
     }
 }

@@ -3,8 +3,6 @@ package dev.schmarrn.lighty.config;
 public class IntegerConfig extends ConfigType<Integer> {
     IntegerConfig(String key, Integer defaultValue) {
         super(key, defaultValue);
-
-        Config.register(key, this);
     }
 
     @Override
