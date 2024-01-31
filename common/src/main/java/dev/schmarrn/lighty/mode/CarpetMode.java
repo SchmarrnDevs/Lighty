@@ -54,7 +54,7 @@ public class CarpetMode extends LightyMode {
         int blockLightLevel = world.getBrightness(LightLayer.BLOCK, posUp);
         int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
 
-        if (LightyHelper.isSafe(blockLightLevel) && !Config.getShowSafe()) {
+        if (LightyHelper.isSafe(blockLightLevel) && !Config.SHOW_SAFE.getValue()) {
             return;
         }
 
@@ -69,7 +69,7 @@ public class CarpetMode extends LightyMode {
         double x = pos.getX();
         double y = pos.getY() + 1 + offset;
         double z = pos.getZ();
-        int overlayBrightness = Config.getOverlayBrightness();
+        int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
         // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
         int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
         //TOP

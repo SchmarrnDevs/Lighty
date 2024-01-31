@@ -16,155 +16,89 @@ package dev.schmarrn.lighty.config;
 
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.UtilDefinition;
-import dev.schmarrn.lighty.api.LightyColors;
 import net.minecraft.resources.ResourceLocation;
 
 import java.io.*;
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BiConsumer;
 
 public class Config {
-    private static final String PATH = UtilDefinition.INSTANCE.getConfigDir().toString() + "/lighty.config";
+    private static final String PATH = UtilDefinition.INSTANCE.getConfigDir().toString() + "/lighty3.config";
+    private static final Map<String, String> fileState = new HashMap<>();
+    private static final Map<String, ConfigSerDe> configValues = new HashMap<>();
 
-    private final Properties properties;
+    public static final ResourceLocationConfig LAST_USED_MODE = new ResourceLocationConfig("lighty.last_used_mode", new ResourceLocation("lighty:carpet_mode"));
 
-    private static Config config;
+    public static final IntegerConfig SKY_THRESHOLD = new IntegerConfig("lighty.sky_threshold", 0);
+    public static final IntegerConfig BLOCK_THRESHOLD = new IntegerConfig("lighty.block_threshold", 0);
+    public static final IntegerConfig OVERLAY_DISTANCE = new IntegerConfig("lighty.overlay_distance", 2);
+    public static final IntegerConfig OVERLAY_BRIGHTNESS = new IntegerConfig("lighty.overlay_brightness", 10);
 
-    private static final String LAST_USED_MODE = "lighty.last_used_mode";
-    private static final String SKY_THRESHOLD = "lighty.sky_threshold";
-    private static final String BLOCK_THRESHOLD = "lighty.block_threshold";
-    private static final String OVERLAY_DISTANCE = "lighty.overlay_distance";
-    private static final String OVERLAY_BRIGHTNESS = "lighty.overlay_brightness";
-    private static final String SHOW_SAFE = "lighty.show_safe";
+    public static final BooleanConfig SHOW_SAFE = new BooleanConfig("lighty.show_safe", true);
 
-    private static final String OVERLAY_GREEN = "lighty.overlay_green";
-    private static final String OVERLAY_ORANGE = "lighty.overlay_orange";
-    private static final String OVERLAY_RED = "lighty.overlay_red";
+    public static final ColorConfig OVERLAY_GREEN = new ColorConfig("lighty.overlay_green", 0x00FF00);
+    public static final ColorConfig OVERLAY_ORANGE = new ColorConfig("lighty.overlay_orange", 0xFF6600);
+    public static final ColorConfig OVERLAY_RED = new ColorConfig("lighty.overlay_red", 0xFF0000);
 
-    private Config() {
-        properties = new Properties();
+    private static void afterRegister(String key, ConfigSerDe type) {
+        String value = fileState.getOrDefault(key, null);
+        if (value != null) {
+            type.deserialize(value);
+        }
+    }
 
-        try (Reader reader = new FileReader(PATH)) {
-            properties.load(reader);
+    public static void register(String key, ConfigSerDe type) {
+        configValues.put(key, type);
+        afterRegister(key, type);
+    }
 
-            // Set Defaults if no values are set
-            properties.putIfAbsent(LAST_USED_MODE, "lighty:carpet_mode");
-            properties.putIfAbsent(SKY_THRESHOLD, "0");
-            properties.putIfAbsent(BLOCK_THRESHOLD, "0");
-            properties.putIfAbsent(OVERLAY_DISTANCE, "2");
-            properties.putIfAbsent(OVERLAY_BRIGHTNESS, "10");
-            properties.putIfAbsent(SHOW_SAFE, String.valueOf(true));
-            properties.putIfAbsent(OVERLAY_GREEN, Integer.toHexString(0x00FF00));
-            properties.putIfAbsent(OVERLAY_ORANGE, Integer.toHexString(0xFF6600));
-            properties.putIfAbsent(OVERLAY_RED, Integer.toHexString(0xFF0000));
+    public static void reloadFromDisk() {
+        File file = new File(PATH);
+        try {
+            BufferedReader bf = new BufferedReader(new FileReader(file));
+
+            bf.lines().forEach((line) -> {
+                var splits = line.split("=");
+                if (splits.length == 2) {
+                    fileState.putIfAbsent(splits[0].trim(), splits[1].trim());
+                } else {
+                    Lighty.LOGGER.warn("Too many = signs on some line in the config, good luck finding them.");
+                }
+            });
+            bf.close();
         } catch (FileNotFoundException e) {
-            Lighty.LOGGER.warn("No Lighty config found at {}, loading defaults and saving config file.", PATH);
-
-            // Add Defaults here
-            properties.setProperty(LAST_USED_MODE, "lighty:carpet_mode");
-            properties.setProperty(SKY_THRESHOLD, "0");
-            properties.setProperty(BLOCK_THRESHOLD, "0");
-            properties.setProperty(OVERLAY_DISTANCE, "2");
-            properties.setProperty(OVERLAY_BRIGHTNESS, "10");
-            properties.setProperty(SHOW_SAFE, String.valueOf(true));
-
-            properties.setProperty(OVERLAY_GREEN, Integer.toHexString(0x00FF00));
-            properties.setProperty(OVERLAY_ORANGE, Integer.toHexString(0xFF6600));
-            properties.setProperty(OVERLAY_RED, Integer.toHexString(0xFF0000));
+            Lighty.LOGGER.warn("No Lighty config found at {}, using defaults.", PATH);
         } catch (IOException e) {
-            Lighty.LOGGER.error("Error while reading from Lighty config at {}: {}", PATH, e);
+            Lighty.LOGGER.error("Could not close Lighty config at {}. This should not happen, please report on GitHub. Abort.", PATH);
+            throw new RuntimeException(e);
         }
 
-        this.write();
-    }
-
-    private void write() {
-        try (FileWriter writer = new FileWriter(PATH)){
-            properties.store(writer, null);
-        } catch (IOException e) {
-            Lighty.LOGGER.error("Error while writing to Lighty config at {}: {}", PATH, e);
+        for (var entry : configValues.entrySet()) {
+            afterRegister(entry.getKey(), entry.getValue());
         }
     }
 
-    public static int getSkyThreshold() {
-        return Integer.parseInt(config.properties.getProperty(SKY_THRESHOLD, "0"));
-    }
+    public static void save() {
+        StringBuilder content = new StringBuilder();
 
-    public static int getBlockThreshold() {
-        return Integer.parseInt(config.properties.getProperty(BLOCK_THRESHOLD, "0"));
-    }
+        for (var pair : configValues.entrySet()) {
+            content.append(pair.getKey()).append("=").append(pair.getValue().serialize()).append("\n");
+        }
 
-    public static int getOverlayDistance() {
-        return Integer.parseInt(config.properties.getProperty(OVERLAY_DISTANCE, "2"));
-    }
+        File file = new File(PATH);
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+            bw.write(content.toString());
+            bw.flush();
+            bw.close();
+        } catch (IOException e) {
+            Lighty.LOGGER.warn("Could not write Lighty config file at {}. Config changes are not saved.", PATH);
+        }
 
-    public static int getOverlayBrightness() {
-        return Integer.parseInt(config.properties.getProperty(OVERLAY_BRIGHTNESS, "10"));
-    }
-    public static boolean getShowSafe() {
-        return Boolean.parseBoolean(config.properties.getProperty(SHOW_SAFE, String.valueOf(true)));
-    }
-
-    public static ResourceLocation getLastUsedMode() {
-        return new ResourceLocation(config.properties.getProperty(LAST_USED_MODE, "lighty:carpet_mode"));
-    }
-
-    public static void setLastUsedMode(ResourceLocation id) {
-        config.properties.setProperty(LAST_USED_MODE, id.toString());
-        config.write();
-    }
-
-    public static void setSkyThreshold(int i) {
-        config.properties.setProperty(SKY_THRESHOLD, String.valueOf(i));
-        config.write();
-    }
-
-    public static void setBlockThreshold(int i) {
-        config.properties.setProperty(BLOCK_THRESHOLD, String.valueOf(i));
-        config.write();
-    }
-
-    public static void setOverlayDistance(int i) {
-        config.properties.setProperty(OVERLAY_DISTANCE, String.valueOf(i));
-        config.write();
-    }
-
-    public static void setOverlayBrightness(int i) {
-        config.properties.setProperty(OVERLAY_BRIGHTNESS, String.valueOf(i));
-        config.write();
-    }
-
-    public static void setShowSafe(boolean b) {
-        config.properties.setProperty(SHOW_SAFE, String.valueOf(b));
-        config.write();
-    }
-
-    public static void setOverlayGreen(int color) {
-        config.properties.setProperty(OVERLAY_GREEN, Integer.toHexString(color));
-        config.write();
-        LightyColors.onConfigUpdate();
-    }
-    public static void setOverlayOrange(int color) {
-        config.properties.setProperty(OVERLAY_ORANGE, Integer.toHexString(color));
-        config.write();
-        LightyColors.onConfigUpdate();
-    }
-    public static void setOverlayRed(int color) {
-        config.properties.setProperty(OVERLAY_RED, Integer.toHexString(color));
-        config.write();
-        LightyColors.onConfigUpdate();
-    }
-
-    public static int getOverlayGreen() {
-        return Integer.parseUnsignedInt(config.properties.getProperty(OVERLAY_GREEN, Integer.toHexString(0x00FF00)), 16);
-    }
-    public static int getOverlayOrange() {
-        return Integer.parseUnsignedInt(config.properties.getProperty(OVERLAY_ORANGE, Integer.toHexString(0xFF6600)), 16);
-    }
-    public static int getOverlayRed() {
-        return Integer.parseUnsignedInt(config.properties.getProperty(OVERLAY_RED, Integer.toHexString(0xFF0000)), 16);
     }
 
     public static void init() {
-        config = new Config();
+        reloadFromDisk();
     }
 }

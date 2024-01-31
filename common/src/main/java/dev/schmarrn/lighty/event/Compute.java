@@ -51,7 +51,7 @@ public class Compute {
     private static final Map<SectionPos, BufferHolder> cachedBuffers = new HashMap<>();
     private static ChunkPos playerPos = null;
 
-    private static int computationDistance = Math.min(Config.getOverlayDistance(), Minecraft.getInstance().options.renderDistance().get());
+    private static int computationDistance = Math.min(Config.OVERLAY_DISTANCE.getValue(), Minecraft.getInstance().options.renderDistance().get());
 
 
     private static boolean outOfRange(SectionPos pos) {
@@ -73,7 +73,7 @@ public class Compute {
             vertexBuffer.close();
         });
         cachedBuffers.clear();
-        computationDistance = Math.min(Config.getOverlayDistance(), Minecraft.getInstance().options.renderDistance().get());
+        computationDistance = Math.min(Config.OVERLAY_DISTANCE.getValue(), Minecraft.getInstance().options.renderDistance().get());
     }
 
     public static void updateSubChunk(SectionPos pos) {

@@ -56,6 +56,6 @@ public class LightyHelper {
     }
 
     public static boolean isSafe(int blockLightLevel) {
-        return !(blockLightLevel <= Config.getBlockThreshold());
+        return !(blockLightLevel <= Config.BLOCK_THRESHOLD.getValue());
     }
 }

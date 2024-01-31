@@ -39,7 +39,7 @@ public class ModeLoader {
         }
 
         ModeLoader.mode = modeToLoad;
-        Config.setLastUsedMode(id);
+        Config.LAST_USED_MODE.setValue(id);
         Compute.clear();
         enable();
     }
@@ -71,7 +71,7 @@ public class ModeLoader {
      * If the requested mode isn't loaded, default to the first registered mode.
      */
     public static void setLastUsedMode() {
-        mode = MODES.getOrDefault(Config.getLastUsedMode(), MODES.values().iterator().next());
+        mode = MODES.getOrDefault(Config.LAST_USED_MODE.getValue(), MODES.values().iterator().next());
     }
 
     private ModeLoader() {}

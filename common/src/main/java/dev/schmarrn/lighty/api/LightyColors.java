@@ -17,49 +17,23 @@ package dev.schmarrn.lighty.api;
 import dev.schmarrn.lighty.config.Config;
 
 public class LightyColors {
-    private static int GREEN = 0x00FF00;
-    private static int ORANGE = 0xFF6600;
-    private static int RED = 0xFF0000;
-
-    static {
-        onConfigUpdate();
+    private static int getSafeARGB() {
+        return Config.OVERLAY_GREEN.getValue() | 0xFF000000;
     }
 
-    public static void onConfigUpdate() {
-        GREEN = Config.getOverlayGreen();
-        ORANGE = Config.getOverlayOrange();
-        RED = Config.getOverlayRed();
+    private static int getWarningARGB() {
+        return Config.OVERLAY_ORANGE.getValue() | 0xFF000000;
     }
 
-    public static int getSafe() {
-        return GREEN;
-    }
-
-    public static int getSafeARGB() {
-        return GREEN | 0xFF000000;
-    }
-
-    public static int getWarning() {
-        return ORANGE;
-    }
-
-    public static int getWarningARGB() {
-        return ORANGE | 0xFF000000;
-    }
-
-    public static int getDanger() {
-        return RED;
-    }
-
-    public static int getDangerARGB() {
-        return RED  | 0xFF000000;
+    private static int getDangerARGB() {
+        return Config.OVERLAY_RED.getValue() | 0xFF000000;
     }
 
     public static int getARGB(int blockLightLevel, int skyLightLevel) {
         int color = LightyColors.getSafeARGB();
 
-        if (blockLightLevel <= Config.getBlockThreshold()) {
-            if (skyLightLevel <= Config.getSkyThreshold()) {
+        if (blockLightLevel <= Config.BLOCK_THRESHOLD.getValue()) {
+            if (skyLightLevel <= Config.SKY_THRESHOLD.getValue()) {
                 color = LightyColors.getDangerARGB();
             } else {
                 color = LightyColors.getWarningARGB();

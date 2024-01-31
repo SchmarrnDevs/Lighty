@@ -96,7 +96,7 @@ public class NumberMode extends LightyMode {
         int blockLightLevel = world.getBrightness(LightLayer.BLOCK, posUp);
         int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
 
-        if (LightyHelper.isSafe(blockLightLevel) && !Config.getShowSafe()) {
+        if (LightyHelper.isSafe(blockLightLevel) && !Config.SHOW_SAFE.getValue()) {
             return;
         }
 
@@ -111,7 +111,7 @@ public class NumberMode extends LightyMode {
         float y = pos.getY() + 1f + 0.005f + offset;
         float z1 = pos.getZ() + PXL * 4f;
 
-        int overlayBrightness = Config.getOverlayBrightness();
+        int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
         int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
 
         renderNumber(builder, blockLightLevel, x1, y, z1, color, lightmap);

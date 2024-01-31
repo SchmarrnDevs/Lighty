@@ -49,8 +49,8 @@ public class SettingsScreen extends Screen {
                 (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
                 new OptionInstance.IntRange(1, 32),
                 Codec.intRange(1, 32),
-                Config.getOverlayDistance(),
-                Config::setOverlayDistance
+                Config.OVERLAY_DISTANCE.getValue(),
+                Config.OVERLAY_DISTANCE::setValue
         ));
 
         list.addBig(new OptionInstance<>(
@@ -59,8 +59,8 @@ public class SettingsScreen extends Screen {
                 (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
                 new OptionInstance.IntRange(0, 15),
                 Codec.intRange(0, 15),
-                Config.getOverlayBrightness(),
-                Config::setOverlayBrightness
+                Config.OVERLAY_BRIGHTNESS.getValue(),
+                Config.OVERLAY_BRIGHTNESS::setValue
         ));
 
         list.addSmall(
@@ -71,8 +71,8 @@ public class SettingsScreen extends Screen {
                                 (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
                                 new OptionInstance.IntRange(0, 15),
                                 Codec.intRange(0, 15),
-                                Config.getBlockThreshold(),
-                                Config::setBlockThreshold
+                                Config.BLOCK_THRESHOLD.getValue(),
+                                Config.BLOCK_THRESHOLD::setValue
                         ),
                         new OptionInstance<>(
                                 "lighty.options.sky_threshold",
@@ -80,14 +80,14 @@ public class SettingsScreen extends Screen {
                                 (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
                                 new OptionInstance.IntRange(0, 15),
                                 Codec.intRange(0, 15),
-                                Config.getSkyThreshold(),
-                                Config::setSkyThreshold
+                                Config.SKY_THRESHOLD.getValue(),
+                                Config.SKY_THRESHOLD::setValue
                         ),
                         OptionInstance.createBoolean(
                                 "lighty.options.show_safe",
                                 object -> Tooltip.create(Component.translatable("lighty.options.show_safe.tooltip", object)),
-                                Config.getShowSafe(),
-                                Config::setShowSafe
+                                Config.SHOW_SAFE.getValue(),
+                                Config.SHOW_SAFE::setValue
                         )
                 }
         );

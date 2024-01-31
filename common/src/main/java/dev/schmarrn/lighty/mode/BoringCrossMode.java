@@ -44,7 +44,7 @@ public class BoringCrossMode extends LightyMode {
             int blockLightLevel = world.getBrightness(LightLayer.BLOCK, pos);
             int skyLightLevel = world.getBrightness(LightLayer.SKY, pos);
 
-            if (LightyHelper.isSafe(blockLightLevel) && !Config.getShowSafe()) {
+            if (LightyHelper.isSafe(blockLightLevel) && !Config.SHOW_SAFE.getValue()) {
                 return;
             }
 
@@ -61,7 +61,7 @@ public class BoringCrossMode extends LightyMode {
             float z1 = pos.getZ();
             float z2 = pos.getZ() + 1f;
 
-            int overlayBrightness = Config.getOverlayBrightness();
+            int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
             int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
 
             builder.vertex(x1, y, z1).color(color).uv(0, 0).uv2(lightmap).normal(0f, 1f, 0f).endVertex();
