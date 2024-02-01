@@ -41,28 +41,34 @@ public class ModeLoader {
         ModeLoader.mode = modeToLoad;
         Config.LAST_USED_MODE.setValue(id);
         Compute.clear();
-        enable();
+        //enable();
     }
 
     public static void disable() {
-        enabled = false;
+       setEnabled(false);
     }
 
     public static void enable() {
-        enabled = true;
+        setEnabled(true);
     }
 
     public static void toggle() {
-        enabled = !enabled;
+        setEnabled(!isEnabled());
     }
 
     public static void put(ResourceLocation id, LightyMode mode) {
         MODES.put(id, mode);
     }
 
-    @Nullable
+    public static boolean isEnabled() {
+        return enabled;
+    }
+
+    public static void setEnabled(boolean val) {
+        enabled = val;
+    }
+
     public static LightyMode getCurrentMode() {
-        if (!enabled) return null;
         return mode;
     }
 

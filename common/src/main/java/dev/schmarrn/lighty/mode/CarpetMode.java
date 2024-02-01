@@ -123,7 +123,14 @@ public class CarpetMode extends LightyMode {
         RenderType.translucent().clearRenderState();
         RenderSystem.disableDepthTest();
     }
+
+    @Override
+    public ResourceLocation getResourceLocation() {
+        return new ResourceLocation(Lighty.MOD_ID, "carpet_mode");
+    }
+
     public static void init() {
-        ModeManager.registerMode(new ResourceLocation(Lighty.MOD_ID, "carpet_mode"), new CarpetMode());
+        CarpetMode mode = new CarpetMode();
+        ModeManager.registerMode(mode.getResourceLocation(), mode);
     }
 }

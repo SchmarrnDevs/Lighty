@@ -32,8 +32,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 
 public class SettingsScreen extends Screen {
-    public SettingsScreen() {
+    private final Screen parent;
+
+    public SettingsScreen(Screen parent) {
         super(Component.translatable("settings.lighty.title"));
+        this.parent = parent;
     }
 
     @Override
@@ -108,7 +111,8 @@ public class SettingsScreen extends Screen {
     @Override
     public void onClose() {
         Compute.clear();
-        super.onClose();
+        assert this.minecraft != null;
+        this.minecraft.setScreen(parent);
     }
 
     @Override

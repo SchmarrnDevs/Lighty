@@ -15,6 +15,7 @@
 package dev.schmarrn.lighty.ui;
 
 import dev.schmarrn.lighty.ModeLoader;
+import dev.schmarrn.lighty.event.KeyBind;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -30,9 +31,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class ModeSwitcherScreen extends Screen {
-    private static final List<ButtonHolder> BUTTONS = Lists.newArrayList();
-    public ModeSwitcherScreen() {
+public class LightyScreen extends Screen {
+    static final List<ButtonHolder> BUTTONS = Lists.newArrayList();
+    public LightyScreen() {
         super(Component.translatable("modeSwitcher.lighty.title"));
     }
 
@@ -42,14 +43,27 @@ public class ModeSwitcherScreen extends Screen {
         gridWidget.defaultCellSetting().paddingBottom(4).alignHorizontallyCenter().alignVerticallyMiddle();
         GridLayout.RowHelper adder = gridWidget.createRowHelper(1);
 
-        adder.addChild(Button.builder(CommonComponents.OPTION_OFF, button -> ModeLoader.disable()).build());
+        adder.addChild(Button.builder(
+                Component.translatable("lighty.overlay", CommonComponents.optionStatus(ModeLoader.isEnabled()).getString()),
+                btn -> {
+                    ModeLoader.toggle();
+                    btn.setMessage(Component.translatable("lighty.overlay", CommonComponents.optionStatus(ModeLoader.isEnabled()).getString()));
+                }
+        ).tooltip(Tooltip.create(Component.translatable("lighty.overlay.tooltip", KeyBind.toggleKeyBind.getTranslatedKeyMessage().getString()))).build());
 
-        for (ButtonHolder btn : BUTTONS) {
-            adder.addChild(btn.get());
-        }
+        adder.addChild(Button.builder(
+                Component.translatable(
+                        "lighty.selected",
+                        Component.translatable("modeSwitcher." + ModeLoader.getCurrentMode().getResourceLocation().toString().replace(":", "."))
+                ),
+                button -> Minecraft.getInstance().setScreen(new ModeSelectionScreen(this))
+        ).tooltip(Tooltip.create(Component.translatable("lighty.selected.tooltip"))).build());
+        adder.addChild(Button.builder(
+                Component.translatable("modeSwitcher.lighty.settings"),
+                button -> Minecraft.getInstance().setScreen(new SettingsScreen(this))
+        ).tooltip(Tooltip.create(Component.translatable("modeSwitcher.lighty.settings.tooltip"))).build());
 
-        adder.addChild(Button.builder(Component.translatable("modeSwitcher.lighty.settings"), button -> Minecraft.getInstance().setScreen(new SettingsScreen())).build(), adder.newCellSettings().paddingTop(6));
-        adder.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).build());
+        adder.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).build(), adder.newCellSettings().paddingTop(6));
         gridWidget.arrangeElements();
         FrameLayout.alignInRectangle(gridWidget, 0, this.height/6 - 12, this.width, this.height, 0.5f, 0f);
         gridWidget.visitWidgets(this::addRenderableWidget);
@@ -75,7 +89,7 @@ public class ModeSwitcherScreen extends Screen {
         BUTTONS.add(new ButtonHolder(Button.builder(message, onPress).tooltip(Tooltip.create(tooltip))));
     }
 
-    private static class ButtonHolder implements Supplier<Button> {
+    static class ButtonHolder implements Supplier<Button> {
         private final Button.Builder builder;
         private Button button = null;
         ButtonHolder(Button.Builder builder) {

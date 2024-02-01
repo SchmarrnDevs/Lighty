@@ -83,7 +83,13 @@ public class BoringCrossMode extends LightyMode {
         RenderSystem.disableDepthTest();
     }
 
+    @Override
+    public ResourceLocation getResourceLocation() {
+        return new ResourceLocation(Lighty.MOD_ID, "boring_cross_mode");
+    }
+
     public static void init() {
-        ModeManager.registerMode(new ResourceLocation(Lighty.MOD_ID, "boring_cross_mode"), new BoringCrossMode());
+        BoringCrossMode mode = new BoringCrossMode();
+        ModeManager.registerMode(mode.getResourceLocation(), mode);
     }
 }

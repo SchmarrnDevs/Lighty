@@ -125,7 +125,13 @@ public class NumberMode extends LightyMode {
         RenderSystem.setShaderTexture(0, new ResourceLocation(Lighty.MOD_ID, "textures/block/numbers.png"));
     }
 
+    @Override
+    public ResourceLocation getResourceLocation() {
+        return new ResourceLocation(Lighty.MOD_ID, "number_mode");
+    }
+
     public static void init() {
-        ModeManager.registerMode(new ResourceLocation(Lighty.MOD_ID, "number_mode"), new NumberMode());
+        NumberMode mode = new NumberMode();
+        ModeManager.registerMode(mode.getResourceLocation(), mode);
     }
 }

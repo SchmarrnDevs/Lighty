@@ -107,8 +107,8 @@ public class Compute {
     }
 
     public static void computeCache(Minecraft client) {
+        if (!ModeLoader.isEnabled()) return;
         LightyMode mode = ModeLoader.getCurrentMode();
-        if (mode == null) return;
 
         ClientLevel world = client.level;
 
@@ -158,8 +158,8 @@ public class Compute {
     }
 
     public static void render(@Nullable Frustum frustum, PoseStack matrixStack, Matrix4f projectionMatrix) {
+        if (!ModeLoader.isEnabled()) return;
         LightyMode mode = ModeLoader.getCurrentMode();
-        if (mode == null) return;
 
         if (frustum == null) {
             return;

@@ -17,7 +17,7 @@ package dev.schmarrn.lighty.event;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.schmarrn.lighty.ModeLoader;
 import dev.schmarrn.lighty.UtilDefinition;
-import dev.schmarrn.lighty.ui.ModeSwitcherScreen;
+import dev.schmarrn.lighty.ui.LightyScreen;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
@@ -49,7 +49,7 @@ public class KeyBind {
             ModeLoader.toggle();
         }
         if (newKeyState && !KeyBind.oldKeyState) {
-            client.setScreen(new ModeSwitcherScreen());
+            client.setScreen(new LightyScreen());
         }
 
         // old state is new state

@@ -17,6 +17,7 @@ package dev.schmarrn.lighty.api;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Implement this class if you want to provide a LightyMode.
@@ -42,6 +43,8 @@ public abstract class LightyMode {
      * - exactly one call to `afterCompute()`
      */
     public void afterCompute() {}
+
+    public abstract ResourceLocation getResourceLocation();
 
     /**
      * Implement the compute method to fill `cache` with the data you need for rendering.
