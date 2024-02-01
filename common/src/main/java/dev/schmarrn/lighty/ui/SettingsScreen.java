@@ -36,12 +36,10 @@ public class SettingsScreen extends Screen {
         super(Component.translatable("settings.lighty.title"));
     }
 
-    OptionsList list;
-
     @Override
     protected void init() {
         assert this.minecraft != null;
-        this.list = new OptionsList(this.minecraft, this.width, this.height - 32, 32, 25);
+        OptionsList list = new OptionsList(this.minecraft, this.width, this.height - 32, 32, 25);
 
         list.addBig(new OptionInstance<>(
                 "lighty.options.overlay_distance",
@@ -92,16 +90,19 @@ public class SettingsScreen extends Screen {
                 }
         );
 
-        this.addWidget(list);
+        this.addRenderableWidget(list);
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).bounds(this.width / 2 - 100, this.height - 27, 200, 20).build());
     }
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
-        this.renderDirtBackground(guiGraphics);
-        list.render(guiGraphics, i, j , f);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
         super.render(guiGraphics, i, j, f);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
+    }
+
+    @Override
+    public void renderBackground(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
+        this.renderDirtBackground(guiGraphics);
     }
 
     @Override
