@@ -1,5 +1,7 @@
 package dev.schmarrn.lighty.config;
 
+import net.minecraft.client.OptionInstance;
+
 abstract class ConfigType<T> extends ConfigSerDe{
     public void onChange(T value){}
 
@@ -24,6 +26,15 @@ abstract class ConfigType<T> extends ConfigSerDe{
 
     public String getKey() {
         return KEY;
+    }
+
+    public abstract OptionInstance<T> getOptionInstance();
+    protected String getTranslationKey() {
+        return KEY.replaceFirst("\\.", ".options.");
+    }
+
+    protected String getTranslationTooltipKey() {
+        return getTranslationKey() + ".tooltip";
     }
 
     ConfigType(String key, T defaultValue) {

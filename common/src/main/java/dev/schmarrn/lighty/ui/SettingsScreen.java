@@ -44,52 +44,13 @@ public class SettingsScreen extends Screen {
         assert this.minecraft != null;
         OptionsList list = new OptionsList(this.minecraft, this.width, this.height - 32, 32, 25);
 
-        list.addBig(new OptionInstance<>(
-                "lighty.options.overlay_distance",
-                object -> Tooltip.create(Component.translatable("lighty.options.overlay_distance.tooltip", object)),
-                (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
-                new OptionInstance.IntRange(1, 32),
-                Codec.intRange(1, 32),
-                Config.OVERLAY_DISTANCE.getValue(),
-                Config.OVERLAY_DISTANCE::setValue
-        ));
-
-        list.addBig(new OptionInstance<>(
-                "lighty.options.overlay_brightness",
-                object -> Tooltip.create(Component.translatable("lighty.options.overlay_brightness.tooltip", object)),
-                (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
-                new OptionInstance.IntRange(0, 15),
-                Codec.intRange(0, 15),
-                Config.OVERLAY_BRIGHTNESS.getValue(),
-                Config.OVERLAY_BRIGHTNESS::setValue
-        ));
-
+        list.addBig(Config.OVERLAY_DISTANCE.getOptionInstance());
+        list.addBig(Config.OVERLAY_BRIGHTNESS.getOptionInstance());
         list.addSmall(
                 new OptionInstance[]{
-                        new OptionInstance<>(
-                                "lighty.options.block_threshold",
-                                object -> Tooltip.create(Component.translatable("lighty.options.block_threshold.tooltip", object)),
-                                (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
-                                new OptionInstance.IntRange(0, 15),
-                                Codec.intRange(0, 15),
-                                Config.BLOCK_THRESHOLD.getValue(),
-                                Config.BLOCK_THRESHOLD::setValue
-                        ),
-                        new OptionInstance<>(
-                                "lighty.options.sky_threshold",
-                                object -> Tooltip.create(Component.translatable("lighty.options.sky_threshold.tooltip", object)),
-                                (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
-                                new OptionInstance.IntRange(0, 15),
-                                Codec.intRange(0, 15),
-                                Config.SKY_THRESHOLD.getValue(),
-                                Config.SKY_THRESHOLD::setValue
-                        ),
-                        OptionInstance.createBoolean(
-                                "lighty.options.show_safe",
-                                object -> Tooltip.create(Component.translatable("lighty.options.show_safe.tooltip", object)),
-                                Config.SHOW_SAFE.getValue(),
-                                Config.SHOW_SAFE::setValue
-                        )
+                        Config.BLOCK_THRESHOLD.getOptionInstance(),
+                        Config.SKY_THRESHOLD.getOptionInstance(),
+                        Config.SHOW_SAFE.getOptionInstance()
                 }
         );
 

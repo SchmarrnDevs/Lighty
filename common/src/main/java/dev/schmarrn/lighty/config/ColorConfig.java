@@ -1,6 +1,13 @@
 package dev.schmarrn.lighty.config;
 
+import net.minecraft.client.OptionInstance;
+
 public class ColorConfig extends ConfigType<Integer> {
+    @Override
+    public OptionInstance<Integer> getOptionInstance() {
+        return null;
+    }
+
     public ColorConfig(String key, Integer defaultValue) {
         super(key, defaultValue);
     }

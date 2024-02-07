@@ -41,7 +41,6 @@ public class ModeLoader {
         ModeLoader.mode = modeToLoad;
         Config.LAST_USED_MODE.setValue(id);
         Compute.clear();
-        //enable();
     }
 
     public static void disable() {

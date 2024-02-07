@@ -30,10 +30,10 @@ public class Config {
 
     public static final ResourceLocationConfig LAST_USED_MODE = new ResourceLocationConfig("lighty.last_used_mode", new ResourceLocation("lighty:carpet_mode"));
 
-    public static final IntegerConfig SKY_THRESHOLD = new IntegerConfig("lighty.sky_threshold", 0);
-    public static final IntegerConfig BLOCK_THRESHOLD = new IntegerConfig("lighty.block_threshold", 0);
-    public static final IntegerConfig OVERLAY_DISTANCE = new IntegerConfig("lighty.overlay_distance", 2);
-    public static final IntegerConfig OVERLAY_BRIGHTNESS = new IntegerConfig("lighty.overlay_brightness", 10);
+    public static final IntegerConfig SKY_THRESHOLD = new IntegerConfig("lighty.sky_threshold", 0, 0, 15);
+    public static final IntegerConfig BLOCK_THRESHOLD = new IntegerConfig("lighty.block_threshold", 0, 0, 15);
+    public static final IntegerConfig OVERLAY_DISTANCE = new IntegerConfig("lighty.overlay_distance", 2, 1, 32);
+    public static final IntegerConfig OVERLAY_BRIGHTNESS = new IntegerConfig("lighty.overlay_brightness", 10, 0, 15);
 
     public static final BooleanConfig SHOW_SAFE = new BooleanConfig("lighty.show_safe", true);
 
