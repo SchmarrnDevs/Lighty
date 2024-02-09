@@ -25,7 +25,6 @@ import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
@@ -157,6 +156,32 @@ public class Compute {
         toBeRemoved = new HashSet<>(INITIAL_HASHSET_CAPACITY);
     }
 
+    private static Matrix4f rotY(float theta) {
+        // Sorry, but german:
+        // Homogene Zustandstransformationsmatrix nach ACIN Modellbildung
+        // Siehe: https://www.acin.tuwien.ac.at/file/teaching/bachelor/modellbildung/Formelsammlung_Modellbildung_2020S.pdf
+        // Beinhaltet nur Rotation um die Y Achse, ohne Verschiebung.
+        return new Matrix4f(
+                Mth.cos(theta), 0, Mth.sin(theta), 0,
+                0, 1, 0, 0,
+                -Mth.sin(theta), 0, Mth.cos(theta), 0,
+                0, 0, 0, 1
+        );
+    }
+
+    private static Matrix4f rotX(float psi) {
+        // Sorry, but german:
+        // Homogene Zustandstransformationsmatrix nach ACIN Modellbildung
+        // Siehe: https://www.acin.tuwien.ac.at/file/teaching/bachelor/modellbildung/Formelsammlung_Modellbildung_2020S.pdf
+        // Beinhaltet nur Rotation um die X Achse, ohne Verschiebung.
+        return new Matrix4f(
+                1, 0, 0, 0,
+                0, Mth.cos(psi), -Mth.sin(psi), 0,
+                0, Mth.sin(psi), Mth.cos(psi), 0,
+                0, 0, 0, 1
+        );
+    }
+
     public static void render(@Nullable Frustum frustum, PoseStack matrixStack, Matrix4f projectionMatrix) {
         if (!ModeLoader.isEnabled()) return;
         LightyMode mode = ModeLoader.getCurrentMode();
@@ -178,6 +203,8 @@ public class Compute {
 
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
         matrixStack.pushPose();
+        matrixStack.mulPose(rotX(-camera.getXRot() * Mth.PI / 180f));
+        matrixStack.mulPose(rotY(-camera.getYRot() * Mth.PI / 180f + Mth.PI));
         matrixStack.translate(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z);
         Matrix4f positionMatrix = matrixStack.last().pose();
 
