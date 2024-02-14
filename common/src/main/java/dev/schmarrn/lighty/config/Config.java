@@ -16,15 +16,15 @@ package dev.schmarrn.lighty.config;
 
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.UtilDefinition;
+import dev.schmarrn.lighty.config.compat.Lighty2Config;
 import net.minecraft.resources.ResourceLocation;
 
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 public class Config {
-    private static final String PATH = UtilDefinition.INSTANCE.getConfigDir().toString() + "/lighty3.config";
+    private static final String PATH = UtilDefinition.INSTANCE.getConfigDir().toString() + "/lighty/base.config";
     private static final Map<String, String> fileState = new HashMap<>();
     private static final Map<String, ConfigSerDe> configValues = new HashMap<>();
 
@@ -70,7 +70,7 @@ public class Config {
         } catch (FileNotFoundException e) {
             Lighty.LOGGER.warn("No Lighty config found at {}, using defaults.", PATH);
         } catch (IOException e) {
-            Lighty.LOGGER.error("Could not close Lighty config at {}. This should not happen, please report on GitHub. Abort.", PATH);
+            Lighty.LOGGER.error("Could not close Lighty config at {}. This should not happen, please report on GitHub. Abort. {}", PATH, e);
             throw new RuntimeException(e);
         }
 
@@ -87,18 +87,30 @@ public class Config {
         }
 
         File file = new File(PATH);
+        // Create the lighty config folder if it doesn't already exist
+        file.getParentFile().mkdirs();
+
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(file));
             bw.write(content.toString());
             bw.flush();
             bw.close();
         } catch (IOException e) {
-            Lighty.LOGGER.warn("Could not write Lighty config file at {}. Config changes are not saved.", PATH);
+            Lighty.LOGGER.warn("Could not write Lighty config file at {}. Config changes are not saved. {}", PATH, e);
         }
 
     }
 
     public static void init() {
-        reloadFromDisk();
+        // Old config
+        if (Lighty2Config.exists()) {
+            Lighty2Config.migrate();
+            // save the old config values immediately. the old config file is no longer available and
+            // we need to persist them!
+            save();
+        } else {
+            // Try to read the normal config from disk.
+            reloadFromDisk();
+        }
     }
 }
