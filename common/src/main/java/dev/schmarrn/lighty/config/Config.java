@@ -22,12 +22,16 @@ import net.minecraft.resources.ResourceLocation;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Config {
+    // Internal variables tracking config state
     private static final String PATH = UtilDefinition.INSTANCE.getConfigDir().toString() + "/lighty/base.config";
     private static final Map<String, String> fileState = new HashMap<>();
     private static final Map<String, ConfigSerDe> configValues = new HashMap<>();
+    private static boolean initStage = true;
 
+    // all the different config values
     public static final ResourceLocationConfig LAST_USED_MODE = new ResourceLocationConfig("lighty.last_used_mode", new ResourceLocation("lighty:carpet_mode"));
 
     public static final IntegerConfig SKY_THRESHOLD = new IntegerConfig("lighty.sky_threshold", 0, 0, 15);
@@ -41,16 +45,18 @@ public class Config {
     public static final ColorConfig OVERLAY_ORANGE = new ColorConfig("lighty.overlay_orange", 0xFF6600);
     public static final ColorConfig OVERLAY_RED = new ColorConfig("lighty.overlay_red", 0xFF0000);
 
-    private static void afterRegister(String key, ConfigSerDe type) {
+    private static void loadFromFile(String key, ConfigSerDe type) {
+        // If the file contains the config value, get the configured value...
         String value = fileState.getOrDefault(key, null);
         if (value != null) {
+            // ... and update the internal value to reflect the file content
             type.deserialize(value);
         }
     }
 
     public static void register(String key, ConfigSerDe type) {
         configValues.put(key, type);
-        afterRegister(key, type);
+        loadFromFile(key, type);
     }
 
     public static void reloadFromDisk() {
@@ -58,12 +64,15 @@ public class Config {
         try {
             BufferedReader bf = new BufferedReader(new FileReader(file));
 
+            // For line numbers, I apparently need an atomic integer
+            AtomicInteger lineNumber = new AtomicInteger(0);
             bf.lines().forEach((line) -> {
+                int ln = lineNumber.incrementAndGet();
                 var splits = line.split("=");
                 if (splits.length == 2) {
                     fileState.putIfAbsent(splits[0].trim(), splits[1].trim());
                 } else {
-                    Lighty.LOGGER.warn("Too many = signs on some line in the config, good luck finding them.");
+                    Lighty.LOGGER.warn("Too many = signs on line {}. Removing \"{}\" from config.", ln, line);
                 }
             });
             bf.close();
@@ -75,11 +84,15 @@ public class Config {
         }
 
         for (var entry : configValues.entrySet()) {
-            afterRegister(entry.getKey(), entry.getValue());
+            loadFromFile(entry.getKey(), entry.getValue());
         }
     }
 
     public static void save() {
+        // If we are in the init stage, do not save to disk
+        if (initStage) {
+            return;
+        }
         StringBuilder content = new StringBuilder();
 
         for (var pair : configValues.entrySet()) {
@@ -88,6 +101,7 @@ public class Config {
 
         File file = new File(PATH);
         // Create the lighty config folder if it doesn't already exist
+        //noinspection ResultOfMethodCallIgnored (If it doesn't work we'll know about it when the bufferedwriter fails)
         file.getParentFile().mkdirs();
 
         try {
@@ -102,15 +116,16 @@ public class Config {
     }
 
     public static void init() {
-        // Old config
+        // Load config data (first try old config file)
         if (Lighty2Config.exists()) {
             Lighty2Config.migrate();
-            // save the old config values immediately. the old config file is no longer available and
-            // we need to persist them!
-            save();
         } else {
-            // Try to read the normal config from disk.
+            // If there is no old config, try to read the normal config from disk.
             reloadFromDisk();
         }
+        // Init Stage complete!
+        initStage = false;
+        // save the newly loaded config values to disk once, for good measure (and to persist old config state)
+        save();
     }
 }
