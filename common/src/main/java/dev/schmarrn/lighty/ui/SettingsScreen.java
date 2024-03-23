@@ -24,6 +24,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.OptionsList;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -31,18 +32,21 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-public class SettingsScreen extends Screen {
+public class SettingsScreen extends OptionsSubScreen {
     private final Screen parent;
-
+    private OptionsList list;
     public SettingsScreen(Screen parent) {
-        super(Component.translatable("settings.lighty.title"));
+        // passing null to options is fine, because it is only used in the respective OptionsSubScreens,
+        // and we don't use it here
+        //noinspection DataFlowIssue
+        super(parent, null, Component.translatable("settings.lighty.title"));
         this.parent = parent;
     }
 
     @Override
     protected void init() {
         assert this.minecraft != null;
-        OptionsList list = new OptionsList(this.minecraft, this.width, this.height - 32, 32, 25);
+        list = new OptionsList(this.minecraft, this.width, this.height - 32, this);
 
         list.addBig(Config.OVERLAY_DISTANCE.getOptionInstance());
         list.addBig(Config.OVERLAY_BRIGHTNESS.getOptionInstance());
@@ -55,18 +59,22 @@ public class SettingsScreen extends Screen {
         );
 
         this.addRenderableWidget(list);
-        this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).bounds(this.width / 2 - 100, this.height - 27, 200, 20).build());
-    }
+        this.layout.addTitleHeader(this.title, this.font);
+        this.layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, $$0 -> this.onClose()).width(200).build());
+        this.layout.visitWidgets(this::addRenderableWidget);
 
-    @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
-        super.render(guiGraphics, i, j, f);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
+        this.repositionElements();
     }
 
     @Override
     public void renderBackground(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
-        this.renderDirtBackground(guiGraphics);
+        this.renderBlurredBackground(1.0f);
+    }
+
+    @Override
+    protected void repositionElements() {
+        super.repositionElements();
+        this.list.updateSize(this.width, this.layout);
     }
 
     @Override

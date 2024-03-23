@@ -40,7 +40,7 @@ public class ModeSelectionScreen extends Screen {
 
     @Override
     public void renderBackground(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
-        this.renderTransparentBackground(guiGraphics);
+        this.renderBlurredBackground(f);
     }
 
     @Override

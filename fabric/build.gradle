@@ -33,7 +33,17 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.findProperty("fabric_loader_version")}"
 
     // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${rootProject.findProperty("fabric_api_version")}"
+    // modImplementation "net.fabricmc.fabric-api:fabric-api:${rootProject.findProperty("fabric_api_version")}"
+    Set<String> apiModules = [
+            "fabric-api-base", // Base stuff, yk
+            "fabric-lifecycle-events-v1", // To execute stuff every tick
+            "fabric-rendering-v1", // For injecting into the right render stuff
+            "fabric-resource-loader-v0", // to stitch our textures into the atlas
+            "fabric-key-binding-api-v1", // For keybindings, yk
+    ]
+    apiModules.forEach {
+        include(modImplementation(fabricApi.module(it, rootProject.findProperty("fabric_api_version"))))
+    }
 
     compileOnly project(":common")
 
