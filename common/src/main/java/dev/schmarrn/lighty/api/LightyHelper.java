@@ -29,11 +29,11 @@ public class LightyHelper {
         return block instanceof CarpetBlock;
     }
 
-    public static float getOffset(BlockState blockState, BlockPos pos, BlockState blockStateUp, BlockPos posUp, ClientLevel world) {
+    public static float getOffset(BlockState blockState, BlockState blockStateUp) {
         // Returns the offset of blocks that aren't 16 pixels high, for example snow layers or farmland.
         Block blockUp = blockStateUp.getBlock();
         if (blockUp instanceof SnowLayerBlock) { // snow layers
-            int layer = world.getBlockState(posUp).getValue(SnowLayerBlock.LAYERS);
+            int layer = blockStateUp.getValue(SnowLayerBlock.LAYERS);
             if (layer != 1) {
                 // Mobs cannot spawn on those blocks
                 return -1;

@@ -60,7 +60,7 @@ public class CarpetMode extends LightyMode {
 
         int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
-        double offset = LightyHelper.getOffset(blockState, pos, blockStateUp, posUp, world);
+        double offset = LightyHelper.getOffset(blockState, blockStateUp);
         if (offset == -1f) {
             return;
         }
