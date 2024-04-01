@@ -102,7 +102,7 @@ public class NumberMode extends LightyMode {
 
         int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
-        float offset = LightyHelper.getOffset(block, pos, blockUp, posUp, world);
+        float offset = LightyHelper.getOffset(block, blockUp);
         if (offset == -1f) {
             return;
         }
