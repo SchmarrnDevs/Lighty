@@ -21,6 +21,8 @@
   "lighty.overlay.title": "Choose an Overlay",
   "lighty.options.block_threshold": "Block Threshold",
   "lighty.options.block_threshold.tooltip": "If the block light level is less than or equal to %d, the overlay is red or orange, depending on the sky light level. Otherwise, it is green.",
+  "lighty.options.farm_growth_threshold": "Farmland Growth Threshold",
+  "lighty.options.farm_growth_threshold.tooltip": "If the block light level is less than or equal to %d, the overlay is red or orange, depending on the sky light level. Otherwise, it is green.",
   "lighty.options.sky_threshold": "Sky Threshold",
   "lighty.options.sky_threshold.tooltip": "If the block light level is below the value specified in 'Block Threshold' and the sky light level is less than or equal to %d, the overlay is red. Otherwise, it is orange.",
   "lighty.options.overlay_distance": "Overlay Distance",

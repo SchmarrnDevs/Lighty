@@ -14,23 +14,17 @@
 
 package dev.schmarrn.lighty.ui;
 
-import com.mojang.serialization.Codec;
 import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.event.Compute;
 import net.minecraft.client.OptionInstance;
-import net.minecraft.client.Options;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.OptionsList;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
 
 public class SettingsScreen extends OptionsSubScreen {
     private final Screen parent;
@@ -54,7 +48,8 @@ public class SettingsScreen extends OptionsSubScreen {
                 new OptionInstance[]{
                         Config.BLOCK_THRESHOLD.getOptionInstance(),
                         Config.SKY_THRESHOLD.getOptionInstance(),
-                        Config.SHOW_SAFE.getOptionInstance()
+                        Config.SHOW_SAFE.getOptionInstance(),
+                        Config.FARM_GROWTH_THRESHOLD.getOptionInstance()
                 }
         );
 
