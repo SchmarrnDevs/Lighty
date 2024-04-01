@@ -53,18 +53,20 @@ public class LightyHelper {
         return 0f;
     }
 
-    public static boolean isBlocked(BlockState block, BlockState up, ClientLevel world, BlockPos pos, BlockPos upPos) {
+    public static boolean isBlocked(BlockState block, BlockPos pos, ClientLevel world) {
         if (block.getBlock() instanceof FarmBlock) return false; // farmland
 
+        BlockPos posUp = pos.above();
+        BlockState blockStateUp = world.getBlockState(posUp);
         // Resource: https://minecraft.fandom.com/wiki/Tutorials/Spawn-proofing
-        return (up.isCollisionShapeFullBlock(world, upPos) || // Full blocks are not spawnable in
+        return (blockStateUp.isCollisionShapeFullBlock(world, posUp) || // Full blocks are not spawnable in
                 !block.isFaceSturdy(world, pos, Direction.UP) || // Block below needs to be sturdy
-                isRedstone(up.getBlock()) || // Mobs don't spawn in redstone
-                specialCases(up.getBlock()) || // Carpets and snow
+                isRedstone(blockStateUp.getBlock()) || // Mobs don't spawn in redstone
+                specialCases(blockStateUp.getBlock()) || // Carpets and snow
                 !protectedIsValidSpawnCheck(block, pos, world) || // use minecraft internal isValidSpawn check
-                !up.getFluidState().isEmpty()) || // don't spawn in fluidlogged stuff (Kelp, Seagrass, Growlichen)
-                !up.getBlock().isPossibleToRespawnInThis(up) ||
-                up.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE); // As of 1.20.1, only contains rails, don't know if it is even really available on the client
+                !blockStateUp.getFluidState().isEmpty()) || // don't spawn in fluidlogged stuff (Kelp, Seagrass, Growlichen)
+                !blockStateUp.getBlock().isPossibleToRespawnInThis(blockStateUp) ||
+                blockStateUp.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE); // As of 1.20.1, only contains rails, don't know if it is even really available on the client
     }
 
     public static boolean isSafe(int blockLightLevel) {
