@@ -44,10 +44,9 @@ public class CarpetMode extends LightyMode {
     @Override
     public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
         BlockPos posUp = pos.above();
-        BlockState blockStateUp = world.getBlockState(posUp);
         BlockState blockState = world.getBlockState(pos);
 
-        if (LightyHelper.isBlocked(blockState, blockStateUp, world, pos, posUp)) {
+        if (LightyHelper.isBlocked(blockState, pos, world)) {
             return;
         }
 

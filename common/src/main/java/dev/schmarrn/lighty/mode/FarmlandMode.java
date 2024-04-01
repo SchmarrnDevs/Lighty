@@ -40,7 +40,7 @@ public class FarmlandMode extends CarpetMode {
 
         int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
-        double offset = LightyHelper.getOffset(blockState, blockStateUp);
+        double offset = LightyHelper.getOffset(blockState, pos, world);
         if (offset == -1f) {
             return;
         }

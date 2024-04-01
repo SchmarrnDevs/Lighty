@@ -42,7 +42,7 @@ public class BoringCrossMode extends LightyMode {
     @Override
     public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
         BlockState blockState = world.getBlockState(pos);
-        if (!LightyHelper.isBlocked(world.getBlockState(pos.below()), blockState, world, pos.below(), pos)) {
+        if (!LightyHelper.isBlocked(world.getBlockState(pos.below()), pos, world)) {
             int blockLightLevel = world.getBrightness(LightLayer.BLOCK, pos);
             int skyLightLevel = world.getBrightness(LightLayer.SKY, pos);
 
