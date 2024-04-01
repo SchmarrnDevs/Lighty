@@ -18,6 +18,7 @@ import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.event.KeyBind;
 import dev.schmarrn.lighty.mode.BoringCrossMode;
 import dev.schmarrn.lighty.mode.CarpetMode;
+import dev.schmarrn.lighty.mode.FarmlandMode;
 import dev.schmarrn.lighty.mode.NumberMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,7 @@ public class Lighty {
         CarpetMode.init();
         NumberMode.init();
         BoringCrossMode.init();
+        FarmlandMode.init();
         KeyBind.init();
     }
 
