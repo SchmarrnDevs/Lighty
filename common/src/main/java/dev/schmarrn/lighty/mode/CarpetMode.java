@@ -44,10 +44,10 @@ public class CarpetMode extends LightyMode {
     @Override
     public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
         BlockPos posUp = pos.above();
-        BlockState up = world.getBlockState(posUp);
-        BlockState block = world.getBlockState(pos);
+        BlockState blockStateUp = world.getBlockState(posUp);
+        BlockState blockState = world.getBlockState(pos);
 
-        if (LightyHelper.isBlocked(block, up, world, pos, posUp)) {
+        if (LightyHelper.isBlocked(blockState, blockStateUp, world, pos, posUp)) {
             return;
         }
 
@@ -60,8 +60,7 @@ public class CarpetMode extends LightyMode {
 
         int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
-        double offset = LightyHelper.getOffset(up, posUp, world);
-
+        double offset = LightyHelper.getOffset(blockState, pos, blockStateUp, posUp, world);
         if (offset == -1f) {
             return;
         }

@@ -29,21 +29,31 @@ public class LightyHelper {
         return block instanceof CarpetBlock;
     }
 
-    public static float getOffset(BlockState block, BlockPos pos, ClientLevel world) {
-        float offset = 0;
-        if (block.getBlock() instanceof SnowLayerBlock) { // snow layers
-            int layer = world.getBlockState(pos).getValue(SnowLayerBlock.LAYERS);
+    public static float getOffset(BlockState blockState, BlockPos pos, BlockState blockStateUp, BlockPos posUp, ClientLevel world) {
+        // Returns the offset of blocks that aren't 16 pixels high, for example snow layers or farmland.
+        Block blockUp = blockStateUp.getBlock();
+        if (blockUp instanceof SnowLayerBlock) { // snow layers
+            int layer = world.getBlockState(posUp).getValue(SnowLayerBlock.LAYERS);
             if (layer != 1) {
                 // Mobs cannot spawn on those blocks
                 return -1;
             }
             // One layer of snow is two pixels high, with one pixel being 1/16
-            offset = 2f / 16f * layer;
+            return 2f / 16f * layer;
         }
-        return offset;
+
+        Block block = blockState.getBlock();
+        if (block instanceof FarmBlock) { // farmland
+            // FarmBlocks are 15 pixels high
+            return -1f/16f;
+        }
+
+        return 0f;
     }
 
     public static boolean isBlocked(BlockState block, BlockState up, ClientLevel world, BlockPos pos, BlockPos upPos) {
+        if (block.getBlock() instanceof FarmBlock) return false; // farmland
+
         // Resource: https://minecraft.fandom.com/wiki/Tutorials/Spawn-proofing
         return (up.isCollisionShapeFullBlock(world, upPos) || // Full blocks are not spawnable in
                 !block.isFaceSturdy(world, pos, Direction.UP) || // Block below needs to be sturdy
