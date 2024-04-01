@@ -29,8 +29,16 @@ public class LightyHelper {
         return block instanceof CarpetBlock;
     }
 
-    public static float getOffset(BlockState blockState, BlockState blockStateUp) {
+    public static float getOffset(BlockState blockState, BlockPos pos, ClientLevel world) {
         // Returns the offset of blocks that aren't 16 pixels high, for example snow layers or farmland.
+
+        Block block = blockState.getBlock();
+        if (block instanceof FarmBlock) { // farmland
+            // FarmBlocks are 15 pixels high
+            return -1f/16f;
+        }
+
+        BlockState blockStateUp = world.getBlockState(pos.above());
         Block blockUp = blockStateUp.getBlock();
         if (blockUp instanceof SnowLayerBlock) { // snow layers
             int layer = blockStateUp.getValue(SnowLayerBlock.LAYERS);
@@ -40,12 +48,6 @@ public class LightyHelper {
             }
             // One layer of snow is two pixels high, with one pixel being 1/16
             return 2f / 16f * layer;
-        }
-
-        Block block = blockState.getBlock();
-        if (block instanceof FarmBlock) { // farmland
-            // FarmBlocks are 15 pixels high
-            return -1f/16f;
         }
 
         return 0f;
