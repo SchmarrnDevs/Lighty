@@ -65,6 +65,7 @@ public class Config {
             properties.setProperty(LAST_USED_MODE, "lighty:carpet_mode");
             properties.setProperty(SKY_THRESHOLD, "0");
             properties.setProperty(BLOCK_THRESHOLD, "0");
+            properties.setProperty(FARM_GROWTH_THRESHOLD, "9");
             properties.setProperty(OVERLAY_DISTANCE, "2");
             properties.setProperty(OVERLAY_BRIGHTNESS, "10");
             properties.setProperty(SHOW_SAFE, String.valueOf(true));

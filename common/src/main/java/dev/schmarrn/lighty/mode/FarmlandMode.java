@@ -24,7 +24,6 @@ public class FarmlandMode extends CarpetMode {
     @Override
     public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
         BlockPos posUp = pos.above();
-        BlockState blockStateUp = world.getBlockState(posUp);
         BlockState blockState = world.getBlockState(pos);
 
         if (!(blockState.getBlock() instanceof FarmBlock)) {
@@ -32,13 +31,7 @@ public class FarmlandMode extends CarpetMode {
         }
 
         int blockLightLevel = world.getBrightness(LightLayer.BLOCK, posUp);
-        int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
-
-        if (LightyHelper.isSafe(blockLightLevel) && !Config.getShowSafe()) {
-            return;
-        }
-
-        int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
+        int color = LightyColors.getGrowthARGB(blockLightLevel);
 
         double offset = LightyHelper.getOffset(blockState, pos, world);
         if (offset == -1f) {
