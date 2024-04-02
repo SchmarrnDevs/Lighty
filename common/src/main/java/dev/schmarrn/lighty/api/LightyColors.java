@@ -30,15 +30,12 @@ public class LightyColors {
     }
 
     public static int getARGB(int blockLightLevel, int skyLightLevel) {
-        if (skyLightLevel <= Config.getSkyThreshold()) {
-            return LightyColors.getDangerARGB();
-        }
-
-        if (blockLightLevel <= Config.getBlockThreshold()) {
-            return LightyColors.getWarningARGB();
-        }
-
-        return LightyColors.getSafeARGB();
+        // Artificial light is always safe
+        if (blockLightLevel > Config.getBlockThreshold()) return LightyColors.getSafeARGB();
+        // If we don't have artificial lighting, mobs can spawn at night
+        if (skyLightLevel > Config.getSkyThreshold()) return LightyColors.getWarningARGB();
+        // Without artificial nor skylight, mobs can always spawn
+        return LightyColors.getDangerARGB();
     }
 
     public static int getGrowthARGB(int blockLightLevel) {
