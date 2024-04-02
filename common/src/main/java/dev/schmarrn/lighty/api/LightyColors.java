@@ -30,17 +30,23 @@ public class LightyColors {
     }
 
     public static int getARGB(int blockLightLevel, int skyLightLevel) {
-        int color = LightyColors.getSafeARGB();
-
-        if (blockLightLevel <= Config.BLOCK_THRESHOLD.getValue()) {
-            if (skyLightLevel <= Config.SKY_THRESHOLD.getValue()) {
-                color = LightyColors.getDangerARGB();
-            } else {
-                color = LightyColors.getWarningARGB();
-            }
+        if (skyLightLevel <= Config.getSkyThreshold()) {
+            return LightyColors.getDangerARGB();
         }
 
-        return color;
+        if (blockLightLevel <= Config.getBlockThreshold()) {
+            return LightyColors.getWarningARGB();
+        }
+
+        return LightyColors.getSafeARGB();
+    }
+
+    public static int getGrowthARGB(int blockLightLevel) {
+        if (blockLightLevel <= Config.getFarmGrowthThreshold()) {
+            return LightyColors.getWarningARGB();
+        }
+
+        return LightyColors.getSafeARGB();
     }
 
     private LightyColors() {}
