@@ -54,8 +54,6 @@ public class LightyHelper {
     }
 
     public static boolean isBlocked(BlockState block, BlockPos pos, ClientLevel world) {
-        if (block.getBlock() instanceof FarmBlock) return false; // farmland
-
         BlockPos posUp = pos.above();
         BlockState blockStateUp = world.getBlockState(posUp);
         // Resource: https://minecraft.fandom.com/wiki/Tutorials/Spawn-proofing
