@@ -31,7 +31,8 @@ public class FarmlandMode extends CarpetMode {
         }
 
         int blockLightLevel = world.getBrightness(LightLayer.BLOCK, posUp);
-        int color = LightyColors.getGrowthARGB(blockLightLevel);
+        int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
+        int color = LightyColors.getGrowthARGB(blockLightLevel, skyLightLevel);
 
         double offset = LightyHelper.getOffset(blockState, pos, world);
         if (offset == -1f) {

@@ -64,12 +64,15 @@ public class LightyColors {
         return LightyColors.getDangerARGB();
     }
 
-    public static int getGrowthARGB(int blockLightLevel) {
-        if (blockLightLevel <= Config.getFarmGrowthThreshold()) {
+    public static int getGrowthARGB(int blockLightLevel, int skyLightLevel) {
+        // Equal to above the growth threshold crops always grow
+        if (blockLightLevel >= Config.getFarmGrowthThreshold()) return LightyColors.getSafeARGB();
+        // Crops won't grow at night without artificial light
+        if (skyLightLevel > Config.getFarmUprootThreshold() || blockLightLevel > Config.getFarmUprootThreshold()) {
             return LightyColors.getWarningARGB();
         }
-
-        return LightyColors.getSafeARGB();
+        // There is insufficient artificial and skylight here; crops will uproot themselves and can't be planted
+        return LightyColors.getDangerARGB();
     }
 
     private LightyColors() {}

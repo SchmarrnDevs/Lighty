@@ -17,6 +17,8 @@
   "lighty.options.block_threshold.tooltip": "If the block light level is less than or equal to %d, the overlay is red or orange, depending on the sky light level. Otherwise, it is green.",
   "lighty.options.farm_growth_threshold": "Farmland Growth Threshold",
   "lighty.options.farm_growth_threshold.tooltip": "If the block light level is less than or equal to %d, crops won't grow at night and the overlay is orange. Otherwise, it is green.",
+  "lighty.options.farm_uproot_threshold": "Farmland Uproot Threshold",
+  "lighty.options.farm_uproot_threshold.tooltip": "If the block light level is less than or equal to %d, crops will un-plant themselves at night and the overlay is red.",
   "lighty.options.sky_threshold": "Sky Threshold",
   "lighty.options.sky_threshold.tooltip": "If the block light level is below the value specified in 'Block Threshold' and the sky light level is less than or equal to %d, the overlay is red. Otherwise, it is orange.",
   "lighty.options.overlay_distance": "Overlay Distance",

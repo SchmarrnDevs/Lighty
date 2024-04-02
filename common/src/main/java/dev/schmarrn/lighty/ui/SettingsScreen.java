@@ -89,6 +89,15 @@ public class SettingsScreen extends Screen {
                                 Config.getFarmGrowthThreshold(),
                                 Config::setFarmGrowthThreshold
                         ),
+                        new OptionInstance<>(
+                                "lighty.options.farm_uproot_threshold",
+                                object -> Tooltip.create(Component.translatable("lighty.options.farm_uproot_threshold.tooltip", object)),
+                                (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
+                                new OptionInstance.IntRange(0, 15),
+                                Codec.intRange(0, 15),
+                                Config.getFarmUprootThreshold(),
+                                Config::setFarmUprootThreshold
+                        ),
                         OptionInstance.createBoolean(
                                 "lighty.options.show_safe",
                                 object -> Tooltip.create(Component.translatable("lighty.options.show_safe.tooltip", object)),
