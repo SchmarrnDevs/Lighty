@@ -39,8 +39,8 @@ public class Config {
     public static final IntegerConfig OVERLAY_DISTANCE = new IntegerConfig("lighty.overlay_distance", 2, 1, 32);
     public static final IntegerConfig OVERLAY_BRIGHTNESS = new IntegerConfig("lighty.overlay_brightness", 10, 0, 15);
 
-    public static final IntegerConfig FARM_GROWTH_THRESHOLD = new IntegerConfig("lighty.farm_growth_threshold", 9, 0, 15);
-    public static final IntegerConfig FARM_UPROOT_THRESHOLD = new IntegerConfig("lighty.farm_uproot_threshold", 7, 0, 15);
+    public static final IntegerConfig FARM_GROWTH_THRESHOLD = new IntegerConfig("lighty.farm_growth_threshold", 8, 0, 15);
+    public static final IntegerConfig FARM_UPROOT_THRESHOLD = new IntegerConfig("lighty.farm_uproot_threshold", 8, 0, 15);
 
     public static final BooleanConfig SHOW_SAFE = new BooleanConfig("lighty.show_safe", true);
 
@@ -57,6 +57,7 @@ public class Config {
         }
     }
 
+<<<<<<< HEAD
     public static void register(String key, ConfigSerDe type) {
         configValues.put(key, type);
         loadFromFile(key, type);
