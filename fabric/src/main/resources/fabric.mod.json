@@ -5,11 +5,13 @@
   "name": "Lighty",
   "description": "The Light Overlay Mod with a twist!",
   "authors": [
-    "andi_makes",
-    "agnor99"
+    "andi_makes"
+  ],
+  "contributors": [
+    "agnor99",
+    "Alveel"
   ],
   "contact": {
-    "email": "contact@schmarrn.dev",
     "sources": "https://github.com/SchmarrnDevs/Lighty",
     "issues": "https://github.com/SchmarrnDevs/Lighty/issues"
   },
