@@ -76,11 +76,6 @@ public class LightyScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
-        this.renderTransparentBackground(guiGraphics);
-    }
-
-    @Override
     public boolean isPauseScreen() {
         return false;
     }
