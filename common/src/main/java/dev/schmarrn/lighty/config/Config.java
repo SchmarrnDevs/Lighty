@@ -52,8 +52,8 @@ public class Config {
             properties.putIfAbsent(LAST_USED_MODE, "lighty:carpet_mode");
             properties.putIfAbsent(SKY_THRESHOLD, "0");
             properties.putIfAbsent(BLOCK_THRESHOLD, "0");
-            properties.putIfAbsent(FARM_GROWTH_THRESHOLD, "9");
-            properties.putIfAbsent(FARM_UPROOT_THRESHOLD, "7");
+            properties.putIfAbsent(FARM_GROWTH_THRESHOLD, "8");
+            properties.putIfAbsent(FARM_UPROOT_THRESHOLD, "8");
             properties.putIfAbsent(OVERLAY_DISTANCE, "2");
             properties.putIfAbsent(OVERLAY_BRIGHTNESS, "10");
             properties.putIfAbsent(SHOW_SAFE, String.valueOf(true));
@@ -67,8 +67,8 @@ public class Config {
             properties.setProperty(LAST_USED_MODE, "lighty:carpet_mode");
             properties.setProperty(SKY_THRESHOLD, "0");
             properties.setProperty(BLOCK_THRESHOLD, "0");
-            properties.setProperty(FARM_GROWTH_THRESHOLD, "9");
-            properties.setProperty(FARM_UPROOT_THRESHOLD, "7");
+            properties.setProperty(FARM_GROWTH_THRESHOLD, "8");
+            properties.setProperty(FARM_UPROOT_THRESHOLD, "8");
             properties.setProperty(OVERLAY_DISTANCE, "2");
             properties.setProperty(OVERLAY_BRIGHTNESS, "10");
             properties.setProperty(SHOW_SAFE, String.valueOf(true));
@@ -100,11 +100,11 @@ public class Config {
     }
 
     public static int getFarmGrowthThreshold() {
-        return Integer.parseInt(config.properties.getProperty(FARM_GROWTH_THRESHOLD, "9"));
+        return Integer.parseInt(config.properties.getProperty(FARM_GROWTH_THRESHOLD, "8"));
     }
 
     public static int getFarmUprootThreshold() {
-        return Integer.parseInt(config.properties.getProperty(FARM_UPROOT_THRESHOLD, "7"));
+        return Integer.parseInt(config.properties.getProperty(FARM_UPROOT_THRESHOLD, "8"));
     }
 
     public static int getOverlayDistance() {
