@@ -1,63 +1,38 @@
-// Copyright 2022-2023 The Lighty contributors
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package dev.schmarrn.lighty.mode;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.LightyColors;
 import dev.schmarrn.lighty.api.LightyHelper;
-import dev.schmarrn.lighty.api.LightyMode;
 import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class CarpetMode extends LightyMode {
-    @Override
-    public void beforeCompute(BufferBuilder builder) {
-        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-    }
-
+/**
+ * Extending CarpetMode because the code is largely identical
+ */
+public class FarmlandMode extends CarpetMode {
     @Override
     public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
         BlockPos posUp = pos.above();
         BlockState blockState = world.getBlockState(pos);
 
-        if (LightyHelper.isBlocked(blockState, pos, world)) {
+        if (!(blockState.getBlock() instanceof FarmBlock)) {
             return;
         }
 
         int blockLightLevel = world.getBrightness(LightLayer.BLOCK, posUp);
         int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
-
-        if (LightyHelper.isSafe(blockLightLevel) && !Config.getShowSafe()) {
-            return;
-        }
-
-        int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
+        int color = LightyColors.getGrowthARGB(blockLightLevel, skyLightLevel);
 
         double offset = LightyHelper.getOffset(blockState, pos, world);
         if (offset == -1f) {
@@ -109,19 +84,7 @@ public class CarpetMode extends LightyMode {
         }
     }
 
-    @Override
-    public void beforeRendering() {
-        RenderType.translucent().setupRenderState();
-        RenderSystem.setShaderTexture(0, new ResourceLocation(Lighty.MOD_ID, "textures/block/transparent.png"));
-        RenderSystem.enableDepthTest();
-    }
-
-    @Override
-    public void afterRendering() {
-        RenderType.translucent().clearRenderState();
-        RenderSystem.disableDepthTest();
-    }
     public static void init() {
-        ModeManager.registerMode(new ResourceLocation(Lighty.MOD_ID, "carpet_mode"), new CarpetMode());
+        ModeManager.registerMode(new ResourceLocation(Lighty.MOD_ID, "farmland_mode"), new FarmlandMode());
     }
 }

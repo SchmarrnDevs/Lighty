@@ -87,9 +87,8 @@ public class NumberMode extends LightyMode {
     @Override
     public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
         BlockPos posUp = pos.above();
-        BlockState up = world.getBlockState(posUp);
-        BlockState block = world.getBlockState(pos);
-        if (LightyHelper.isBlocked(block, up, world, pos, posUp)) {
+        BlockState blockState = world.getBlockState(pos);
+        if (LightyHelper.isBlocked(blockState, pos, world)) {
             return;
         }
 
@@ -102,7 +101,7 @@ public class NumberMode extends LightyMode {
 
         int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
-        float offset = LightyHelper.getOffset(up, posUp, world);
+        float offset = LightyHelper.getOffset(blockState, pos, world);
         if (offset == -1f) {
             return;
         }

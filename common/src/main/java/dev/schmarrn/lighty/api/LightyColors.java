@@ -56,17 +56,22 @@ public class LightyColors {
     }
 
     public static int getARGB(int blockLightLevel, int skyLightLevel) {
-        int color = LightyColors.getSafeARGB();
+        // Artificial light is always safe
+        if (blockLightLevel > Config.getBlockThreshold()) return LightyColors.getSafeARGB();
+        // If we don't have artificial lighting, mobs can spawn at night
+        if (skyLightLevel > Config.getSkyThreshold()) return LightyColors.getWarningARGB();
+        // Without artificial nor skylight, mobs can always spawn
+        return LightyColors.getDangerARGB();
+    }
 
-        if (blockLightLevel <= Config.getBlockThreshold()) {
-            if (skyLightLevel <= Config.getSkyThreshold()) {
-                color = LightyColors.getDangerARGB();
-            } else {
-                color = LightyColors.getWarningARGB();
-            }
-        }
-
-        return color;
+    public static int getGrowthARGB(int blockLightLevel, int skyLightLevel) {
+        int internalLightLevel = Integer.max(blockLightLevel, skyLightLevel);
+        // Above the growth threshold crops always grow
+        if (internalLightLevel > Config.getFarmGrowthThreshold()) return LightyColors.getSafeARGB();
+        // Crops can be planted but won't grow without additional light
+        if (internalLightLevel < Config.getFarmUprootThreshold()) return LightyColors.getWarningARGB();
+        // There is insufficient light here; crops will uproot themselves and can't be planted
+        return LightyColors.getDangerARGB();
     }
 
     private LightyColors() {}

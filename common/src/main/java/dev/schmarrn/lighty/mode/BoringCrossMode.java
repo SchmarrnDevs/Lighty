@@ -30,6 +30,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class BoringCrossMode extends LightyMode {
 
@@ -40,7 +41,8 @@ public class BoringCrossMode extends LightyMode {
 
     @Override
     public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
-        if (!LightyHelper.isBlocked(world.getBlockState(pos.below()), world.getBlockState(pos), world, pos.below(), pos)) {
+        BlockState blockState = world.getBlockState(pos);
+        if (!LightyHelper.isBlocked(world.getBlockState(pos.below()), pos, world)) {
             int blockLightLevel = world.getBrightness(LightLayer.BLOCK, pos);
             int skyLightLevel = world.getBrightness(LightLayer.SKY, pos);
 
@@ -50,7 +52,7 @@ public class BoringCrossMode extends LightyMode {
 
             int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
-            float offset = LightyHelper.getOffset(world.getBlockState(pos), pos, world);
+            float offset = LightyHelper.getOffset(blockState, pos, world);
             if (offset == -1f) {
                 return;
             }
