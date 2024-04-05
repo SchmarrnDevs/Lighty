@@ -42,10 +42,10 @@ public class LightyColors {
         int internalLightLevel = Integer.max(blockLightLevel, skyLightLevel);
         // Above the growth threshold crops always grow
         if (internalLightLevel > Config.getFarmGrowthThreshold()) return LightyColors.getSafeARGB();
-        // Crops can be planted but won't grow without additional light
-        if (internalLightLevel < Config.getFarmUprootThreshold()) return LightyColors.getWarningARGB();
         // There is insufficient light here; crops will uproot themselves and can't be planted
-        return LightyColors.getDangerARGB();
+        if (internalLightLevel < Config.getFarmUprootThreshold()) return LightyColors.getDangerARGB();
+        // Crops can be planted but won't grow without additional light
+        return LightyColors.getWarningARGB();
     }
 
     private LightyColors() {}
