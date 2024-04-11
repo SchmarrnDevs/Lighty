@@ -48,9 +48,13 @@ public class SettingsScreen extends OptionsSubScreen {
                 new OptionInstance[]{
                         Config.BLOCK_THRESHOLD.getOptionInstance(),
                         Config.SKY_THRESHOLD.getOptionInstance(),
-                        Config.SHOW_SAFE.getOptionInstance(),
-                        Config.FARM_GROWTH_THRESHOLD.getOptionInstance(),
-                        Config.FARM_UPROOT_THRESHOLD.getOptionInstance()
+                }
+        );
+        list.addBig(Config.FARM_GROWTH_THRESHOLD.getOptionInstance());
+        list.addBig(Config.FARM_UPROOT_THRESHOLD.getOptionInstance());
+        list.addSmall(
+                new OptionInstance[]{
+                        Config.SHOW_SAFE.getOptionInstance()
                 }
         );
 

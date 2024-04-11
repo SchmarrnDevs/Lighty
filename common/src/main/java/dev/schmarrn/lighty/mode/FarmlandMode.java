@@ -75,7 +75,13 @@ public class FarmlandMode extends CarpetMode {
         }
     }
 
+    @Override
+    public ResourceLocation getResourceLocation() {
+        return new ResourceLocation(Lighty.MOD_ID, "farmland_mode");
+    }
+
     public static void init() {
-        ModeManager.registerMode(new ResourceLocation(Lighty.MOD_ID, "farmland_mode"), new FarmlandMode());
+        FarmlandMode mode = new FarmlandMode();
+        ModeManager.registerMode(mode.getResourceLocation(), mode);
     }
 }
