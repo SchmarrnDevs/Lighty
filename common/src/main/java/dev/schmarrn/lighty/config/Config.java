@@ -57,7 +57,6 @@ public class Config {
         }
     }
 
-<<<<<<< HEAD
     public static void register(String key, ConfigSerDe type) {
         configValues.put(key, type);
         loadFromFile(key, type);

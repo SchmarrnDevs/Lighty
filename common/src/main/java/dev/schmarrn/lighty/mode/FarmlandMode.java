@@ -34,15 +34,10 @@ public class FarmlandMode extends CarpetMode {
         int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
         int color = LightyColors.getGrowthARGB(blockLightLevel, skyLightLevel);
 
-        double offset = LightyHelper.getOffset(blockState, pos, world);
-        if (offset == -1f) {
-            return;
-        }
-
         double x = pos.getX();
-        double y = pos.getY() + 1 + offset;
+        double y = pos.getY() + 1;
         double z = pos.getZ();
-        int overlayBrightness = Config.getOverlayBrightness();
+        int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
         // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
         int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
         //TOP
@@ -50,10 +45,6 @@ public class FarmlandMode extends CarpetMode {
         builder.vertex(x, y + 1 / 16f, z + 1).color(color).uv(0, 1).uv2(lightmap).normal(0f, 1f, 0f).endVertex();
         builder.vertex(x + 1, y + 1 / 16f, z + 1).color(color).uv(1, 1).uv2(lightmap).normal(0f, 1f, 0f).endVertex();
         builder.vertex(x + 1, y + 1 / 16f, z).color(color).uv(1, 0).uv2(lightmap).normal(0f, 1f, 0f).endVertex();
-        if (offset > 0.001f) {
-            //if it renders above it should check if the block above culls the faces
-            pos = pos.above();
-        }
         //NORTH
         if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), world, pos, Direction.SOUTH, pos.relative(Direction.SOUTH))) {
             builder.vertex(x, y + 1 / 16f, z + 1).color(color).uv(0, 1f / 16).uv2(lightmap).normal(0f, 0f, -1f).endVertex();

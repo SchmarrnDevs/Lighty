@@ -30,14 +30,7 @@ public class LightyHelper {
     }
 
     public static float getOffset(BlockState blockState, BlockPos pos, ClientLevel world) {
-        // Returns the offset of blocks that aren't 16 pixels high, for example snow layers or farmland.
-
-        Block block = blockState.getBlock();
-        if (block instanceof FarmBlock) { // farmland
-            // FarmBlocks are 15 pixels high
-            return -1f/16f;
-        }
-
+        // Returns the offset of blocks that aren't 16 pixels high
         BlockState blockStateUp = world.getBlockState(pos.above());
         Block blockUp = blockStateUp.getBlock();
         if (blockUp instanceof SnowLayerBlock) { // snow layers
