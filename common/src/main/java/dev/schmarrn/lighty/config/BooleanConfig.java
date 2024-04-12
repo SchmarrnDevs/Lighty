@@ -15,7 +15,7 @@ public class BooleanConfig extends ConfigType<Boolean> {
         );
     }
 
-    BooleanConfig(String key, Boolean defaultValue) {
+    public BooleanConfig(String key, Boolean defaultValue) {
         super(key, defaultValue);
     }
 

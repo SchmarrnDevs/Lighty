@@ -9,7 +9,7 @@ public class ResourceLocationConfig extends ConfigType<ResourceLocation> {
         return null;
     }
 
-    ResourceLocationConfig(String key, ResourceLocation defaultValue) {
+    public ResourceLocationConfig(String key, ResourceLocation defaultValue) {
         super(key, defaultValue);
     }
 

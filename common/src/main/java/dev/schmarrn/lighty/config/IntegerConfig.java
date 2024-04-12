@@ -22,7 +22,7 @@ public class IntegerConfig extends ConfigType<Integer> {
         );
     }
 
-    IntegerConfig(String key, Integer defaultValue, int min, int max) {
+    public IntegerConfig(String key, Integer defaultValue, int min, int max) {
         super(key, defaultValue);
         this.min = min;
         this.max = max;
