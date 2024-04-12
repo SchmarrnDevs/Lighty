@@ -29,7 +29,9 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
@@ -49,6 +51,7 @@ public class Compute {
     private static HashSet<SectionPos> toBeRemoved = new HashSet<>(INITIAL_HASHSET_CAPACITY);
     private static final Map<SectionPos, BufferHolder> cachedBuffers = new HashMap<>();
     private static ChunkPos playerPos = null;
+
 
     private static int computationDistance = Math.min(Config.OVERLAY_DISTANCE.getValue(), Minecraft.getInstance().options.renderDistance().get());
 
@@ -106,7 +109,26 @@ public class Compute {
     }
 
     public static void computeCache(Minecraft client) {
-        if (!ModeLoader.isEnabled()) return;
+        if (client.player == null) return;
+
+        if (Config.SHOULD_AUTO_ON.getValue()) {
+            Item activationItem = BuiltInRegistries.ITEM.get(Config.AUTO_ON_ITEM.getValue());
+            Item mainHandItem = client.player.getMainHandItem().getItem();
+            Item offHandItem = client.player.getOffhandItem().getItem();
+
+            // if we hold the activation item in our hands, set auto enabled to true.
+            // if we don't, set it to false and if we aren't enabled, return early.
+            if (mainHandItem == activationItem || offHandItem == activationItem) {
+                ModeLoader.setAutoEnabled();
+            } else {
+                ModeLoader.setAutoDisabled();
+                if (!ModeLoader.isManuallyEnabled()) {
+                    return;
+                }
+            }
+        } else if (!ModeLoader.isEnabled()) {
+            return;
+        }
         LightyMode mode = ModeLoader.getCurrentMode();
 
         ClientLevel world = client.level;

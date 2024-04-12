@@ -27,6 +27,7 @@ public class ModeLoader {
     private static LightyMode mode = null;
 
     private static boolean enabled = false;
+    private static boolean autoEnabled = false;
 
     private static final HashMap<ResourceLocation, LightyMode> MODES = new HashMap<>();
 
@@ -47,12 +48,20 @@ public class ModeLoader {
        setEnabled(false);
     }
 
+    public static void setAutoEnabled() {
+        autoEnabled = true;
+    }
+
+    public static void setAutoDisabled() {
+        autoEnabled = false;
+    }
+
     public static void enable() {
         setEnabled(true);
     }
 
     public static void toggle() {
-        setEnabled(!isEnabled());
+        enabled = !enabled;
     }
 
     public static void put(ResourceLocation id, LightyMode mode) {
@@ -60,6 +69,10 @@ public class ModeLoader {
     }
 
     public static boolean isEnabled() {
+        return enabled || autoEnabled;
+    }
+
+    public static boolean isManuallyEnabled() {
         return enabled;
     }
 
