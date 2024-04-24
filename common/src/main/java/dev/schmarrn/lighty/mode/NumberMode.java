@@ -94,12 +94,13 @@ public class NumberMode extends LightyMode {
 
         int blockLightLevel = world.getBrightness(LightLayer.BLOCK, posUp);
         int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
+        String dimensionName = world.dimensionType().effectsLocation().toString();
 
         if (LightyHelper.isSafe(blockLightLevel) && !Config.getShowSafe()) {
             return;
         }
 
-        int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
+        int color = LightyColors.getARGB(blockLightLevel, skyLightLevel, dimensionName);
 
         float offset = LightyHelper.getOffset(blockState, pos, world);
         if (offset == -1f) {

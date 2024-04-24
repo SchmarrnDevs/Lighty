@@ -68,8 +68,8 @@ public class SettingsScreen extends Screen {
                                 (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
                                 new OptionInstance.IntRange(0, 15),
                                 Codec.intRange(0, 15),
-                                Config.getBlockThreshold(),
-                                Config::setBlockThreshold
+                                Config.getOverworldBlockThreshold(),
+                                Config::setOverworldBlockThreshold
                         ),
                         new OptionInstance<>(
                                 "lighty.options.sky_threshold",
@@ -77,8 +77,8 @@ public class SettingsScreen extends Screen {
                                 (component, integer) -> Options.genericValueLabel(component, Component.literal(integer.toString())),
                                 new OptionInstance.IntRange(0, 15),
                                 Codec.intRange(0, 15),
-                                Config.getSkyThreshold(),
-                                Config::setSkyThreshold
+                                Config.getOverworldSkyThreshold(),
+                                Config::setOverworldSkyThreshold
                         ),
                         new OptionInstance<>(
                                 "lighty.options.farm_growth_threshold",

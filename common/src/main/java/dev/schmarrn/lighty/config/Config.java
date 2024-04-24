@@ -29,9 +29,20 @@ public class Config {
 
     private static Config config;
 
+    private static final String overworld_block_threshold_value = "0";
+    private static final String overworld_sky_threshold_value = "7";
+    private static final String nether_block_threshold_value = "11";
+    private static final String nether_sky_threshold_value = overworld_sky_threshold_value;
+    private static final String end_block_threshold_value = "0";
+    private static final String end_sky_threshold_value = overworld_sky_threshold_value;
+
     private static final String LAST_USED_MODE = "lighty.last_used_mode";
-    private static final String SKY_THRESHOLD = "lighty.sky_threshold";
-    private static final String BLOCK_THRESHOLD = "lighty.block_threshold";
+    private static final String OVERWORLD_BLOCK_THRESHOLD = "lighty.block_threshold";
+    private static final String OVERWORLD_SKY_THRESHOLD = "lighty.sky_threshold";
+    private static final String NETHER_BLOCK_THRESHOLD = "lighty.nether_block_threshold";
+    private static final String NETHER_SKY_THRESHOLD = "lighty.nether_sky_threshold";
+    private static final String END_BLOCK_THRESHOLD = "lighty.nether_block_threshold";
+    private static final String END_SKY_THRESHOLD = "lighty.nether_sky_threshold";
     private static final String FARM_GROWTH_THRESHOLD = "lighty.farm_growth_threshold";
     private static final String FARM_UPROOT_THRESHOLD = "lighty.farm_uproot_threshold";
     private static final String OVERLAY_DISTANCE = "lighty.overlay_distance";
@@ -50,8 +61,8 @@ public class Config {
 
             // Set Defaults if no values are set
             properties.putIfAbsent(LAST_USED_MODE, "lighty:carpet_mode");
-            properties.putIfAbsent(SKY_THRESHOLD, "0");
-            properties.putIfAbsent(BLOCK_THRESHOLD, "0");
+            properties.putIfAbsent(OVERWORLD_BLOCK_THRESHOLD, overworld_block_threshold_value);
+            properties.putIfAbsent(OVERWORLD_SKY_THRESHOLD, overworld_sky_threshold_value);
             properties.putIfAbsent(FARM_GROWTH_THRESHOLD, "8");
             properties.putIfAbsent(FARM_UPROOT_THRESHOLD, "8");
             properties.putIfAbsent(OVERLAY_DISTANCE, "2");
@@ -65,8 +76,8 @@ public class Config {
 
             // Add Defaults here
             properties.setProperty(LAST_USED_MODE, "lighty:carpet_mode");
-            properties.setProperty(SKY_THRESHOLD, "0");
-            properties.setProperty(BLOCK_THRESHOLD, "0");
+            properties.setProperty(OVERWORLD_BLOCK_THRESHOLD, overworld_block_threshold_value);
+            properties.setProperty(OVERWORLD_SKY_THRESHOLD, overworld_sky_threshold_value);
             properties.setProperty(FARM_GROWTH_THRESHOLD, "8");
             properties.setProperty(FARM_UPROOT_THRESHOLD, "8");
             properties.setProperty(OVERLAY_DISTANCE, "2");
@@ -91,12 +102,28 @@ public class Config {
         }
     }
 
-    public static int getSkyThreshold() {
-        return Integer.parseInt(config.properties.getProperty(SKY_THRESHOLD, "0"));
+    public static int getOverworldBlockThreshold() {
+        return Integer.parseInt(config.properties.getProperty(OVERWORLD_BLOCK_THRESHOLD, overworld_block_threshold_value));
     }
 
-    public static int getBlockThreshold() {
-        return Integer.parseInt(config.properties.getProperty(BLOCK_THRESHOLD, "0"));
+    public static int getOverworldSkyThreshold() {
+        return Integer.parseInt(config.properties.getProperty(OVERWORLD_SKY_THRESHOLD, overworld_sky_threshold_value));
+    }
+
+    public static int getNetherBlockThreshold() {
+        return Integer.parseInt(config.properties.getProperty(NETHER_BLOCK_THRESHOLD, nether_block_threshold_value));
+    }
+
+    public static int getNetherSkyThreshold() {
+        return Integer.parseInt(config.properties.getProperty(NETHER_SKY_THRESHOLD, nether_sky_threshold_value));
+    }
+
+    public static int getEndBlockThreshold() {
+        return Integer.parseInt(config.properties.getProperty(END_BLOCK_THRESHOLD, end_block_threshold_value));
+    }
+
+    public static int getEndSkyThreshold() {
+        return Integer.parseInt(config.properties.getProperty(END_SKY_THRESHOLD, end_sky_threshold_value));
     }
 
     public static int getFarmGrowthThreshold() {
@@ -127,13 +154,13 @@ public class Config {
         config.write();
     }
 
-    public static void setSkyThreshold(int i) {
-        config.properties.setProperty(SKY_THRESHOLD, String.valueOf(i));
+    public static void setOverworldBlockThreshold(int i) {
+        config.properties.setProperty(OVERWORLD_BLOCK_THRESHOLD, String.valueOf(i));
         config.write();
     }
 
-    public static void setBlockThreshold(int i) {
-        config.properties.setProperty(BLOCK_THRESHOLD, String.valueOf(i));
+    public static void setOverworldSkyThreshold(int i) {
+        config.properties.setProperty(OVERWORLD_SKY_THRESHOLD, String.valueOf(i));
         config.write();
     }
 

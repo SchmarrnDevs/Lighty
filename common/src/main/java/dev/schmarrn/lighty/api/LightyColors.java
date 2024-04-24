@@ -55,13 +55,31 @@ public class LightyColors {
         return RED  | 0xFF000000;
     }
 
-    public static int getARGB(int blockLightLevel, int skyLightLevel) {
-        // Artificial light is always safe
-        if (blockLightLevel > Config.getBlockThreshold()) return LightyColors.getSafeARGB();
-        // If we don't have artificial lighting, mobs can spawn at night
-        if (skyLightLevel > Config.getSkyThreshold()) return LightyColors.getWarningARGB();
-        // Without artificial nor skylight, mobs can always spawn
-        return LightyColors.getDangerARGB();
+    public static int getARGB(int blockLightLevel, int skyLightLevel, String dimension) {
+        switch (dimension) {
+            case "minecraft:the_nether":
+                // Artificial light is always safe
+                if (blockLightLevel > Config.getNetherBlockThreshold()) return LightyColors.getSafeARGB();
+                // If we don't have artificial lighting, mobs can spawn at night
+                if (skyLightLevel > Config.getNetherSkyThreshold()) return LightyColors.getWarningARGB();
+                // Without artificial nor skylight, mobs can always spawn
+                return LightyColors.getDangerARGB();
+            case "minecraft:the_end":
+                // Artificial light is always safe
+                if (blockLightLevel > Config.getEndBlockThreshold()) return LightyColors.getSafeARGB();
+                // If we don't have artificial lighting, mobs can spawn at night
+                if (skyLightLevel > Config.getEndSkyThreshold()) return LightyColors.getWarningARGB();
+                // Without artificial nor skylight, mobs can always spawn
+                return LightyColors.getDangerARGB();
+            default:
+                // Use "minecraft:overworld" for all other cases
+                // Artificial light is always safe
+                if (blockLightLevel > Config.getOverworldBlockThreshold()) return LightyColors.getSafeARGB();
+                // If we don't have artificial lighting, mobs can spawn at night
+                if (skyLightLevel > Config.getOverworldSkyThreshold()) return LightyColors.getWarningARGB();
+                // Without artificial nor skylight, mobs can always spawn
+                return LightyColors.getDangerARGB();
+        }
     }
 
     public static int getGrowthARGB(int blockLightLevel, int skyLightLevel) {

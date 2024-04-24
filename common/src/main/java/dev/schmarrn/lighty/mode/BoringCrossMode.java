@@ -45,12 +45,13 @@ public class BoringCrossMode extends LightyMode {
         if (!LightyHelper.isBlocked(world.getBlockState(pos.below()), pos, world)) {
             int blockLightLevel = world.getBrightness(LightLayer.BLOCK, pos);
             int skyLightLevel = world.getBrightness(LightLayer.SKY, pos);
+            String dimensionName = world.dimensionType().effectsLocation().toString();
 
             if (LightyHelper.isSafe(blockLightLevel) && !Config.getShowSafe()) {
                 return;
             }
 
-            int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
+            int color = LightyColors.getARGB(blockLightLevel, skyLightLevel, dimensionName);
 
             float offset = LightyHelper.getOffset(blockState, pos, world);
             if (offset == -1f) {
