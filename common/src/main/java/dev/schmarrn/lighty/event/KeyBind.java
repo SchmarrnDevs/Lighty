@@ -48,9 +48,6 @@ public class KeyBind {
         if (newToggleState && !KeyBind.oldToggleState) {
             ModeLoader.toggle();
         }
-        if (newKeyState && !KeyBind.oldKeyState) {
-            client.setScreen(new ModeSwitcherScreen());
-        }
 
         // old state is new state
         KeyBind.oldKeyState = newKeyState;
