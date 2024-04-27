@@ -112,11 +112,11 @@ public class SettingsScreen extends Screen {
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
         this.renderDirtBackground(guiGraphics);
-        list.render(guiGraphics, mouseX, mouseY , delta);
+        list.render(guiGraphics, i, j , f);
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
-        super.render(guiGraphics, mouseX, mouseY, delta);
+        super.render(guiGraphics, i, j, f);
     }
 
     @Override
