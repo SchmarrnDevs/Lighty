@@ -68,7 +68,7 @@ public class SettingsScreen extends OptionsSubScreen {
     }
 
     @Override
-    public void renderBackground(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
+    public void renderBackground(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
         this.renderBlurredBackground(1.0f);
     }
 
