@@ -44,9 +44,9 @@ public class BoringCrossMode extends LightyMode {
     @Override
     public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
         BlockState blockState = world.getBlockState(pos);
-        if (!LightyHelper.isBlocked(world.getBlockState(pos.below()), pos, world)) {
-            int blockLightLevel = world.getBrightness(LightLayer.BLOCK, pos);
-            int skyLightLevel = world.getBrightness(LightLayer.SKY, pos);
+        if (!LightyHelper.isBlocked(blockState, pos, world)) {
+            int blockLightLevel = world.getBrightness(LightLayer.BLOCK, pos.above());
+            int skyLightLevel = world.getBrightness(LightLayer.SKY, pos.above());
 
             if (LightyHelper.isSafe(blockLightLevel) && !Config.SHOW_SAFE.getValue()) {
                 return;
@@ -54,14 +54,14 @@ public class BoringCrossMode extends LightyMode {
 
             int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
-            float offset = LightyHelper.getOffset(blockState, pos.below(), world);
+            float offset = LightyHelper.getOffset(blockState, pos, world);
             if (offset == -1f) {
                 return;
             }
 
             float x1 = pos.getX();
             float x2 = pos.getX() + 1f;
-            float y = pos.getY() + 0.005f + offset;
+            float y = pos.getY() + 1.005f + offset;
             float z1 = pos.getZ();
             float z2 = pos.getZ() + 1f;
 
