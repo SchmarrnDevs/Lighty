@@ -32,5 +32,7 @@
   "lighty.options.overlay_brightness": "Overlay Brightness",
   "lighty.options.overlay_brightness.tooltip": "The brightness of the rendered overlay. Defaults to 10. Especially useful when using shaders.",
   "lighty.options.show_safe": "Show Safe Spots",
-  "lighty.options.show_safe.tooltip": "If on, the overlay gets rendered on safe (green) spots."
+  "lighty.options.show_safe.tooltip": "If on, the overlay gets rendered on safe (green) spots.",
+  "lighty.options.auto_on": "Auto-On",
+  "lighty.options.auto_on.tooltip": "If on, the overlay gets enabled when holding an item of certain type. (Default: OFF, Default item: minecraft:torch)"
 }
