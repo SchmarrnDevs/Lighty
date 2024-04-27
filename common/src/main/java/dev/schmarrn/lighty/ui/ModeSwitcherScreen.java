@@ -33,6 +33,10 @@ import java.util.function.Supplier;
 public class ModeSwitcherScreen extends Screen {
     private Screen parent;
     private static final List<ButtonHolder> BUTTONS = Lists.newArrayList();
+    public ModeSwitcherScreen() {
+        super(Component.translatable("modeSwitcher.lighty.title"));
+    }
+
     public ModeSwitcherScreen(Screen parent) {
         super(Component.translatable("modeSwitcher.lighty.title"));
         this.parent=parent;

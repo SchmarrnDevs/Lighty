@@ -29,8 +29,14 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 public class SettingsScreen extends Screen {
+    private Screen parent;
     public SettingsScreen() {
         super(Component.translatable("settings.lighty.title"));
+    }
+
+    public SettingsScreen(Screen parent) {
+        super(Component.translatable("settings.lighty.title"));
+        this.parent=parent;
     }
 
     OptionsList list;
