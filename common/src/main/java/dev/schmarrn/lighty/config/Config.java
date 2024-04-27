@@ -51,6 +51,9 @@ public class Config {
     public static final ResourceLocationConfig AUTO_ON_ITEM = new ResourceLocationConfig("lighty.auto_on.item", new ResourceLocation("minecraft:torch"));
     public static final BooleanConfig SHOULD_AUTO_ON = new BooleanConfig("lighty.auto_on", false);
 
+    public static final ResourceLocationConfig CARPET_TEXTURE = new ResourceLocationConfig("lighty.mode.carpet.texture", new ResourceLocation(Lighty.MOD_ID, "textures/block/transparent.png"));
+    public static final ResourceLocationConfig CROSS_TEXTURE = new ResourceLocationConfig("lighty.mode.cross.texture", new ResourceLocation(Lighty.MOD_ID, "textures/block/cross.png"));
+
     private static void loadFromFile(String key, ConfigSerDe type) {
         // If the file contains the config value, get the configured value...
         String value = fileState.getOrDefault(key, null);

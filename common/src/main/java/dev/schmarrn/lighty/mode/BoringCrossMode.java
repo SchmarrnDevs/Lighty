@@ -34,8 +34,6 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BoringCrossMode extends LightyMode {
-    private static final ResourceLocationConfig TEXTURE = new ResourceLocationConfig("lighty.mode.cross.texture", new ResourceLocation(Lighty.MOD_ID, "textures/block/cross.png"));
-
     @Override
     public void beforeCompute(BufferBuilder builder) {
         builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
@@ -78,7 +76,7 @@ public class BoringCrossMode extends LightyMode {
     @Override
     public void beforeRendering() {
         RenderType.cutout().setupRenderState();
-        RenderSystem.setShaderTexture(0, TEXTURE.getValue());
+        RenderSystem.setShaderTexture(0, Config.CROSS_TEXTURE.getValue());
         RenderSystem.enableDepthTest();
     }
 
