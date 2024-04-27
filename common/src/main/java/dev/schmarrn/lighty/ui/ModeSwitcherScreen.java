@@ -54,7 +54,8 @@ public class ModeSwitcherScreen extends Screen {
             adder.addChild(btn.get());
         }
 
-        adder.addChild(Button.builder(Component.translatable("modeSwitcher.lighty.settings"), button -> Minecraft.getInstance().setScreen(new SettingsScreen())).build(), adder.newCellSettings().paddingTop(6));
+        assert this.minecraft != null;
+        adder.addChild(Button.builder(Component.translatable("modeSwitcher.lighty.settings"), button -> Minecraft.getInstance().setScreen(new SettingsScreen(this.minecraft.screen))).build(), adder.newCellSettings().paddingTop(6));
         adder.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).build());
         gridWidget.arrangeElements();
         FrameLayout.alignInRectangle(gridWidget, 0, this.height/6 - 12, this.width, this.height, 0.5f, 0f);
@@ -68,6 +69,11 @@ public class ModeSwitcherScreen extends Screen {
         super.render(guiGraphics, mouseX, mouseY, delta);
     }
 
+    @Override
+    public void onClose() {
+        assert this.minecraft != null;
+        this.minecraft.setScreen(parent);
+    }
 
     @Override
     public boolean isPauseScreen() {

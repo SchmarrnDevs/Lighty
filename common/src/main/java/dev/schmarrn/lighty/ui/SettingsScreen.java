@@ -127,8 +127,8 @@ public class SettingsScreen extends Screen {
 
     @Override
     public void onClose() {
-        Compute.clear();
-        super.onClose();
+        assert this.minecraft != null;
+        this.minecraft.setScreen(parent);
     }
 
     @Override
