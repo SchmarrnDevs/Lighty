@@ -29,7 +29,7 @@ jobs:
           curseforge-id: 986380
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          files: fabric/build/libs/lighty-fabric-*([0-9]?(.))?(-alpha.*[0-9])\+*([0-9wa]?(.))?(-pre*[0-9]).jar
+          files: fabric/build/libs/lighty-fabric-*([0-9]?(.))?(-@(alpha|beta).*[0-9])\+*([0-9wa]?(.))?(-pre*[0-9]).jar
           fail-mode: warn
       - name: Publish Neoforge
         uses: Kir-Antipov/mc-publish@v3.3
@@ -39,5 +39,5 @@ jobs:
           curseforge-id: 986380
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          files: neoforge/build/libs/lighty-neoforge-*([0-9]?(.))?(-alpha.*[0-9])\+*([0-9wa]?(.))?(-pre*[0-9]).jar
+          files: neoforge/build/libs/lighty-neoforge-*([0-9]?(.))?(-@(alpha|beta).*[0-9])\+*([0-9wa]?(.))?(-pre*[0-9]).jar
           fail-mode: warn
