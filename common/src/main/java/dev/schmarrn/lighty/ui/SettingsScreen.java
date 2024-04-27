@@ -54,7 +54,8 @@ public class SettingsScreen extends OptionsSubScreen {
         list.addBig(Config.FARM_UPROOT_THRESHOLD.getOptionInstance());
         list.addSmall(
                 new OptionInstance[]{
-                        Config.SHOW_SAFE.getOptionInstance()
+                        Config.SHOW_SAFE.getOptionInstance(),
+                        Config.SHOULD_AUTO_ON.getOptionInstance()
                 }
         );
 
