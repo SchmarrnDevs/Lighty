@@ -49,7 +49,7 @@ public class Config {
     public static final ColorConfig OVERLAY_RED = new ColorConfig("lighty.overlay_red", 0xFF0000);
 
     public static final ResourceLocationConfig AUTO_ON_ITEM = new ResourceLocationConfig("lighty.auto_on.item", new ResourceLocation("minecraft:torch"));
-    public static final BooleanConfig SHOULD_AUTO_ON = new BooleanConfig("lighty.auto_on", true);
+    public static final BooleanConfig SHOULD_AUTO_ON = new BooleanConfig("lighty.auto_on", false);
 
     private static void loadFromFile(String key, ConfigSerDe type) {
         // If the file contains the config value, get the configured value...
