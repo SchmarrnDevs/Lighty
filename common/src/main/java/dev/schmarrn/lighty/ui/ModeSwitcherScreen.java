@@ -39,7 +39,7 @@ public class ModeSwitcherScreen extends Screen {
 
     public ModeSwitcherScreen(Screen parent) {
         super(Component.translatable("modeSwitcher.lighty.title"));
-        this.parent=parent;
+        this.parent = parent;
     }
 
     @Override

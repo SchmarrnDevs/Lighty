@@ -36,7 +36,7 @@ public class SettingsScreen extends Screen {
 
     public SettingsScreen(Screen parent) {
         super(Component.translatable("settings.lighty.title"));
-        this.parent=parent;
+        this.parent = parent;
     }
 
     OptionsList list;
