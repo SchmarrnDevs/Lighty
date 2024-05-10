@@ -126,6 +126,11 @@ public class SettingsScreen extends Screen {
     }
 
     @Override
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+        // do not render background here, we render it in this.render instead
+    }
+
+    @Override
     public void onClose() {
         Compute.clear();
         assert this.minecraft != null;
