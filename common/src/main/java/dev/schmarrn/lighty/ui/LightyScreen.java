@@ -33,8 +33,19 @@ import java.util.function.Supplier;
 
 public class LightyScreen extends Screen {
     static final List<ButtonHolder> BUTTONS = Lists.newArrayList();
-    public LightyScreen() {
+    private final Screen parent;
+    private final boolean isInModMenu;
+
+    public LightyScreen(Screen parent) {
         super(Component.translatable("modeSwitcher.lighty.title"));
+        this.parent = parent;
+        this.isInModMenu = false;
+    }
+
+    public LightyScreen(Screen parent, boolean isInModMenu) {
+        super(Component.translatable("modeSwitcher.lighty.title"));
+        this.parent = parent;
+        this.isInModMenu = isInModMenu;
     }
 
     @Override
@@ -43,13 +54,15 @@ public class LightyScreen extends Screen {
         gridWidget.defaultCellSetting().paddingBottom(4).alignHorizontallyCenter().alignVerticallyMiddle();
         GridLayout.RowHelper adder = gridWidget.createRowHelper(1);
 
-        adder.addChild(Button.builder(
-                Component.translatable("lighty.overlay", CommonComponents.optionStatus(ModeLoader.isEnabled()).getString()),
-                btn -> {
-                    ModeLoader.toggle();
-                    btn.setMessage(Component.translatable("lighty.overlay", CommonComponents.optionStatus(ModeLoader.isEnabled()).getString()));
-                }
-        ).tooltip(Tooltip.create(Component.translatable("lighty.overlay.tooltip", KeyBind.toggleKeyBind.getTranslatedKeyMessage().getString()))).build());
+        if (!isInModMenu) {
+            adder.addChild(Button.builder(
+                    Component.translatable("lighty.overlay", CommonComponents.optionStatus(ModeLoader.isEnabled()).getString()),
+                    btn -> {
+                        ModeLoader.toggle();
+                        btn.setMessage(Component.translatable("lighty.overlay", CommonComponents.optionStatus(ModeLoader.isEnabled()).getString()));
+                    }
+            ).tooltip(Tooltip.create(Component.translatable("lighty.overlay.tooltip", KeyBind.toggleKeyBind.getTranslatedKeyMessage().getString()))).build());
+        }
 
         adder.addChild(Button.builder(
                 Component.translatable(
@@ -73,6 +86,12 @@ public class LightyScreen extends Screen {
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
         super.render(guiGraphics, mouseX, mouseY, delta);
         guiGraphics.drawCenteredString(this.font, this.title, this.width/2, 15, 0xFFFFFF);
+    }
+
+    @Override
+    public void onClose() {
+        assert this.minecraft != null;
+        this.minecraft.setScreen(parent);
     }
 
     @Override

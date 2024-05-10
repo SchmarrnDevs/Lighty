@@ -39,11 +39,6 @@ public class ModeSelectionScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
-        //this.renderBlurredBackground(f * 0.01f);
-    }
-
-    @Override
     public void onClose() {
         assert this.minecraft != null;
         this.minecraft.setScreen(parent);

@@ -49,7 +49,7 @@ public class KeyBind {
             ModeLoader.toggle();
         }
         if (newKeyState && !KeyBind.oldKeyState) {
-            client.setScreen(new LightyScreen());
+            client.setScreen(new LightyScreen(null));
         }
 
         // old state is new state

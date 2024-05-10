@@ -68,11 +68,6 @@ public class SettingsScreen extends OptionsSubScreen {
     }
 
     @Override
-    public void renderBackground(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        this.renderBlurredBackground(1.0f);
-    }
-
-    @Override
     protected void repositionElements() {
         super.repositionElements();
         this.list.updateSize(this.width, this.layout);

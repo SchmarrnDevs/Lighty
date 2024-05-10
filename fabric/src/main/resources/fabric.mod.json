@@ -21,6 +21,9 @@
   "entrypoints": {
     "client": [
       "dev.schmarrn.lighty.fabric.LightyFabric"
+    ],
+    "modmenu": [
+      "dev.schmarrn.lighty.fabric.ModMenuIntegration"
     ]
   },
   "mixins": [
@@ -34,5 +37,8 @@
     "fabric-rendering-v1": "*",
     "fabric-resource-loader-v0": "*",
     "fabric-key-binding-api-v1": "*"
+  },
+  "recommends": {
+    "modmenu": ">=9.0.0"
   }
 }
