@@ -23,9 +23,8 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @Mod(Lighty.MOD_ID)
 public class LightyForge {
@@ -56,7 +55,7 @@ public class LightyForge {
     private static class ClassLoadingProtection2 {
 
         @SubscribeEvent
-        public static void clientTick(LevelTickEvent.Post event) {
+        public static void clientTick(ClientTickEvent.Post event) {
             Compute.computeCache(Minecraft.getInstance());
             KeyBind.handleKeyBind(Minecraft.getInstance());
         }
