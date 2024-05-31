@@ -20,10 +20,12 @@ import dev.schmarrn.lighty.event.KeyBind;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import net.neoforged.neoforge.event.TickEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @Mod(Lighty.MOD_ID)
 public class LightyForge {
@@ -37,7 +39,7 @@ public class LightyForge {
      * This is an inner class to prevent server crashes if this mod is installed on a dedicated server.
      * It's also an EventListener for all events that are {@linkplain net.neoforged.fml.event.IModBusEvent ModBusEvents}. ModBusEvents are events that are gameload events (fired during game loading or resource reload) and don't have game context.
      */
-    @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     private static class ClassLoadingProtection {
 
         @SubscribeEvent
@@ -50,15 +52,13 @@ public class LightyForge {
      * This is an inner class to prevent server crashes if this mod is installed on a dedicated server.
      * It's also an EventListener for all events that are not {@linkplain net.neoforged.fml.event.IModBusEvent ModBusEvents}.
      */
-    @Mod.EventBusSubscriber(Dist.CLIENT)
+    @EventBusSubscriber(value = Dist.CLIENT, modid = Lighty.MOD_ID)
     private static class ClassLoadingProtection2 {
 
         @SubscribeEvent
-        public static void clientTick(TickEvent.ClientTickEvent event) {
-            if (event.phase == TickEvent.Phase.END) {
-                Compute.computeCache(Minecraft.getInstance());
-                KeyBind.handleKeyBind(Minecraft.getInstance());
-            }
+        public static void clientTick(LevelTickEvent.Post event) {
+            Compute.computeCache(Minecraft.getInstance());
+            KeyBind.handleKeyBind(Minecraft.getInstance());
         }
 
         @SubscribeEvent

@@ -18,6 +18,7 @@ import dev.schmarrn.lighty.UtilDefinition;
 import net.minecraft.client.KeyMapping;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -26,7 +27,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class UtilForgeImpl implements UtilDefinition {
 
     private static final List<KeyMapping> MAPPINGS = new ArrayList<>();
