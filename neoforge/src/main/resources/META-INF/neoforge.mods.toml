@@ -1,6 +1,6 @@
 modLoader = "javafml"
 loaderVersion = "${loader_version_range}"
-issueTrackerURL = "https://github.com/SchmarrnDevs/Lighty/issues"
+issueTrackerURL = "${issue_url}"
 license = "${mod_license}"
 
 [[mods]]
@@ -9,7 +9,7 @@ version = "${mod_version}"
 displayName = "${mod_name}"
 authors = "${mod_authors}"
 description = '''${mod_description}'''
-logoFile = "icon.png"
+logoFile = "icon_high_res.png"
 
 [[mixins]]
 config="${mod_id}.mixins.json"

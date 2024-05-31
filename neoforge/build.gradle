@@ -5,7 +5,7 @@ plugins {
     id 'net.neoforged.gradle.userdev' version '7.0.113'
 }
 
-version = rootProject.findProperty("mod_version") + "+" + rootProject.findProperty("minecraft_version")
+version = "${mod_version}+${minecraft_version}"
 group = rootProject.findProperty("maven_group")
 
 repositories {
@@ -13,10 +13,8 @@ repositories {
 }
 
 base {
-    archivesName = "${rootProject.findProperty("mod_name")}-neoforge"
+    archivesName = "${mod_id}-neoforge"
 }
-
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 runs {
     // applies to all the run configs below
@@ -47,7 +45,7 @@ dependencies {
     // You can however also use the vanilla plugin (net.neoforged.gradle.vanilla) to use a version of Minecraft without the neoforge loader.
     // And its provides the option to then use net.minecraft as the group, and one of; client, server or joined as the module name, plus the game version as version.
     // For all intends and purposes: You can treat this dependency as if it is a normal library you would use.
-    implementation "net.neoforged:neoforge:${rootProject.findProperty("neo_version")}"
+    implementation "net.neoforged:neoforge:${neo_version}"
 
     compileOnly project(":common")
 }
@@ -60,7 +58,7 @@ tasks.withType(ProcessResources).configureEach {
     var replaceProperties = [
             minecraft_version: minecraft_version,
             minecraft_version_range: minecraft_version_range,
-            neo_version: rootProject.findProperty("neo_version"),
+            neo_version: neo_version,
             neo_version_range: neo_version_range,
             loader_version_range: loader_version_range,
             mod_id: mod_id,
@@ -69,6 +67,7 @@ tasks.withType(ProcessResources).configureEach {
             mod_version: mod_version,
             mod_authors: mod_authors,
             mod_description: mod_description,
+            issue_url: issue_url
     ]
     inputs.properties replaceProperties
 
