@@ -24,7 +24,6 @@ import dev.schmarrn.lighty.api.LightyHelper;
 import dev.schmarrn.lighty.api.LightyMode;
 import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.config.Config;
-import dev.schmarrn.lighty.config.ResourceLocationConfig;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;

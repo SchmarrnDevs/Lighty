@@ -3,12 +3,10 @@ package dev.schmarrn.lighty.config.compat;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.UtilDefinition;
 import dev.schmarrn.lighty.config.Config;
-import dev.schmarrn.lighty.config.IntegerConfig;
 import net.minecraft.resources.ResourceLocation;
 
 import java.io.*;
 import java.util.Properties;
-import java.util.ResourceBundle;
 
 public class Lighty2Config {
     private static final String PATH = UtilDefinition.INSTANCE.getConfigDir().toString() + "/lighty.config";

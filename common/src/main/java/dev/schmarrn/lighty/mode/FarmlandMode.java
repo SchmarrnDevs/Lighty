@@ -3,7 +3,6 @@ package dev.schmarrn.lighty.mode;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.LightyColors;
-import dev.schmarrn.lighty.api.LightyHelper;
 import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
