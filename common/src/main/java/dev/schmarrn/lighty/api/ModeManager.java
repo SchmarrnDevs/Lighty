@@ -15,7 +15,7 @@
 package dev.schmarrn.lighty.api;
 
 import dev.schmarrn.lighty.ModeLoader;
-import dev.schmarrn.lighty.ui.LightyScreen;
+import dev.schmarrn.lighty.ui.ModeButtonRegister;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -37,7 +37,7 @@ public class ModeManager {
     public static void registerMode(ResourceLocation id, LightyMode mode) {
         ModeLoader.put(id, mode);
 
-        LightyScreen.addButton(
+        ModeButtonRegister.addButton(
                 Component.translatable("modeSwitcher." + id.getNamespace() + "." + id.getPath()),
                 Component.translatable("modeSwitcher." + id.getNamespace() + "." + id.getPath() + ".tooltip"), button -> ModeLoader.loadMode(id)
         );

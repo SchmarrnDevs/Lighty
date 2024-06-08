@@ -25,14 +25,9 @@ import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import org.apache.commons.compress.utils.Lists;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.function.Supplier;
-
 public class LightyScreen extends Screen {
-    static final List<ButtonHolder> BUTTONS = Lists.newArrayList();
     private final Screen parent;
     private final boolean isInModMenu;
 
@@ -97,25 +92,5 @@ public class LightyScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
-    }
-
-    public static void addButton(Component message, Component tooltip, Button.OnPress onPress) {
-        BUTTONS.add(new ButtonHolder(Button.builder(message, onPress).tooltip(Tooltip.create(tooltip))));
-    }
-
-    static class ButtonHolder implements Supplier<Button> {
-        private final Button.Builder builder;
-        private Button button = null;
-        ButtonHolder(Button.Builder builder) {
-            this.builder = builder;
-        }
-
-        @Override
-        public Button get() {
-            if (button == null) {
-                button = builder.build();
-            }
-            return button;
-        }
     }
 }

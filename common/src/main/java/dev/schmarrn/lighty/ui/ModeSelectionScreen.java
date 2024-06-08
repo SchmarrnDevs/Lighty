@@ -22,7 +22,7 @@ public class ModeSelectionScreen extends Screen {
         gridWidget.defaultCellSetting().paddingBottom(4).alignHorizontallyCenter().alignVerticallyMiddle();
         GridLayout.RowHelper adder = gridWidget.createRowHelper(1);
 
-        for (var btn : LightyScreen.BUTTONS) {
+        for (var btn : ModeButtonRegister.BUTTONS) {
             adder.addChild(btn.get());
         }
 
