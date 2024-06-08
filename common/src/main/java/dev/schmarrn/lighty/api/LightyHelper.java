@@ -6,11 +6,16 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.HashSet;
+
 public class LightyHelper {
+    static HashSet<ResourceLocation> invalidBlocks = new HashSet<>();
+
     private static boolean isRedstone(Block block) {
         return block instanceof RedStoneWireBlock ||
                 block instanceof ButtonBlock ||
@@ -26,8 +31,12 @@ public class LightyHelper {
             try {
                 return block.isValidSpawn(world, pos, null);
             } catch (NullPointerException e) {
-                Lighty.LOGGER.error(e.getMessage());
-                Lighty.LOGGER.error("Cannot check `isValidSpawn` on Block {} because it uses entity checks. The overlay might not be accurate for that block.", BuiltInRegistries.BLOCK.getKey(block.getBlock()));
+                ResourceLocation rl = BuiltInRegistries.BLOCK.getKey(block.getBlock());
+                if (!invalidBlocks.contains(rl)) {
+                    invalidBlocks.add(rl);
+                    Lighty.LOGGER.error(e.getMessage());
+                    Lighty.LOGGER.error("Cannot check `isValidSpawn` on Block {} because it uses entity checks. The overlay might not be accurate for that block.", rl);
+                }
                 return true;
             }
         }
