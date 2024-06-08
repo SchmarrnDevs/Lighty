@@ -1,9 +1,11 @@
 package dev.schmarrn.lighty.api;
 
+import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -21,7 +23,13 @@ public class LightyHelper {
         if (block.getBlock() instanceof MagmaBlock) {
             return true;
         } else {
-            return block.isValidSpawn(world, pos, null);
+            try {
+                return block.isValidSpawn(world, pos, null);
+            } catch (NullPointerException e) {
+                Lighty.LOGGER.error(e.getMessage());
+                Lighty.LOGGER.error("Cannot check `isValidSpawn` on Block {} because it uses entity checks. The overlay might not be accurate for that block.", BuiltInRegistries.BLOCK.getKey(block.getBlock()));
+                return true;
+            }
         }
     }
 
