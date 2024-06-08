@@ -30,7 +30,7 @@ public class LightyHelper {
         } else {
             try {
                 return block.isValidSpawn(world, pos, null);
-            } catch (NullPointerException e) {
+            } catch (NullPointerException | IllegalArgumentException e) {
                 ResourceLocation rl = BuiltInRegistries.BLOCK.getKey(block.getBlock());
                 if (!invalidBlocks.contains(rl)) {
                     invalidBlocks.add(rl);
