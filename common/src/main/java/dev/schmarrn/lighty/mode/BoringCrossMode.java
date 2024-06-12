@@ -17,6 +17,7 @@ package dev.schmarrn.lighty.mode;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.LightyColors;
@@ -33,11 +34,6 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BoringCrossMode extends LightyMode {
-    @Override
-    public void beforeCompute(BufferBuilder builder) {
-        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-    }
-
     @Override
     public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
         BlockState blockState = world.getBlockState(pos);
@@ -65,10 +61,10 @@ public class BoringCrossMode extends LightyMode {
             int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
             int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
 
-            builder.vertex(x1, y, z1).color(color).uv(0, 0).uv2(lightmap).normal(0f, 1f, 0f).endVertex();
-            builder.vertex(x1, y, z2).color(color).uv(0, 1).uv2(lightmap).normal(0f, 1f, 0f).endVertex();
-            builder.vertex(x2, y, z2).color(color).uv(1, 1).uv2(lightmap).normal(0f, 1f, 0f).endVertex();
-            builder.vertex(x2, y, z1).color(color).uv(1, 0).uv2(lightmap).normal(0f, 1f, 0f).endVertex();
+            builder.addVertex(x1, y, z1).setColor(color).setUv(0, 0).setLight(lightmap).setNormal(0f, 1f, 0f);
+            builder.addVertex(x1, y, z2).setColor(color).setUv(0, 1).setLight(lightmap).setNormal(0f, 1f, 0f);
+            builder.addVertex(x2, y, z2).setColor(color).setUv(1, 1).setLight(lightmap).setNormal(0f, 1f, 0f);
+            builder.addVertex(x2, y, z1).setColor(color).setUv(1, 0).setLight(lightmap).setNormal(0f, 1f, 0f);
         }
     }
 
@@ -86,7 +82,7 @@ public class BoringCrossMode extends LightyMode {
 
     @Override
     public ResourceLocation getResourceLocation() {
-        return new ResourceLocation(Lighty.MOD_ID, "boring_cross_mode");
+        return ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "boring_cross_mode");
     }
 
     public static void init() {

@@ -86,8 +86,8 @@ public class Compute {
         toBeUpdated.add(pos);
     }
 
-    private static BufferHolder buildChunk(LightyMode mode, SectionPos chunkPos, BufferBuilder builder, ClientLevel world) {
-        mode.beforeCompute(builder);
+    private static BufferHolder buildChunk(LightyMode mode, SectionPos chunkPos, Tesselator tesselator, ClientLevel world) {
+        BufferBuilder builder = mode.beforeCompute(tesselator);
         for (int x = 0; x < 16; ++x) {
             for (int y = 0; y < 16; ++y) {
                 for (int z = 0; z < 16; ++z) {
@@ -102,7 +102,7 @@ public class Compute {
         if (buffer == null) {
             buffer = new BufferHolder();
         }
-        buffer.upload(builder.end());
+        buffer.upload(builder.build());
 
         mode.afterCompute();
         return buffer;
@@ -155,7 +155,7 @@ public class Compute {
                     if (vertexBuffer != null) {
                         vertexBuffer.close();
                     }
-                    return buildChunk(mode, pos, Tesselator.getInstance().getBuilder(), world);
+                    return buildChunk(mode, pos, Tesselator.getInstance(), world);
                 });
             }
         }

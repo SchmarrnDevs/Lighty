@@ -17,6 +17,7 @@ package dev.schmarrn.lighty.mode;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.LightyColors;
@@ -37,11 +38,6 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class CarpetMode extends LightyMode {
     @Override
-    public void beforeCompute(BufferBuilder builder) {
-        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-    }
-
-    @Override
     public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
         BlockPos posUp = pos.above();
         BlockState blockState = world.getBlockState(pos);
@@ -59,53 +55,57 @@ public class CarpetMode extends LightyMode {
 
         int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
-        double offset = LightyHelper.getOffset(blockState, pos, world);
+        float offset = LightyHelper.getOffset(blockState, pos, world);
         if (offset == -1f) {
             return;
         }
 
-        double x = pos.getX();
-        double y = pos.getY() + 1 + offset;
-        double z = pos.getZ();
+        float x = pos.getX();
+        float y = pos.getY() + 1 + offset;
+        float z = pos.getZ();
         int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
         // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
         int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
         //TOP
-        builder.vertex(x, y + 1 / 16f, z).color(color).uv(0, 0).uv2(lightmap).normal(0f, 1f, 0f).endVertex();
-        builder.vertex(x, y + 1 / 16f, z + 1).color(color).uv(0, 1).uv2(lightmap).normal(0f, 1f, 0f).endVertex();
-        builder.vertex(x + 1, y + 1 / 16f, z + 1).color(color).uv(1, 1).uv2(lightmap).normal(0f, 1f, 0f).endVertex();
-        builder.vertex(x + 1, y + 1 / 16f, z).color(color).uv(1, 0).uv2(lightmap).normal(0f, 1f, 0f).endVertex();
-        if (offset > 0.001f) {
-            //if it renders above it should check if the block above culls the faces
-            pos = pos.above();
-        }
-        //NORTH
-        if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), world, pos, Direction.SOUTH, pos.relative(Direction.SOUTH))) {
-            builder.vertex(x, y + 1 / 16f, z + 1).color(color).uv(0, 1f / 16).uv2(lightmap).normal(0f, 0f, -1f).endVertex();
-            builder.vertex(x, y, z + 1).color(color).uv(0, 0).uv2(lightmap).normal(0f, 0f, -1f).endVertex();
-            builder.vertex(x + 1, y, z + 1).color(color).uv(1, 0).uv2(lightmap).normal(0f, 0f, -1f).endVertex();
-            builder.vertex(x + 1, y + 1 / 16f, z + 1).color(color).uv(1, 1f / 16).uv2(lightmap).normal(0f, 0f, -1f).endVertex();
-        }
-        //EAST
-        if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), world, pos, Direction.WEST, pos.relative(Direction.WEST))) {
-            builder.vertex(x, y + 1/16f, z).color(color).uv(0,1f/16).uv2(lightmap).normal(-1f, 0f, 0f).endVertex();
-            builder.vertex(x, y, z).color(color).uv(0, 0).uv2(lightmap).normal(-1f, 0f, 0f).endVertex();
-            builder.vertex(x, y, z + 1).color(color).uv(1, 0).uv2(lightmap).normal(-1f, 0f, 0f).endVertex();
-            builder.vertex(x, y + 1/16f, z + 1).color(color).uv(1, 1f/16).uv2(lightmap).normal(-1f, 0f, 0f).endVertex();
-        }
-        //SOUTH
-        if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), world, pos, Direction.NORTH, pos.relative(Direction.NORTH))) {
-            builder.vertex(x+1, y + 1/16f, z).color(color).uv(0,1f/16).uv2(lightmap).normal(0f, 0f, 1f).endVertex();
-            builder.vertex(x+1, y, z).color(color).uv(0, 0).uv2(lightmap).normal(0f, 0f, -1f).endVertex();
-            builder.vertex(x, y, z).color(color).uv(1, 0).uv2(lightmap).normal(0f, 0f, -1f).endVertex();
-            builder.vertex(x, y + 1/16f, z).color(color).uv(1, 1f/16).uv2(lightmap).normal(0f, 0f, -1f).endVertex();
-        }
-        //WEST
-        if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), world, pos, Direction.EAST, pos.relative(Direction.EAST))) {
-            builder.vertex(x+1, y + 1/16f, z+1).color(color).uv(0,1f/16).uv2(lightmap).normal(1f, 0f, 0f).endVertex();
-            builder.vertex(x+1, y, z+1).color(color).uv(0, 0).uv2(lightmap).normal(1f, 0f, 0f).endVertex();
-            builder.vertex(x+1, y, z).color(color).uv(1, 0).uv2(lightmap).normal(1f, 0f, 0f).endVertex();
-            builder.vertex(x+1, y + 1/16f, z).color(color).uv(1, 1f/16).uv2(lightmap).normal(1f, 0f, 0f).endVertex();
+        try {
+            builder.addVertex(x, y + 1 / 16f, z).setColor(color).setUv(0, 0).setLight(lightmap).setNormal(0f, 1f, 0f);
+            builder.addVertex(x, y + 1 / 16f, z + 1).setColor(color).setUv(0, 1).setLight(lightmap).setNormal(0f, 1f, 0f);
+            builder.addVertex(x + 1, y + 1 / 16f, z + 1).setColor(color).setUv(1, 1).setLight(lightmap).setNormal(0f, 1f, 0f);
+            builder.addVertex(x + 1, y + 1 / 16f, z).setColor(color).setUv(1, 0).setLight(lightmap).setNormal(0f, 1f, 0f);
+            if (offset > 0.001f) {
+                //if it renders above it should check if the block above culls the faces
+                pos = pos.above();
+            }
+            //NORTH
+            if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), world, pos, Direction.SOUTH, pos.relative(Direction.SOUTH))) {
+                builder.addVertex(x, y + 1 / 16f, z + 1).setColor(color).setUv(0, 1f / 16).setLight(lightmap).setNormal(0f, 0f, -1f);
+                builder.addVertex(x, y, z + 1).setColor(color).setUv(0, 0).setLight(lightmap).setNormal(0f, 0f, -1f);
+                builder.addVertex(x + 1, y, z + 1).setColor(color).setUv(1, 0).setLight(lightmap).setNormal(0f, 0f, -1f);
+                builder.addVertex(x + 1, y + 1 / 16f, z + 1).setColor(color).setUv(1, 1f / 16).setLight(lightmap).setNormal(0f, 0f, -1f);
+            }
+            //EAST
+            if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), world, pos, Direction.WEST, pos.relative(Direction.WEST))) {
+                builder.addVertex(x, y + 1/16f, z).setColor(color).setUv(0,1f/16).setLight(lightmap).setNormal(-1f, 0f, 0f);
+                builder.addVertex(x, y, z).setColor(color).setUv(0, 0).setLight(lightmap).setNormal(-1f, 0f, 0f);
+                builder.addVertex(x, y, z + 1).setColor(color).setUv(1, 0).setLight(lightmap).setNormal(-1f, 0f, 0f);
+                builder.addVertex(x, y + 1/16f, z + 1).setColor(color).setUv(1, 1f/16).setLight(lightmap).setNormal(-1f, 0f, 0f);
+            }
+            //SOUTH
+            if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), world, pos, Direction.NORTH, pos.relative(Direction.NORTH))) {
+                builder.addVertex(x+1, y + 1/16f, z).setColor(color).setUv(0,1f/16).setLight(lightmap).setNormal(0f, 0f, 1f);
+                builder.addVertex(x+1, y, z).setColor(color).setUv(0, 0).setLight(lightmap).setNormal(0f, 0f, -1f);
+                builder.addVertex(x, y, z).setColor(color).setUv(1, 0).setLight(lightmap).setNormal(0f, 0f, -1f);
+                builder.addVertex(x, y + 1/16f, z).setColor(color).setUv(1, 1f/16).setLight(lightmap).setNormal(0f, 0f, -1f);
+            }
+            //WEST
+            if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), world, pos, Direction.EAST, pos.relative(Direction.EAST))) {
+                builder.addVertex(x+1, y + 1/16f, z+1).setColor(color).setUv(0,1f/16).setLight(lightmap).setNormal(1f, 0f, 0f);
+                builder.addVertex(x+1, y, z+1).setColor(color).setUv(0, 0).setLight(lightmap).setNormal(1f, 0f, 0f);
+                builder.addVertex(x+1, y, z).setColor(color).setUv(1, 0).setLight(lightmap).setNormal(1f, 0f, 0f);
+                builder.addVertex(x+1, y + 1/16f, z).setColor(color).setUv(1, 1f/16).setLight(lightmap).setNormal(1f, 0f, 0f);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -124,7 +124,7 @@ public class CarpetMode extends LightyMode {
 
     @Override
     public ResourceLocation getResourceLocation() {
-        return new ResourceLocation(Lighty.MOD_ID, "carpet_mode");
+        return ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "carpet_mode");
     }
 
     public static void init() {

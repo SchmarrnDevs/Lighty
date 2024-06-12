@@ -15,6 +15,7 @@
 package dev.schmarrn.lighty.event;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.jetbrains.annotations.Nullable;
@@ -42,15 +43,14 @@ public class BufferHolder {
         }
     }
 
-    void upload(BufferBuilder.RenderedBuffer buffer) {
+    void upload(MeshData buffer) {
         if (vertexBuffer != null) {
             vertexBuffer.close();
         }
-        if (buffer.isEmpty()) {
+        if (buffer == null) {
             // Don't upload
             isEmpty = true;
             vertexBuffer = null;
-            buffer.release();
         } else {
             isEmpty = false;
             vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);

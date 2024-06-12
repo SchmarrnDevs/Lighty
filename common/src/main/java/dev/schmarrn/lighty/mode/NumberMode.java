@@ -33,11 +33,6 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class NumberMode extends LightyMode {
-    @Override
-    public void beforeCompute(BufferBuilder builder) {
-        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-    }
-
     private static final float PXL = 1/16f;
     private static final float dx = 0.25f;
     private static final float dz = 0.25f;
@@ -46,30 +41,26 @@ public class NumberMode extends LightyMode {
         float startU = (0b11 & digit) / 4f;
         float startV = ((digit >> 2) & 0b11) / 4f;
 
-        builder.vertex(x, y, z)
-                .color(color)
-                .uv(startU,startV)
-                .uv2(lightmap)
-                .normal(0f, 1f, 0f)
-                .endVertex();
-        builder.vertex(x, y, z + dz)
-                .color(color)
-                .uv(startU, startV + 0.25f)
-                .uv2(lightmap)
-                .normal(0f, 1f, 0f)
-                .endVertex();
-        builder.vertex(x + dx, y, z + dz)
-                .color(color)
-                .uv(startU + 0.25f, startV + 0.25f)
-                .uv2(lightmap)
-                .normal(0f, 1f, 0f)
-                .endVertex();
-        builder.vertex(x + dx, y, z)
-                .color(color)
-                .uv(startU + 0.25f, startV)
-                .uv2(lightmap)
-                .normal(0f, 1f, 0f)
-                .endVertex();
+        builder.addVertex(x, y, z)
+                .setColor(color)
+                .setUv(startU,startV)
+                .setLight(lightmap)
+                .setNormal(0f, 1f, 0f);
+        builder.addVertex(x, y, z + dz)
+                .setColor(color)
+                .setUv(startU, startV + 0.25f)
+                .setLight(lightmap)
+                .setNormal(0f, 1f, 0f);
+        builder.addVertex(x + dx, y, z + dz)
+                .setColor(color)
+                .setUv(startU + 0.25f, startV + 0.25f)
+                .setLight(lightmap)
+                .setNormal(0f, 1f, 0f);
+        builder.addVertex(x + dx, y, z)
+                .setColor(color)
+                .setUv(startU + 0.25f, startV)
+                .setLight(lightmap)
+                .setNormal(0f, 1f, 0f);
     }
 
     private static void renderNumber(BufferBuilder builder, int number, float x, float y, float z, int color, int lightmap) {
@@ -121,12 +112,12 @@ public class NumberMode extends LightyMode {
     public void beforeRendering() {
         RenderType.cutout().setupRenderState();
         RenderSystem.enableDepthTest();
-        RenderSystem.setShaderTexture(0, new ResourceLocation(Lighty.MOD_ID, "textures/block/numbers.png"));
+        RenderSystem.setShaderTexture(0, ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "textures/block/numbers.png"));
     }
 
     @Override
     public ResourceLocation getResourceLocation() {
-        return new ResourceLocation(Lighty.MOD_ID, "number_mode");
+        return ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "number_mode");
     }
 
     public static void init() {

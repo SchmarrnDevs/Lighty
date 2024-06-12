@@ -32,7 +32,7 @@ public class Config {
     private static boolean initStage = true;
 
     // all the different config values
-    public static final ResourceLocationConfig LAST_USED_MODE = new ResourceLocationConfig("lighty.last_used_mode", new ResourceLocation("lighty:carpet_mode"));
+    public static final ResourceLocationConfig LAST_USED_MODE = new ResourceLocationConfig("lighty.last_used_mode", ResourceLocation.parse("lighty:carpet_mode"));
 
     public static final IntegerConfig SKY_THRESHOLD = new IntegerConfig("lighty.sky_threshold", 0, 0, 15);
     public static final IntegerConfig BLOCK_THRESHOLD = new IntegerConfig("lighty.block_threshold", 0, 0, 15);
@@ -48,11 +48,11 @@ public class Config {
     public static final ColorConfig OVERLAY_ORANGE = new ColorConfig("lighty.overlay_orange", 0xFF6600);
     public static final ColorConfig OVERLAY_RED = new ColorConfig("lighty.overlay_red", 0xFF0000);
 
-    public static final ResourceLocationConfig AUTO_ON_ITEM = new ResourceLocationConfig("lighty.auto_on.item", new ResourceLocation("minecraft:torch"));
+    public static final ResourceLocationConfig AUTO_ON_ITEM = new ResourceLocationConfig("lighty.auto_on.item", ResourceLocation.parse("minecraft:torch"));
     public static final BooleanConfig SHOULD_AUTO_ON = new BooleanConfig("lighty.auto_on", false);
 
-    public static final ResourceLocationConfig CARPET_TEXTURE = new ResourceLocationConfig("lighty.mode.carpet.texture", new ResourceLocation(Lighty.MOD_ID, "textures/block/transparent.png"));
-    public static final ResourceLocationConfig CROSS_TEXTURE = new ResourceLocationConfig("lighty.mode.cross.texture", new ResourceLocation(Lighty.MOD_ID, "textures/block/cross.png"));
+    public static final ResourceLocationConfig CARPET_TEXTURE = new ResourceLocationConfig("lighty.mode.carpet.texture", ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "textures/block/transparent.png"));
+    public static final ResourceLocationConfig CROSS_TEXTURE = new ResourceLocationConfig("lighty.mode.cross.texture", ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "textures/block/cross.png"));
 
     private static void loadFromFile(String key, ConfigSerDe type) {
         // If the file contains the config value, get the configured value...

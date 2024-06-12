@@ -67,7 +67,8 @@ processResources {
             mod_description: mod_description,
             issue_url: issue_url,
             modmenu_version: modmenu_version,
-            fabric_loader_version: fabric_loader_version
+            fabric_loader_version: fabric_loader_version,
+            minecraft_version_lower_bound: minecraft_version_lower_bound
     ]
 
     inputs.properties replaceProperties

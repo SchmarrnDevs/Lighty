@@ -20,6 +20,6 @@ public class ResourceLocationConfig extends ConfigType<ResourceLocation> {
 
     @Override
     void deserialize(String value) {
-        setValue(new ResourceLocation(value));
+        setValue(ResourceLocation.parse(value));
     }
 }
