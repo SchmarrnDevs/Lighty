@@ -10,6 +10,7 @@ displayName = "${mod_name}"
 authors = "${mod_authors}"
 description = '''${mod_description}'''
 logoFile = "icon_high_res.png"
+displayTest="IGNORE_ALL_VERSION"
 
 [[mixins]]
 config="${mod_id}.mixins.json"
