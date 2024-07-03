@@ -33,6 +33,8 @@
   "lighty.options.overlay_brightness.tooltip": "The brightness of the rendered overlay. Defaults to 10. Especially useful when using shaders.",
   "lighty.options.show_safe": "Show Safe Spots",
   "lighty.options.show_safe.tooltip": "If on, the overlay gets rendered on safe (green) spots.",
+  "lighty.options.show_skylight_level": "Show Skylight Level",
+  "lighty.options.show_skylight_level.tooltip": "If on, Number Mode shows both block-light and sky-light levels. (Default: ON)",
   "lighty.options.auto_on": "Auto-On",
   "lighty.options.auto_on.tooltip": "If on, the overlay gets enabled when holding an item of certain type. (Default: OFF, Default item: minecraft:torch)"
 }

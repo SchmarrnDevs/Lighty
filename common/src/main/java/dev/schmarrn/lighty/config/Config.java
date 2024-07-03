@@ -51,6 +51,8 @@ public class Config {
     public static final ResourceLocationConfig AUTO_ON_ITEM = new ResourceLocationConfig("lighty.auto_on.item", ResourceLocation.parse("minecraft:torch"));
     public static final BooleanConfig SHOULD_AUTO_ON = new BooleanConfig("lighty.auto_on", false);
 
+    public static final BooleanConfig SHOW_SKYLIGHT_LEVEL = new BooleanConfig("lighty.show_skylight_level", true);
+
     public static final ResourceLocationConfig CARPET_TEXTURE = new ResourceLocationConfig("lighty.mode.carpet.texture", ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "textures/block/transparent.png"));
     public static final ResourceLocationConfig CROSS_TEXTURE = new ResourceLocationConfig("lighty.mode.cross.texture", ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "textures/block/cross.png"));
 

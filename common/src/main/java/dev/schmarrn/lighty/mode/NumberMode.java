@@ -104,8 +104,12 @@ public class NumberMode extends LightyMode {
         int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
         int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
 
-        renderNumber(builder, blockLightLevel, x1, y, z1, color, lightmap);
-        renderNumber(builder, skyLightLevel, x1, y, z1 + 0.3f, color, lightmap);
+        if (Config.SHOW_SKYLIGHT_LEVEL.getValue()) {
+            renderNumber(builder, blockLightLevel, x1, y, z1, color, lightmap);
+            renderNumber(builder, skyLightLevel, x1, y, z1 + PXL * 6f, color, lightmap);
+        }
+        else
+            renderNumber(builder, blockLightLevel, x1, y, z1 + PXL * 2f, color, lightmap);
     }
 
     @Override
