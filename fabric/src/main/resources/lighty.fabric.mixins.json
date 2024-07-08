@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.schmarrn.lighty.fabric.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "plugin": "dev.schmarrn.lighty.fabric.mixin.ConditionalMixinPlugin",
+  "client": [
+    "ImmPtlFix"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
