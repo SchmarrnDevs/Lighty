@@ -12,6 +12,7 @@ description = '''
 The Light Overlay Mod with a twist!
 '''
 logoFile = "assets/lighty/icon.png"
+displayTest="IGNORE_ALL_VERSION"
 
 [[dependencies.lighty]]
 modId = "forge"
