@@ -78,6 +78,16 @@ public class Compute {
         computationDistance = Math.min(Config.OVERLAY_DISTANCE.getValue(), Minecraft.getInstance().options.renderDistance().get());
     }
 
+    public static void updateBlockPos(BlockPos pos) {
+        SectionPos spos = SectionPos.of(pos);
+        if (spos.minBlockY() == pos.getY()) {
+            // if we are on the y-border of a SubChunk, we need to update *both* SubChunks
+            // see https://github.com/SchmarrnDevs/Lighty/issues/70
+            updateSubChunk(spos.offset(0, -1, 0));
+        }
+        updateSubChunk(spos);
+    }
+
     public static void updateSubChunk(SectionPos pos) {
         if (outOfRange(pos)) {
             return;

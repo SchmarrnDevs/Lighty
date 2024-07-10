@@ -17,6 +17,6 @@ public class BlockPlacedMixin {
     private void lighty$onPlace(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, BlockState blockState2, int i, CallbackInfo ci) {
         // TODO Nice to have: Only execute on blocks that don't change the lightmap
         // On the other Hand: We are just inserting into a HashMap, which should be cheap enough to don't care
-        Compute.updateSubChunk(SectionPos.of(blockPos));
+        Compute.updateBlockPos(blockPos);
     }
 }
