@@ -16,8 +16,6 @@ package dev.schmarrn.lighty.mode;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.LightyColors;
 import dev.schmarrn.lighty.api.LightyHelper;
@@ -117,6 +115,12 @@ public class NumberMode extends LightyMode {
         RenderType.cutout().setupRenderState();
         RenderSystem.enableDepthTest();
         RenderSystem.setShaderTexture(0, ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "textures/block/numbers.png"));
+    }
+
+    @Override
+    public void afterRendering() {
+        RenderType.cutout().clearRenderState();
+        RenderSystem.disableDepthTest();
     }
 
     @Override
