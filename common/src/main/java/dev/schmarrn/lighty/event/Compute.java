@@ -22,6 +22,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import dev.schmarrn.lighty.ModeLoader;
 import dev.schmarrn.lighty.api.LightyMode;
 import dev.schmarrn.lighty.config.Config;
+import dev.schmarrn.lighty.overlaystate.SMACH;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -29,9 +30,7 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
@@ -121,29 +120,10 @@ public class Compute {
     public static void computeCache(Minecraft client) {
         if (client.player == null) return;
 
-        if (Config.SHOULD_AUTO_ON.getValue()) {
-            var activationItems = Config.AUTO_ON_ITEM_LIST.getValue();
-            boolean isAutoOn = false;
-            for (var rl : activationItems) {
-                Item activationItem = BuiltInRegistries.ITEM.get(rl);
-                Item mainHandItem = client.player.getMainHandItem().getItem();
-                Item offHandItem = client.player.getOffhandItem().getItem();
+        // update state machine state that's based on items etc
+        SMACH.updateCompute(client);
 
-                // if we hold the activation item in our hands, set auto enabled to true.
-                // if we don't, set it to false and if we aren't enabled, return early.
-                if (mainHandItem == activationItem || offHandItem == activationItem) {
-                    ModeLoader.setAutoEnabled();
-                    isAutoOn = true;
-                    break;
-                }
-            }
-            if (!isAutoOn) {
-                ModeLoader.setAutoDisabled();
-                if (!ModeLoader.isManuallyEnabled()) {
-                    return;
-                }
-            }
-        } else if (!ModeLoader.isEnabled()) {
+        if (!ModeLoader.isEnabled()) {
             return;
         }
         LightyMode mode = ModeLoader.getCurrentMode();

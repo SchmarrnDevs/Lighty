@@ -17,6 +17,8 @@ package dev.schmarrn.lighty;
 import dev.schmarrn.lighty.api.LightyMode;
 import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.event.Compute;
+import dev.schmarrn.lighty.overlaystate.SMACH;
+import dev.schmarrn.lighty.overlaystate.State;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,9 +27,6 @@ import java.util.HashMap;
 public class ModeLoader {
     @Nullable
     private static LightyMode mode = null;
-
-    private static boolean enabled = false;
-    private static boolean autoEnabled = false;
 
     private static final HashMap<ResourceLocation, LightyMode> MODES = new HashMap<>();
 
@@ -44,24 +43,8 @@ public class ModeLoader {
         Compute.clear();
     }
 
-    public static void disable() {
-       setEnabled(false);
-    }
-
-    public static void setAutoEnabled() {
-        autoEnabled = true;
-    }
-
-    public static void setAutoDisabled() {
-        autoEnabled = false;
-    }
-
-    public static void enable() {
-        setEnabled(true);
-    }
-
     public static void toggle() {
-        enabled = !enabled;
+        SMACH.toggle();
     }
 
     public static void put(ResourceLocation id, LightyMode mode) {
@@ -69,15 +52,7 @@ public class ModeLoader {
     }
 
     public static boolean isEnabled() {
-        return enabled || autoEnabled;
-    }
-
-    public static boolean isManuallyEnabled() {
-        return enabled;
-    }
-
-    public static void setEnabled(boolean val) {
-        enabled = val;
+        return SMACH.getState() == State.AUTO || SMACH.getState() == State.ON;
     }
 
     public static LightyMode getCurrentMode() {
