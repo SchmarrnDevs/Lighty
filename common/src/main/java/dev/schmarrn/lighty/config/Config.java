@@ -20,11 +20,16 @@ import dev.schmarrn.lighty.config.compat.Lighty2Config;
 import net.minecraft.resources.ResourceLocation;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Config {
+    private static List<ResourceLocation> stringToRL(String... stuff) {
+        return Arrays.stream(stuff).map(ResourceLocation::parse).toList();
+    }
     // Internal variables tracking config state
     private static final String PATH = UtilDefinition.INSTANCE.getConfigDir().toString() + "/lighty/base.config";
     private static final Map<String, String> fileState = new HashMap<>();
@@ -48,7 +53,12 @@ public class Config {
     public static final ColorConfig OVERLAY_ORANGE = new ColorConfig("lighty.overlay_orange", 0xFF6600);
     public static final ColorConfig OVERLAY_RED = new ColorConfig("lighty.overlay_red", 0xFF0000);
 
-    public static final ResourceLocationConfig AUTO_ON_ITEM = new ResourceLocationConfig("lighty.auto_on.item", ResourceLocation.parse("minecraft:torch"));
+    public static final ResourceLocationListConfig AUTO_ON_ITEM_LIST = new ResourceLocationListConfig("lighty.auto_on.item", stringToRL(
+            "minecraft:torch",
+            "minecraft:soul_torch",
+            "minecraft:lantern",
+            "minecraft:soul_lantern"
+    ));
     public static final BooleanConfig SHOULD_AUTO_ON = new BooleanConfig("lighty.auto_on", false);
 
     public static final BooleanConfig SHOW_SKYLIGHT_LEVEL = new BooleanConfig("lighty.show_skylight_level", true);
