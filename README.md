@@ -2,6 +2,13 @@
 
 [Please visit Modrinth for an overview about the mod!](https://modrinth.com/mod/lighty)
 
+## Localizations and Translations
+
+If you want to contribute a translation to your language for Lighty, please also check out [GitHub Issue #74][localization].
+There I provide updates whenever something changes in the translation files.
+
+[localization]: <https://github.com/SchmarrnDevs/Lighty/issues/74>
+
 ## About Supported Minecraft Versions
 
 Because of time restraints I am only able to bring features to *the most recent Minecraft version*.
@@ -21,4 +28,4 @@ That said, PRs of any kind are more than welcome! If it is anything big, conside
 
 There may be slight differences between the same Lighty version (for example, `v1.1.0+1.18.2` and `v1.1.0+1.19.3`) because of technical changes. The core feature set (the light overlays) should work similarly though.
 
-> Inspired by [LightLevel](https://github.com/Parzivail-Modding-Team/LightLevel) and motivated by [Light Overlay](https://github.com/shedaniel/LightOverlay)
+> Originally inspired by [LightLevel](https://github.com/Parzivail-Modding-Team/LightLevel) and motivated by [Light Overlay](https://github.com/shedaniel/LightOverlay)
