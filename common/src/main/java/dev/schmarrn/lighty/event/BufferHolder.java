@@ -14,10 +14,10 @@
 
 package dev.schmarrn.lighty.event;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexBuffer;
-import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.CompiledShaderProgram;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
@@ -53,14 +53,14 @@ public class BufferHolder {
             vertexBuffer = null;
         } else {
             isEmpty = false;
-            vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+            vertexBuffer = new VertexBuffer(BufferUsage.DYNAMIC_WRITE);
             vertexBuffer.bind();
             vertexBuffer.upload(buffer);
             VertexBuffer.unbind();
         }
     }
 
-    void draw(Matrix4f positionMatrix, Matrix4f projectionMatrix, ShaderInstance shader) {
+    void draw(Matrix4f positionMatrix, Matrix4f projectionMatrix, CompiledShaderProgram shader) {
         if (vertexBuffer != null) {
             vertexBuffer.bind();
             vertexBuffer.drawWithShader(positionMatrix, projectionMatrix, shader);

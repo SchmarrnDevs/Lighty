@@ -26,7 +26,8 @@ import dev.schmarrn.lighty.overlaystate.SMACH;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.CompiledShaderProgram;
+import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -227,7 +228,7 @@ public class Compute {
         matrixStack.translate(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z);
         Matrix4f positionMatrix = matrixStack.last().pose();
 
-        ShaderInstance shader = RenderSystem.getShader();
+        CompiledShaderProgram shader = RenderSystem.getShader();
 
         // The times 16 is just a magic number, chosen by trial and error.
         // The fog shenanigans should fix a really annoying issue: https://github.com/SchmarrnDevs/Lighty/issues/47
@@ -235,19 +236,15 @@ public class Compute {
         float renderDistance = Minecraft.getInstance().gameRenderer.getRenderDistance() * 16f * 0xFAC;
         float fogStart = renderDistance - Mth.clamp(renderDistance/10f, 4f, 64f);
 
-        float oldFogStart = RenderSystem.getShaderFogStart();
-        float oldFogEnd = RenderSystem.getShaderFogEnd();
-        FogShape oldFogShape = RenderSystem.getShaderFogShape();
+        FogParameters oldFog = RenderSystem.getShaderFog();
 
-        RenderSystem.setShaderFogStart(fogStart);
-        RenderSystem.setShaderFogEnd(renderDistance);
-        RenderSystem.setShaderFogShape(FogShape.CYLINDER);
+        RenderSystem.setShaderFog(new FogParameters(fogStart, renderDistance, FogShape.CYLINDER, 0.0f, 0.0f, 0.0f, 0.0f));
 
         for (int x = -computationDistance + 1; x < computationDistance; ++x) {
             for (int z = -computationDistance + 1; z < computationDistance; ++z) {
                 ChunkPos chunkPos = new ChunkPos(playerPos.x + x, playerPos.z + z);
                 for (int i = 0; i < world.getSectionsCount(); ++i) {
-                    var chunkSection = SectionPos.of(chunkPos, world.getMinSection() + i);
+                    var chunkSection = SectionPos.of(chunkPos, world.getMinSectionY() + i);
                     if (frustum.isVisible(AABB.encapsulatingFullBlocks(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16,16,16)))) {
                         if (cachedBuffers.containsKey(chunkSection)) {
                             BufferHolder cachedBuffer = cachedBuffers.get(chunkSection);
@@ -265,9 +262,7 @@ public class Compute {
         }
 
         // Reset Fog stuff
-        RenderSystem.setShaderFogStart(oldFogStart);
-        RenderSystem.setShaderFogEnd(oldFogEnd);
-        RenderSystem.setShaderFogShape(oldFogShape);
+        RenderSystem.setShaderFog(oldFog);
 
         matrixStack.popPose();
 

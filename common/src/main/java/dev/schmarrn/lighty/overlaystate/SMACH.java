@@ -21,7 +21,7 @@ public class SMACH {
         var activationItems = Config.AUTO_ON_ITEM_LIST.getValue();
 
         for (var rl : activationItems) {
-            Item activationItem = BuiltInRegistries.ITEM.get(rl);
+            Item activationItem = BuiltInRegistries.ITEM.get(rl).get().value();
             Item mainHandItem = client.player.getMainHandItem().getItem();
             Item offHandItem = client.player.getOffhandItem().getItem();
 
