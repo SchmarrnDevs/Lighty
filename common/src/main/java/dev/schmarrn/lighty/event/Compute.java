@@ -148,6 +148,9 @@ public class Compute {
             if (outOfRange(sectionPos)) {
                 toBeRemoved.add(sectionPos);
             } else {
+                if (!Minecraft.getInstance().levelRenderer.isSectionCompiled(sectionPos.origin())) {
+                    continue;
+                }
                 removeFromToBeUpdated.add(sectionPos);
                 cachedBuffers.compute(sectionPos, (pos, vertexBuffer) -> {
                     if (vertexBuffer != null) {
