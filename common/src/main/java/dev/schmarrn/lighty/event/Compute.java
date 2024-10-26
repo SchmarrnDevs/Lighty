@@ -51,7 +51,6 @@ public class Compute {
     private static final Map<SectionPos, BufferHolder> cachedBuffers = new HashMap<>();
     private static ChunkPos playerPos = null;
 
-
     private static int computationDistance = Math.min(Config.OVERLAY_DISTANCE.getValue(), Minecraft.getInstance().options.renderDistance().get());
 
 
@@ -227,8 +226,9 @@ public class Compute {
         matrixStack.pushPose();
         matrixStack.mulPose(rotX(-camera.getXRot() * Mth.PI / 180f));
         matrixStack.mulPose(rotY(-camera.getYRot() * Mth.PI / 180f + Mth.PI));
-        matrixStack.translate(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z);
-        Matrix4f positionMatrix = matrixStack.last().pose();
+        // only translate to the nearest SectionPos
+        matrixStack.translate(-(camera.getPosition().x % 16), -(camera.getPosition().y % 16), -(camera.getPosition().z % 16));
+        SectionPos camSectionPos = SectionPos.of(camera.getBlockPosition());
 
         ShaderInstance shader = RenderSystem.getShader();
 
@@ -257,7 +257,13 @@ public class Compute {
                             if (!cachedBuffer.isValid()) {
                                 toBeUpdated.add(chunkSection);
                             } else {
-                                cachedBuffer.draw(positionMatrix, projectionMatrix, shader);
+                                int dX = chunkSection.x() - camSectionPos.x();
+                                int dY = chunkSection.y() - camSectionPos.y();
+                                int dZ = chunkSection.z() - camSectionPos.z();
+                                matrixStack.pushPose();
+                                matrixStack.translate(dX*16, dY*16, dZ*16);
+                                cachedBuffer.draw(matrixStack.last().pose(), projectionMatrix, shader);
+                                matrixStack.popPose();
                             }
                         } else {
                             toBeUpdated.add(chunkSection);

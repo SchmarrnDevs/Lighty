@@ -16,55 +16,30 @@ package dev.schmarrn.lighty.mode;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.Lighty;
-import dev.schmarrn.lighty.api.LightyColors;
-import dev.schmarrn.lighty.api.LightyHelper;
-import dev.schmarrn.lighty.api.LightyMode;
-import dev.schmarrn.lighty.api.ModeManager;
+import dev.schmarrn.lighty.api.*;
 import dev.schmarrn.lighty.config.Config;
+import dev.schmarrn.lighty.dataproviders.NormalDataProvider;
+import dev.schmarrn.lighty.renderers.CrossRenderer;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.state.BlockState;
 
 public class BoringCrossMode extends LightyMode {
+    private static final NormalDataProvider dataProvider = new NormalDataProvider();
+    private static final CrossRenderer renderer = new CrossRenderer();
+
     @Override
     public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
-        BlockState blockState = world.getBlockState(pos);
-        if (!LightyHelper.isBlocked(blockState, pos, world)) {
-            int blockLightLevel = world.getBrightness(LightLayer.BLOCK, pos.above());
-            int skyLightLevel = world.getBrightness(LightLayer.SKY, pos.above());
+        OverlayData data = dataProvider.compute(world, pos);
 
-            if (LightyHelper.isSafe(blockLightLevel) && !Config.SHOW_SAFE.getValue()) {
-                return;
-            }
-
-            int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
-
-            float offset = LightyHelper.getOffset(blockState, pos, world);
-            if (offset == -1f) {
-                return;
-            }
-
-            float x1 = pos.getX();
-            float x2 = pos.getX() + 1f;
-            float y = pos.getY() + 1.005f + offset;
-            float z1 = pos.getZ();
-            float z2 = pos.getZ() + 1f;
-
+        if (data.valid()) {
             int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
+            // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
             int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
-
-            builder.addVertex(x1, y, z1).setColor(color).setUv(0, 0).setLight(lightmap).setNormal(0f, 1f, 0f);
-            builder.addVertex(x1, y, z2).setColor(color).setUv(0, 1).setLight(lightmap).setNormal(0f, 1f, 0f);
-            builder.addVertex(x2, y, z2).setColor(color).setUv(1, 1).setLight(lightmap).setNormal(0f, 1f, 0f);
-            builder.addVertex(x2, y, z1).setColor(color).setUv(1, 0).setLight(lightmap).setNormal(0f, 1f, 0f);
+            renderer.compute(world, pos, data, builder, lightmap);
         }
     }
 

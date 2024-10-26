@@ -4,7 +4,11 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.LightyColors;
 import dev.schmarrn.lighty.api.ModeManager;
+import dev.schmarrn.lighty.api.OverlayData;
 import dev.schmarrn.lighty.config.Config;
+import dev.schmarrn.lighty.dataproviders.FarmlandDataProvider;
+import dev.schmarrn.lighty.dataproviders.NormalDataProvider;
+import dev.schmarrn.lighty.renderers.CarpetRenderer;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
@@ -20,57 +24,18 @@ import net.minecraft.world.level.block.state.BlockState;
  * Extending CarpetMode because the code is largely identical
  */
 public class FarmlandMode extends CarpetMode {
+    private static final FarmlandDataProvider dataProvider = new FarmlandDataProvider();
+    private static final CarpetRenderer renderer = new CarpetRenderer();
+
     @Override
     public void compute(ClientLevel world, BlockPos pos, BufferBuilder builder) {
-        BlockPos posUp = pos.above();
-        BlockState blockState = world.getBlockState(pos);
+        OverlayData data = dataProvider.compute(world, pos);
 
-        if (!(blockState.getBlock() instanceof FarmBlock)) {
-            return;
-        }
-
-        int blockLightLevel = world.getBrightness(LightLayer.BLOCK, posUp);
-        int skyLightLevel = world.getBrightness(LightLayer.SKY, posUp);
-        int color = LightyColors.getGrowthARGB(blockLightLevel, skyLightLevel);
-
-        float x = pos.getX();
-        float y = pos.getY() + 15f/16f;
-        float z = pos.getZ();
-        int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
-        // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
-        int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
-        //TOP
-        builder.addVertex(x, y + 1 / 16f, z).setColor(color).setUv(0, 0).setLight(lightmap).setNormal(0f, 1f, 0f);
-        builder.addVertex(x, y + 1 / 16f, z + 1).setColor(color).setUv(0, 1).setLight(lightmap).setNormal(0f, 1f, 0f);
-        builder.addVertex(x + 1, y + 1 / 16f, z + 1).setColor(color).setUv(1, 1).setLight(lightmap).setNormal(0f, 1f, 0f);
-        builder.addVertex(x + 1, y + 1 / 16f, z).setColor(color).setUv(1, 0).setLight(lightmap).setNormal(0f, 1f, 0f);
-        //NORTH
-        if (Block.shouldRenderFace(Blocks.FARMLAND.defaultBlockState(), world, pos, Direction.SOUTH, pos.relative(Direction.SOUTH))) {
-            builder.addVertex(x, y + 1 / 16f, z + 1).setColor(color).setUv(0, 1f / 16).setLight(lightmap).setNormal(0f, 0f, -1f);
-            builder.addVertex(x, y, z + 1).setColor(color).setUv(0, 0).setLight(lightmap).setNormal(0f, 0f, -1f);
-            builder.addVertex(x + 1, y, z + 1).setColor(color).setUv(1, 0).setLight(lightmap).setNormal(0f, 0f, -1f);
-            builder.addVertex(x + 1, y + 1 / 16f, z + 1).setColor(color).setUv(1, 1f / 16).setLight(lightmap).setNormal(0f, 0f, -1f);
-        }
-        //EAST
-        if (Block.shouldRenderFace(Blocks.FARMLAND.defaultBlockState(), world, pos, Direction.WEST, pos.relative(Direction.WEST))) {
-            builder.addVertex(x, y + 1/16f, z).setColor(color).setUv(0,1f/16).setLight(lightmap).setNormal(-1f, 0f, 0f);
-            builder.addVertex(x, y, z).setColor(color).setUv(0, 0).setLight(lightmap).setNormal(-1f, 0f, 0f);
-            builder.addVertex(x, y, z + 1).setColor(color).setUv(1, 0).setLight(lightmap).setNormal(-1f, 0f, 0f);
-            builder.addVertex(x, y + 1/16f, z + 1).setColor(color).setUv(1, 1f/16).setLight(lightmap).setNormal(-1f, 0f, 0f);
-        }
-        //SOUTH
-        if (Block.shouldRenderFace(Blocks.FARMLAND.defaultBlockState(), world, pos, Direction.NORTH, pos.relative(Direction.NORTH))) {
-            builder.addVertex(x+1, y + 1/16f, z).setColor(color).setUv(0,1f/16).setLight(lightmap).setNormal(0f, 0f, 1f);
-            builder.addVertex(x+1, y, z).setColor(color).setUv(0, 0).setLight(lightmap).setNormal(0f, 0f, -1f);
-            builder.addVertex(x, y, z).setColor(color).setUv(1, 0).setLight(lightmap).setNormal(0f, 0f, -1f);
-            builder.addVertex(x, y + 1/16f, z).setColor(color).setUv(1, 1f/16).setLight(lightmap).setNormal(0f, 0f, -1f);
-        }
-        //WEST
-        if (Block.shouldRenderFace(Blocks.FARMLAND.defaultBlockState(), world, pos, Direction.EAST, pos.relative(Direction.EAST))) {
-            builder.addVertex(x+1, y + 1/16f, z+1).setColor(color).setUv(0,1f/16).setLight(lightmap).setNormal(1f, 0f, 0f);
-            builder.addVertex(x+1, y, z+1).setColor(color).setUv(0, 0).setLight(lightmap).setNormal(1f, 0f, 0f);
-            builder.addVertex(x+1, y, z).setColor(color).setUv(1, 0).setLight(lightmap).setNormal(1f, 0f, 0f);
-            builder.addVertex(x+1, y + 1/16f, z).setColor(color).setUv(1, 1f/16).setLight(lightmap).setNormal(1f, 0f, 0f);
+        if (data.valid()) {
+            int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
+            // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
+            int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
+            renderer.compute(world, pos, data, builder, lightmap);
         }
     }
 

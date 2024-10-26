@@ -28,6 +28,14 @@ public class IntegerConfig extends ConfigType<Integer> {
         this.max = max;
     }
 
+    public int getMax() {
+        return this.max;
+    }
+
+    public int getMin() {
+        return this.min;
+    }
+
     @Override
     public void setValue(Integer newValue) {
         if (newValue >= min && newValue <= max) {
