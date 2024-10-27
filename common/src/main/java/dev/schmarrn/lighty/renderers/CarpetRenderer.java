@@ -1,15 +1,19 @@
 package dev.schmarrn.lighty.renderers;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import dev.schmarrn.lighty.api.OverlayData;
+import dev.schmarrn.lighty.api.OverlayRenderer;
+import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
-public class CarpetRenderer {
-    public void compute(ClientLevel level, BlockPos pos, OverlayData data, BufferBuilder builder, int lightmap) {
+public class CarpetRenderer implements OverlayRenderer {
+    public void build(ClientLevel level, BlockPos pos, OverlayData data, BufferBuilder builder, int lightmap) {
         float x = pos.getX() % 16;
         float y = pos.getY() % 16 + 1 + data.yOffset();
         float z = pos.getZ() % 16;
@@ -54,5 +58,16 @@ public class CarpetRenderer {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void beforeRendering() {
+        RenderType.translucent().setupRenderState();
+        RenderSystem.setShaderTexture(0, Config.CARPET_TEXTURE.getValue());
+        RenderSystem.enableDepthTest();
+    }
+
+    public void afterRendering() {
+        RenderType.translucent().clearRenderState();
+        RenderSystem.disableDepthTest();
     }
 }

@@ -35,7 +35,7 @@ public class FarmlandMode extends CarpetMode {
             int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
             // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
             int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
-            renderer.compute(world, pos, data, builder, lightmap);
+            renderer.build(world, pos, data, builder, lightmap);
         }
     }
 

@@ -14,7 +14,6 @@
 
 package dev.schmarrn.lighty.mode;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.*;
@@ -23,7 +22,6 @@ import dev.schmarrn.lighty.dataproviders.NormalDataProvider;
 import dev.schmarrn.lighty.renderers.CrossRenderer;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 
@@ -39,20 +37,18 @@ public class BoringCrossMode extends LightyMode {
             int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
             // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
             int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
-            renderer.compute(world, pos, data, builder, lightmap);
+            renderer.build(world, pos, data, builder, lightmap);
         }
     }
 
     @Override
     public void beforeRendering() {
-        RenderType.cutout().setupRenderState();
-        RenderSystem.setShaderTexture(0, Config.CROSS_TEXTURE.getValue());
-        RenderSystem.enableDepthTest();
+        renderer.beforeRendering();
     }
 
     @Override
     public void afterRendering() {
-        RenderSystem.disableDepthTest();
+        renderer.afterRendering();
     }
 
     @Override

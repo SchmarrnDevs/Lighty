@@ -1,12 +1,17 @@
 package dev.schmarrn.lighty.renderers;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.OverlayData;
+import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 
-public class NumberRenderer {
+public class NumberRenderer implements OverlayRenderer {
     private static final float PXL = 1/16f;
     private static final float dx = 0.25f;
     private static final float dz = 0.25f;
@@ -49,7 +54,7 @@ public class NumberRenderer {
         }
     }
 
-    public void compute(ClientLevel level, BlockPos pos, OverlayData data, BufferBuilder builder, int lightmap) {
+    public void build(ClientLevel level, BlockPos pos, OverlayData data, BufferBuilder builder, int lightmap) {
         float x1 = pos.getX() % 16 + PXL * 5.25f;
         float y = pos.getY() % 16 + 1f + 0.005f + data.yOffset();
         float z1 = pos.getZ() % 16 + PXL * 4f;
@@ -60,5 +65,16 @@ public class NumberRenderer {
         } else {
             renderNumber(builder, data.blockNumber(), x1, y, z1 + PXL * 2f, data.color(), lightmap);
         }
+    }
+
+    public void beforeRendering() {
+        RenderType.cutout().setupRenderState();
+        RenderSystem.enableDepthTest();
+        RenderSystem.setShaderTexture(0, ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "textures/block/numbers.png"));
+    }
+
+    public void afterRendering() {
+        RenderType.cutout().clearRenderState();
+        RenderSystem.disableDepthTest();
     }
 }
