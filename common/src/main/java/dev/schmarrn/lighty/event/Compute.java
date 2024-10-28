@@ -19,26 +19,29 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
-import dev.schmarrn.lighty.ModeLoader;
-import dev.schmarrn.lighty.api.LightyMode;
+import dev.schmarrn.lighty.DataProviders;
+import dev.schmarrn.lighty.Renderers;
+import dev.schmarrn.lighty.api.OverlayData;
+import dev.schmarrn.lighty.api.OverlayDataProvider;
+import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.overlaystate.SMACH;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 public class Compute {
     // Based on some observations, the hashset size only exceeds around 400 elements
@@ -94,16 +97,30 @@ public class Compute {
         toBeUpdated.add(pos);
     }
 
-    private static BufferHolder buildChunk(LightyMode mode, SectionPos chunkPos, Tesselator tesselator, ClientLevel world) {
-        BufferBuilder builder = mode.beforeCompute(tesselator);
+    private static BufferHolder buildChunk(OverlayRenderer renderer, List<OverlayDataProvider> dataProviders, SectionPos chunkPos, Tesselator tesselator, ClientLevel world) {
+        List<OverlayData> overlayData = new ArrayList<>();
+
         for (int x = 0; x < 16; ++x) {
             for (int y = 0; y < 16; ++y) {
                 for (int z = 0; z < 16; ++z) {
                     BlockPos pos = chunkPos.origin().offset(x, y, z);
 
-                    mode.compute(world, pos, builder);
+                    for (var dataProvider : dataProviders) {
+                        var data = dataProvider.compute(world, pos);
+                        if (data.valid()) {
+                            overlayData.add(data);
+                        }
+                    }
                 }
             }
+        }
+
+        BufferBuilder builder = renderer.beforeBuild(tesselator);
+        int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
+        // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
+        int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
+        for (var data : overlayData) {
+            renderer.build(world, data.pos(), data, builder, lightmap);
         }
 
         BufferHolder buffer = cachedBuffers.get(chunkPos);
@@ -112,7 +129,6 @@ public class Compute {
         }
         buffer.upload(builder.build());
 
-        mode.afterCompute();
         return buffer;
     }
 
@@ -122,10 +138,11 @@ public class Compute {
         // update state machine state that's based on items etc
         SMACH.updateCompute(client);
 
-        if (!ModeLoader.isEnabled()) {
+        if (!SMACH.isEnabled()) {
             return;
         }
-        LightyMode mode = ModeLoader.getCurrentMode();
+        List<OverlayDataProvider> dataProviders = DataProviders.getActiveProviders();
+        OverlayRenderer renderer = Renderers.getRenderer();
 
         ClientLevel world = client.level;
 
@@ -152,9 +169,10 @@ public class Compute {
                 removeFromToBeUpdated.add(sectionPos);
                 cachedBuffers.compute(sectionPos, (pos, vertexBuffer) -> {
                     if (vertexBuffer != null) {
+                        // Ensure to have a clean state after building
                         vertexBuffer.close();
                     }
-                    return buildChunk(mode, pos, Tesselator.getInstance(), world);
+                    return buildChunk(renderer, dataProviders, pos, Tesselator.getInstance(), world);
                 });
             }
         }
@@ -204,8 +222,9 @@ public class Compute {
     }
 
     public static void render(@Nullable Frustum frustum, PoseStack matrixStack, Matrix4f projectionMatrix) {
-        if (!ModeLoader.isEnabled()) return;
-        LightyMode mode = ModeLoader.getCurrentMode();
+        if (!SMACH.isEnabled()) return;
+
+        OverlayRenderer renderer = Renderers.getRenderer();
 
         if (frustum == null) {
             return;
@@ -220,7 +239,7 @@ public class Compute {
             return;
         }
 
-        mode.beforeRendering();
+        renderer.beforeRendering();
 
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
         matrixStack.pushPose();
@@ -229,6 +248,11 @@ public class Compute {
         // only translate to the nearest SectionPos
         matrixStack.translate(-(camera.getPosition().x % 16), -(camera.getPosition().y % 16), -(camera.getPosition().z % 16));
         SectionPos camSectionPos = SectionPos.of(camera.getBlockPosition());
+        // Don't ask me *why* I need this offset if the camera has negative components
+        int dX = camSectionPos.getX() < 0 ? -16 : 0;
+        int dY = camSectionPos.getY() < 0 ? -16 : 0;
+        int dZ = camSectionPos.getZ() < 0 ? -16 : 0;
+        BlockPos camOrigin = camSectionPos.origin().subtract(new Vec3i(dX, dY, dZ));
 
         ShaderInstance shader = RenderSystem.getShader();
 
@@ -257,11 +281,10 @@ public class Compute {
                             if (!cachedBuffer.isValid()) {
                                 toBeUpdated.add(chunkSection);
                             } else {
-                                int dX = chunkSection.x() - camSectionPos.x();
-                                int dY = chunkSection.y() - camSectionPos.y();
-                                int dZ = chunkSection.z() - camSectionPos.z();
+                                BlockPos origin = chunkSection.origin();
+                                BlockPos dPos = origin.subtract(camOrigin);
                                 matrixStack.pushPose();
-                                matrixStack.translate(dX*16, dY*16, dZ*16);
+                                matrixStack.translate(dPos.getX(), dPos.getY(), dPos.getZ());
                                 cachedBuffer.draw(matrixStack.last().pose(), projectionMatrix, shader);
                                 matrixStack.popPose();
                             }
@@ -280,7 +303,7 @@ public class Compute {
 
         matrixStack.popPose();
 
-        mode.afterRendering();
+        renderer.afterRendering();
     }
 
     private Compute() {}

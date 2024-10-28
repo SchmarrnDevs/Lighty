@@ -14,8 +14,9 @@
 
 package dev.schmarrn.lighty.ui;
 
-import dev.schmarrn.lighty.ModeLoader;
+import dev.schmarrn.lighty.Renderers;
 import dev.schmarrn.lighty.event.KeyBind;
+import dev.schmarrn.lighty.overlaystate.SMACH;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -51,10 +52,10 @@ public class LightyScreen extends Screen {
 
         if (!isInModMenu) {
             adder.addChild(Button.builder(
-                    Component.translatable("lighty.overlay", CommonComponents.optionStatus(ModeLoader.isEnabled()).getString()),
+                    Component.translatable("lighty.overlay", CommonComponents.optionStatus(SMACH.isEnabled()).getString()),
                     btn -> {
-                        ModeLoader.toggle();
-                        btn.setMessage(Component.translatable("lighty.overlay", CommonComponents.optionStatus(ModeLoader.isEnabled()).getString()));
+                        SMACH.toggle();
+                        btn.setMessage(Component.translatable("lighty.overlay", CommonComponents.optionStatus(SMACH.isEnabled()).getString()));
                     }
             ).tooltip(Tooltip.create(Component.translatable("lighty.overlay.tooltip", KeyBind.toggleKeyBind.getTranslatedKeyMessage().getString()))).build());
         }
@@ -62,7 +63,7 @@ public class LightyScreen extends Screen {
         adder.addChild(Button.builder(
                 Component.translatable(
                         "lighty.selected",
-                        Component.translatable("modeSwitcher." + ModeLoader.getCurrentMode().getResourceLocation().toString().replace(":", "."))
+                        Component.translatable("modeSwitcher." + Renderers.getRenderer().getResourceLocation().toString().replace(":", "."))
                 ),
                 button -> Minecraft.getInstance().setScreen(new ModeSelectionScreen(this))
         ).tooltip(Tooltip.create(Component.translatable("lighty.selected.tooltip"))).build());

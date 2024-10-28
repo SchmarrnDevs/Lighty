@@ -37,7 +37,11 @@ public class Config {
     private static boolean initStage = true;
 
     // all the different config values
-    public static final ResourceLocationConfig LAST_USED_MODE = new ResourceLocationConfig("lighty.last_used_mode", ResourceLocation.parse("lighty:carpet_mode"));
+    public static final ResourceLocationConfig LAST_USED_RENDERER = new ResourceLocationConfig("lighty.last_used_renderer", ResourceLocation.parse("lighty:renderer_carpet"));
+    public static final ResourceLocationListConfig ACTIVE_DATA_PROVIDERS = new ResourceLocationListConfig("lighty.active_data_providers", stringToRL(
+            "lighty:data_provider_base",
+            "lighty:data_provider_farmland"
+    ));
 
     public static final IntegerConfig SKY_THRESHOLD = new IntegerConfig("lighty.sky_threshold", 0, 0, 15);
     public static final IntegerConfig BLOCK_THRESHOLD = new IntegerConfig("lighty.block_threshold", 0, 0, 15);
@@ -52,6 +56,10 @@ public class Config {
     public static final ColorConfig OVERLAY_GREEN = new ColorConfig("lighty.overlay_green", 0x00FF00);
     public static final ColorConfig OVERLAY_ORANGE = new ColorConfig("lighty.overlay_orange", 0xFF6600);
     public static final ColorConfig OVERLAY_RED = new ColorConfig("lighty.overlay_red", 0xFF0000);
+
+    public static final ColorConfig ADDITIONAL_OVERLAY_GOOD = new ColorConfig("lighty.additional_overlay_good", 0x00FF66);
+    public static final ColorConfig ADDITIONAL_OVERLAY_WARN = new ColorConfig("lighty.additional_overlay_warn", 0x0000FF);
+    public static final ColorConfig ADDITIONAL_OVERLAY_BAD = new ColorConfig("lighty.additional_overlay_bad", 0x6600FF);
 
     public static final ResourceLocationListConfig AUTO_ON_ITEM_LIST = new ResourceLocationListConfig("lighty.auto_on.item", stringToRL(
             "minecraft:torch",

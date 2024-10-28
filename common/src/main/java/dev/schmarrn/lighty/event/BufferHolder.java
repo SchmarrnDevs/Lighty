@@ -21,47 +21,43 @@ import net.minecraft.client.renderer.ShaderInstance;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BufferHolder {
-    @Nullable
-    private VertexBuffer vertexBuffer;
-    private boolean isEmpty;
+    private final List<VertexBuffer> vertexBuffers;
 
     BufferHolder() {
-        vertexBuffer = null;
-        isEmpty = false;
+        vertexBuffers = new ArrayList<>();
     }
 
     boolean isValid() {
-        return isEmpty || vertexBuffer != null;
+        return !vertexBuffers.isEmpty();
     }
 
     void close() {
-        if (vertexBuffer != null) {
-            vertexBuffer.close();
-            vertexBuffer = null;
-            isEmpty = false;
+        for (var buffer : vertexBuffers) {
+            buffer.close();
         }
+        vertexBuffers.clear();
     }
 
     void upload(MeshData buffer) {
-        if (vertexBuffer != null) {
-            vertexBuffer.close();
-        }
         if (buffer == null) {
             // Don't upload
-            isEmpty = true;
-            vertexBuffer = null;
-        } else {
-            isEmpty = false;
-            vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
-            vertexBuffer.bind();
-            vertexBuffer.upload(buffer);
-            VertexBuffer.unbind();
+            return;
         }
+
+        var vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+        vertexBuffer.bind();
+        vertexBuffer.upload(buffer);
+        VertexBuffer.unbind();
+
+        vertexBuffers.add(vertexBuffer);
     }
 
     void draw(Matrix4f positionMatrix, Matrix4f projectionMatrix, ShaderInstance shader) {
-        if (vertexBuffer != null) {
+        for (var vertexBuffer : vertexBuffers) {
             vertexBuffer.bind();
             vertexBuffer.drawWithShader(positionMatrix, projectionMatrix, shader);
             VertexBuffer.unbind();

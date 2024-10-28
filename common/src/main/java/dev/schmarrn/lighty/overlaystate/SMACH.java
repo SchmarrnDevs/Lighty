@@ -65,4 +65,8 @@ public class SMACH {
     public static State getState() {
         return state;
     }
+
+    public static boolean isEnabled() {
+        return state == State.AUTO || state == State.ON;
+    }
 }

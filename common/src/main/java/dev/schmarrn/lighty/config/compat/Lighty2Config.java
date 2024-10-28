@@ -3,7 +3,6 @@ package dev.schmarrn.lighty.config.compat;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.UtilDefinition;
 import dev.schmarrn.lighty.config.Config;
-import net.minecraft.resources.ResourceLocation;
 
 import java.io.*;
 import java.util.Properties;
@@ -49,7 +48,6 @@ public class Lighty2Config {
             properties.putIfAbsent(OVERLAY_RED, Integer.toHexString(0xFF0000));
 
             // Set the new stuff
-            Config.LAST_USED_MODE.setValue(ResourceLocation.parse(properties.getProperty(LAST_USED_MODE)));
             Config.SKY_THRESHOLD.setValue(Integer.valueOf(properties.getProperty(SKY_THRESHOLD)));
             Config.BLOCK_THRESHOLD.setValue(Integer.valueOf(properties.getProperty(BLOCK_THRESHOLD)));
             Config.FARM_GROWTH_THRESHOLD.setValue(Integer.valueOf(properties.getProperty(FARM_GROWTH_THRESHOLD)));

@@ -9,8 +9,6 @@
   "modeSwitcher.lighty.carpet_mode.tooltip": "Lighty独有的类似地毯的显示效果。",
   "modeSwitcher.lighty.boring_cross_mode": "大叉模式",
   "modeSwitcher.lighty.boring_cross_mode.tooltip": "亮度显示模组的标配模式。",
-  "modeSwitcher.lighty.farmland_mode": "耕地模式",
-  "modeSwitcher.lighty.farmland_mode.tooltip": "与地毯模式类似，但仅对耕地生效。",
   "modeSwitcher.lighty.settings": "覆盖层设置",
   "modeSwitcher.lighty.settings.tooltip": "随你所需自定义 Lighty! ",
   "settings.lighty.title": "Lighty 设置",

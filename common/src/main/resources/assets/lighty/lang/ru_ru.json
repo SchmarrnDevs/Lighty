@@ -9,8 +9,6 @@
   "modeSwitcher.lighty.carpet_mode.tooltip": "Оригинальный оверлей в виде ковра",
   "modeSwitcher.lighty.boring_cross_mode": "Режим скучного креста",
   "modeSwitcher.lighty.boring_cross_mode.tooltip": "Похоже они есть в каждом похожем моде",
-  "modeSwitcher.lighty.farmland_mode": "Режим грядки",
-  "modeSwitcher.lighty.farmland_mode.tooltip": "Похож на Режим ковра, но только для блоков грядки",
   "modeSwitcher.lighty.settings": "Настройки оверлея",
   "modeSwitcher.lighty.settings.tooltip": "Настройте Lighty под свои потребности!",
   "settings.lighty.title": "Настройки Lighty",

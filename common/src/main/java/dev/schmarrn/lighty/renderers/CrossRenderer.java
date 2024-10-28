@@ -2,12 +2,15 @@ package dev.schmarrn.lighty.renderers;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import dev.schmarrn.lighty.Lighty;
+import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.api.OverlayData;
 import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 
 public class CrossRenderer implements OverlayRenderer {
     public void build(ClientLevel level, BlockPos pos, OverlayData data, BufferBuilder builder, int lightmap) {
@@ -31,5 +34,15 @@ public class CrossRenderer implements OverlayRenderer {
 
     public void afterRendering() {
         RenderSystem.disableDepthTest();
+    }
+
+    @Override
+    public ResourceLocation getResourceLocation() {
+        return ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "renderer_cross");
+    }
+
+    public static void init() {
+        var dp = new CrossRenderer();
+        ModeManager.registerRenderer(dp.getResourceLocation(), dp);
     }
 }

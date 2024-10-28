@@ -3,6 +3,7 @@ package dev.schmarrn.lighty.renderers;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import dev.schmarrn.lighty.Lighty;
+import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.api.OverlayData;
 import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.config.Config;
@@ -76,5 +77,15 @@ public class NumberRenderer implements OverlayRenderer {
     public void afterRendering() {
         RenderType.cutout().clearRenderState();
         RenderSystem.disableDepthTest();
+    }
+
+    @Override
+    public ResourceLocation getResourceLocation() {
+        return ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "renderer_number");
+    }
+
+    public static void init() {
+        var dp = new NumberRenderer();
+        ModeManager.registerRenderer(dp.getResourceLocation(), dp);
     }
 }

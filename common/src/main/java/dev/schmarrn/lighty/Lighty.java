@@ -15,11 +15,12 @@
 package dev.schmarrn.lighty;
 
 import dev.schmarrn.lighty.config.Config;
+import dev.schmarrn.lighty.dataproviders.BaseDataProvider;
+import dev.schmarrn.lighty.dataproviders.FarmlandDataProvider;
 import dev.schmarrn.lighty.event.KeyBind;
-import dev.schmarrn.lighty.mode.BoringCrossMode;
-import dev.schmarrn.lighty.mode.CarpetMode;
-import dev.schmarrn.lighty.mode.FarmlandMode;
-import dev.schmarrn.lighty.mode.NumberMode;
+import dev.schmarrn.lighty.renderers.CarpetRenderer;
+import dev.schmarrn.lighty.renderers.CrossRenderer;
+import dev.schmarrn.lighty.renderers.NumberRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,10 +34,14 @@ public class Lighty {
         LOGGER.info("Let there be {}", MOD_NAME);
 
         Config.init();
-        CarpetMode.init();
-        NumberMode.init();
-        BoringCrossMode.init();
-        FarmlandMode.init();
+
+        BaseDataProvider.init();
+        FarmlandDataProvider.init();
+
+        CarpetRenderer.init();
+        CrossRenderer.init();
+        NumberRenderer.init();
+
         KeyBind.init();
     }
 
@@ -44,6 +49,7 @@ public class Lighty {
      * Called after Lighty Modes are registered
      */
     public static void postLoad() {
-        ModeLoader.setLastUsedMode();
+        DataProviders.setLastActiveProviders();
+        Renderers.setLastUsedRenderer();
     }
 }

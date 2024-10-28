@@ -1,16 +1,15 @@
 package dev.schmarrn.lighty.dataproviders;
 
-import dev.schmarrn.lighty.api.LightyColors;
-import dev.schmarrn.lighty.api.LightyHelper;
-import dev.schmarrn.lighty.api.OverlayData;
-import dev.schmarrn.lighty.api.OverlayDataProvider;
+import dev.schmarrn.lighty.Lighty;
+import dev.schmarrn.lighty.api.*;
 import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class NormalDataProvider implements OverlayDataProvider {
+public class BaseDataProvider implements OverlayDataProvider {
     public OverlayData compute(ClientLevel level, BlockPos pos) {
         BlockPos posUp = pos.above();
         BlockState blockState = level.getBlockState(pos);
@@ -34,5 +33,15 @@ public class NormalDataProvider implements OverlayDataProvider {
         }
 
         return new OverlayData(true, color, skyLightLevel, blockLightLevel, pos, offset);
+    }
+
+    @Override
+    public ResourceLocation getResourceLocation() {
+        return ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "data_provider_base");
+    }
+
+    public static void init() {
+        var dp = new BaseDataProvider();
+        ModeManager.registerDataProvider(dp.getResourceLocation(), dp);
     }
 }

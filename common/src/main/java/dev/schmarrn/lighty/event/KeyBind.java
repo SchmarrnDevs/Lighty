@@ -15,8 +15,8 @@
 package dev.schmarrn.lighty.event;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.schmarrn.lighty.ModeLoader;
 import dev.schmarrn.lighty.UtilDefinition;
+import dev.schmarrn.lighty.overlaystate.SMACH;
 import dev.schmarrn.lighty.ui.LightyScreen;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -46,7 +46,7 @@ public class KeyBind {
 
         // Check for rising edges
         if (newToggleState && !KeyBind.oldToggleState) {
-            ModeLoader.toggle();
+            SMACH.toggle();
         }
         if (newKeyState && !KeyBind.oldKeyState) {
             client.setScreen(new LightyScreen(null));

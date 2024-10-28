@@ -14,7 +14,8 @@
 
 package dev.schmarrn.lighty.api;
 
-import dev.schmarrn.lighty.ModeLoader;
+import dev.schmarrn.lighty.DataProviders;
+import dev.schmarrn.lighty.Renderers;
 import dev.schmarrn.lighty.ui.ModeButtonRegister;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -24,22 +25,34 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class ModeManager {
     /**
-     * Registers a Lighty Mode and adds a Button to enable the mode to the ModeSwitcherScreen.
+     * Registers a Lighty OverlayDataProvider.
+     *
+     * If on Fabric: use the LightyModesRegistration EntryPoint
+     * If on Forge: call during FMLClientSetupEvent and enqueue work
+     * @param rl Used to generate the translatable text resource locations
+     * @param dataProvider Your OverlayDataProvider to be registered
+     */
+    public static void registerDataProvider(ResourceLocation rl, OverlayDataProvider dataProvider) {
+        DataProviders.put(rl, dataProvider);
+    }
+
+    /**
+     * Registers a Lighty OverlayRenderer and adds a Button to enable the renderer to the ModeSwitcherScreen.
      * For the Button, you need to specify `modeSwitcher.{id.getNamespace}.{id.getPath}` for the
      * Button Name, and `modeSwitcher.{id.getNamespace}.{id.getPath}.tooltip` for the Tooltip of
      * the Button.
      *
      * If on Fabric: use the LightyModesRegistration EntryPoint
      * If on Forge: call during FMLClientSetupEvent and enqueue work
-     * @param id Used to generate the translatable text resource locations
-     * @param mode Your LightyMode to be registered
+     * @param rl Used to generate the translatable text resource locations
+     * @param renderer Your OverlayRenderer to be registered
      */
-    public static void registerMode(ResourceLocation id, LightyMode mode) {
-        ModeLoader.put(id, mode);
+    public static void registerRenderer(ResourceLocation rl, OverlayRenderer renderer) {
+        Renderers.put(rl, renderer);
 
         ModeButtonRegister.addButton(
-                Component.translatable("modeSwitcher." + id.getNamespace() + "." + id.getPath()),
-                Component.translatable("modeSwitcher." + id.getNamespace() + "." + id.getPath() + ".tooltip"), button -> ModeLoader.loadMode(id)
+                Component.translatable("modeSwitcher." + rl.getNamespace() + "." + rl.getPath()),
+                Component.translatable("modeSwitcher." + rl.getNamespace() + "." + rl.getPath() + ".tooltip"), button -> Renderers.loadRenderer(rl)
         );
     }
 
