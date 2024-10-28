@@ -23,6 +23,7 @@ public class DataProviders {
         } else {
             Lighty.LOGGER.error("There is no OverlayDataProvider registered for {}! Not changing active OverlayDataProviders.", rl);
         }
+        Config.ACTIVE_DATA_PROVIDERS.setValue(DATA_PROVIDERS.keySet().stream().toList());
     }
 
     public static void deactivate(ResourceLocation rl) {
@@ -31,6 +32,7 @@ public class DataProviders {
         } else {
             Lighty.LOGGER.error("There is no OverlayDataProvider registered for {}! Cannot remove {}.", rl, rl);
         }
+        Config.ACTIVE_DATA_PROVIDERS.setValue(DATA_PROVIDERS.keySet().stream().toList());
     }
 
     public static void setLastActiveProviders() {
