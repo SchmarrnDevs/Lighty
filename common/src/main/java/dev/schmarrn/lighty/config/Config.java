@@ -57,9 +57,9 @@ public class Config {
     public static final ColorConfig OVERLAY_ORANGE = new ColorConfig("lighty.overlay_orange", 0xFF6600);
     public static final ColorConfig OVERLAY_RED = new ColorConfig("lighty.overlay_red", 0xFF0000);
 
-    public static final ColorConfig ADDITIONAL_OVERLAY_GOOD = new ColorConfig("lighty.additional_overlay_good", 0x00FF66);
-    public static final ColorConfig ADDITIONAL_OVERLAY_WARN = new ColorConfig("lighty.additional_overlay_warn", 0x0000FF);
-    public static final ColorConfig ADDITIONAL_OVERLAY_BAD = new ColorConfig("lighty.additional_overlay_bad", 0x6600FF);
+    public static final ColorConfig ADDITIONAL_OVERLAY_GOOD = new ColorConfig("lighty.additional_overlay_good", 0x00FF00);
+    public static final ColorConfig ADDITIONAL_OVERLAY_WARN = new ColorConfig("lighty.additional_overlay_warn", 0xFF6600);
+    public static final ColorConfig ADDITIONAL_OVERLAY_BAD = new ColorConfig("lighty.additional_overlay_bad", 0xFF0000);
 
     public static final ResourceLocationListConfig AUTO_ON_ITEM_LIST = new ResourceLocationListConfig("lighty.auto_on.item", stringToRL(
             "minecraft:torch",
