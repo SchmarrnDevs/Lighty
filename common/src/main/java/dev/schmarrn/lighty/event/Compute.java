@@ -106,7 +106,7 @@ public class Compute {
                     BlockPos pos = chunkPos.origin().offset(x, y, z);
 
                     for (var dataProvider : dataProviders) {
-                        var data = dataProvider.compute(world, pos);
+                        var data = dataProvider.compute(world, pos, new Vec3i(x, y, z));
                         if (data.valid()) {
                             overlayData.add(data);
                         }

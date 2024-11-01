@@ -56,9 +56,9 @@ public class NumberRenderer implements OverlayRenderer {
     }
 
     public void build(ClientLevel level, BlockPos pos, OverlayData data, BufferBuilder builder, int lightmap) {
-        float x1 = pos.getX() % 16 + PXL * 5.25f;
-        float y = pos.getY() % 16 + 1f + 0.005f + data.yOffset();
-        float z1 = pos.getZ() % 16 + PXL * 4f;
+        float x1 = data.rPos().getX() + PXL * 5.25f;
+        float y  = data.rPos().getY() + 1f + 0.005f + data.yOffset();
+        float z1 = data.rPos().getZ() + PXL * 4f;
 
         if (Config.SHOW_SKYLIGHT_LEVEL.getValue()) {
             renderNumber(builder, data.blockNumber(), x1, y, z1, data.color(), lightmap);

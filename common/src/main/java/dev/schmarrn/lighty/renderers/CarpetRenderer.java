@@ -11,22 +11,15 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.SectionPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 public class CarpetRenderer implements OverlayRenderer {
-    public static Vec3i blockPosToRelative(BlockPos pos) {
-        SectionPos sPos = SectionPos.of(pos);
-        return pos.subtract(sPos.origin());
-    }
     public void build(ClientLevel level, BlockPos pos, OverlayData data, BufferBuilder builder, int lightmap) {
-        var rPos = blockPosToRelative(pos);
-        float x = rPos.getX();
-        float y = rPos.getY() + 1 + data.yOffset();
-        float z = rPos.getZ();
+        float x = data.rPos().getX();
+        float y = data.rPos().getY() + 1 + data.yOffset();
+        float z = data.rPos().getZ();
 
         try {
             builder.addVertex(x, y + 1 / 16f, z).setColor(data.color()).setUv(0, 0).setLight(lightmap).setNormal(0f, 1f, 0f);

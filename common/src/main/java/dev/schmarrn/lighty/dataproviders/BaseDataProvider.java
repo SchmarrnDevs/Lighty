@@ -5,12 +5,13 @@ import dev.schmarrn.lighty.api.*;
 import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BaseDataProvider implements OverlayDataProvider {
-    public OverlayData compute(ClientLevel level, BlockPos pos) {
+    public OverlayData compute(ClientLevel level, BlockPos pos, Vec3i rPos) {
         BlockPos posUp = pos.above();
         BlockState blockState = level.getBlockState(pos);
 
@@ -32,7 +33,7 @@ public class BaseDataProvider implements OverlayDataProvider {
             return OverlayData.invalid();
         }
 
-        return new OverlayData(true, color, skyLightLevel, blockLightLevel, pos, offset);
+        return new OverlayData(true, color, skyLightLevel, blockLightLevel, pos, rPos, offset);
     }
 
     @Override

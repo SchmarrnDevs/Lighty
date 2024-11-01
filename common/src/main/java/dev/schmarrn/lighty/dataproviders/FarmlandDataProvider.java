@@ -7,13 +7,14 @@ import dev.schmarrn.lighty.api.OverlayData;
 import dev.schmarrn.lighty.api.OverlayDataProvider;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class FarmlandDataProvider implements OverlayDataProvider {
-    public OverlayData compute(ClientLevel level, BlockPos pos) {
+    public OverlayData compute(ClientLevel level, BlockPos pos, Vec3i rPos) {
         BlockPos posUp = pos.above();
         BlockState blockState = level.getBlockState(pos);
 
@@ -28,7 +29,7 @@ public class FarmlandDataProvider implements OverlayDataProvider {
 
         float offset = -1f/15f;
 
-        return new OverlayData(true, color, skyLightLevel, blockLightLevel, pos, offset);
+        return new OverlayData(true, color, skyLightLevel, blockLightLevel, pos, rPos, offset);
     }
 
     @Override
