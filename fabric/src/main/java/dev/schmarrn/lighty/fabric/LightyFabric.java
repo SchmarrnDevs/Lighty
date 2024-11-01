@@ -24,7 +24,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
 
 public class LightyFabric implements ClientModInitializer {
-
     @Override
     public void onInitializeClient() {
 
