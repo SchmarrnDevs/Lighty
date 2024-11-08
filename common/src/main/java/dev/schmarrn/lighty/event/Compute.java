@@ -127,7 +127,9 @@ public class Compute {
         if (buffer == null) {
             buffer = new BufferHolder();
         }
-        buffer.upload(builder.build());
+        if (!overlayData.isEmpty()) {
+            buffer.upload(builder.build());
+        }
 
         return buffer;
     }
@@ -275,22 +277,17 @@ public class Compute {
                 ChunkPos chunkPos = new ChunkPos(playerPos.x + x, playerPos.z + z);
                 for (int i = 0; i < world.getSectionsCount(); ++i) {
                     var chunkSection = SectionPos.of(chunkPos, world.getMinSection() + i);
-                    if (frustum.isVisible(AABB.encapsulatingFullBlocks(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16,16,16)))) {
-                        if (cachedBuffers.containsKey(chunkSection)) {
-                            BufferHolder cachedBuffer = cachedBuffers.get(chunkSection);
-                            if (!cachedBuffer.isValid()) {
-                                toBeUpdated.add(chunkSection);
-                            } else {
-                                BlockPos origin = chunkSection.origin();
-                                BlockPos dPos = origin.subtract(camOrigin);
-                                matrixStack.pushPose();
-                                matrixStack.translate(dPos.getX(), dPos.getY(), dPos.getZ());
-                                cachedBuffer.draw(matrixStack.last().pose(), projectionMatrix, shader);
-                                matrixStack.popPose();
-                            }
-                        } else {
-                            toBeUpdated.add(chunkSection);
+                    if (cachedBuffers.containsKey(chunkSection)) {
+                        BufferHolder cachedBuffer = cachedBuffers.get(chunkSection);
+                        if (!cachedBuffer.isValid())
+                            continue;
+                        if (frustum.isVisible(AABB.encapsulatingFullBlocks(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16,16,16)))) {
+                            BlockPos origin = chunkSection.origin();
+                            BlockPos dPos = origin.subtract(camOrigin);
+                            cachedBuffer.draw(matrixStack.last().copy().pose().translate(dPos.getX(), dPos.getY(), dPos.getZ()), projectionMatrix, shader);
                         }
+                    } else {
+                        toBeUpdated.add(chunkSection);
                     }
                 }
             }
