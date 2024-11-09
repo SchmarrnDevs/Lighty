@@ -16,4 +16,5 @@ minecraft {
 
 dependencies {
     compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
+    compileOnly(files(rootProject.getRootDir().path + "/iris_api.jar"))
 }

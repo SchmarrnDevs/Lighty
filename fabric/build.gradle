@@ -50,6 +50,7 @@ dependencies {
     modImplementation fabricApi.module("fabric-screen-api-v1", rootProject.findProperty("fabric_api_version"))
 
     compileOnly project(":common")
+    compileOnly(files(rootProject.getRootDir().path + "/iris_api.jar"))
 }
 
 compileJava {

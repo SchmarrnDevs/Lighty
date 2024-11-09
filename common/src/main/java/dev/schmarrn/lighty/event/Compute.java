@@ -24,12 +24,14 @@ import dev.schmarrn.lighty.Renderers;
 import dev.schmarrn.lighty.api.OverlayData;
 import dev.schmarrn.lighty.api.OverlayDataProvider;
 import dev.schmarrn.lighty.api.OverlayRenderer;
+import dev.schmarrn.lighty.compat.IrisCompat;
 import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.overlaystate.SMACH;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
@@ -40,6 +42,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 
 import java.util.*;
 
@@ -55,7 +58,6 @@ public class Compute {
     private static ChunkPos playerPos = null;
 
     private static int computationDistance = Math.min(Config.OVERLAY_DISTANCE.getValue(), Minecraft.getInstance().options.renderDistance().get());
-
 
     private static boolean outOfRange(SectionPos pos) {
         int computationDistanceSquared = computationDistance * computationDistance;
@@ -197,32 +199,6 @@ public class Compute {
         toBeRemoved = new HashSet<>(INITIAL_HASHSET_CAPACITY);
     }
 
-    private static Matrix4f rotY(float theta) {
-        // Sorry, but german:
-        // Homogene Zustandstransformationsmatrix nach ACIN Modellbildung
-        // Siehe: https://www.acin.tuwien.ac.at/file/teaching/bachelor/modellbildung/Formelsammlung_Modellbildung_2020S.pdf
-        // Beinhaltet nur Rotation um die Y Achse, ohne Verschiebung.
-        return new Matrix4f(
-                Mth.cos(theta), 0, Mth.sin(theta), 0,
-                0, 1, 0, 0,
-                -Mth.sin(theta), 0, Mth.cos(theta), 0,
-                0, 0, 0, 1
-        );
-    }
-
-    private static Matrix4f rotX(float psi) {
-        // Sorry, but german:
-        // Homogene Zustandstransformationsmatrix nach ACIN Modellbildung
-        // Siehe: https://www.acin.tuwien.ac.at/file/teaching/bachelor/modellbildung/Formelsammlung_Modellbildung_2020S.pdf
-        // Beinhaltet nur Rotation um die X Achse, ohne Verschiebung.
-        return new Matrix4f(
-                1, 0, 0, 0,
-                0, Mth.cos(psi), -Mth.sin(psi), 0,
-                0, Mth.sin(psi), Mth.cos(psi), 0,
-                0, 0, 0, 1
-        );
-    }
-
     public static void render(@Nullable Frustum frustum, PoseStack matrixStack, Matrix4f projectionMatrix) {
         if (!SMACH.isEnabled()) return;
 
@@ -236,17 +212,22 @@ public class Compute {
             return;
         }
 
-        ClientLevel world = Minecraft.getInstance().level;
+        Minecraft minecraft = Minecraft.getInstance();
+
+        ClientLevel world = minecraft.level;
         if (world == null) {
             return;
         }
 
         renderer.beforeRendering();
 
-        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-        matrixStack.pushPose();
-        matrixStack.mulPose(rotX(-camera.getXRot() * Mth.PI / 180f));
-        matrixStack.mulPose(rotY(-camera.getYRot() * Mth.PI / 180f + Mth.PI));
+        GameRenderer gameRenderer = minecraft.gameRenderer;
+        Camera camera = gameRenderer.getMainCamera();
+
+        // fixes view-bobbing and hurt-tilt causing the overlay to move when playing with shaders
+        IrisCompat.fixIrisShaders(matrixStack, camera, gameRenderer, minecraft);
+
+        matrixStack.last().pose().rotate(camera.rotation().conjugate(new Quaternionf()));
         // only translate to the nearest SectionPos
         matrixStack.translate(-(camera.getPosition().x % 16), -(camera.getPosition().y % 16), -(camera.getPosition().z % 16));
         SectionPos camSectionPos = SectionPos.of(camera.getBlockPosition());

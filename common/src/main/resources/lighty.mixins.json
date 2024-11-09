@@ -5,8 +5,9 @@
   "refmap": "lighty.refmap.json",
   "compatibilityLevel": "JAVA_8",
   "client": [
-    "LightUpdateMixin",
-    "BlockPlacedMixin"
+    "BlockPlacedMixin",
+    "GameRendererAccessor",
+    "LightUpdateMixin"
   ],
   "injectors": {
     "defaultRequire": 1
