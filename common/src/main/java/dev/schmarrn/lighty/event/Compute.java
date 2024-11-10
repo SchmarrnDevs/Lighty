@@ -225,6 +225,8 @@ public class Compute {
         GameRenderer gameRenderer = minecraft.gameRenderer;
         Camera camera = gameRenderer.getMainCamera();
 
+        matrixStack.pushPose();
+
         // fixes view-bobbing and hurt-tilt causing the overlay to move when playing with shaders
         // applies bobbing effects to the matrixStack because it isn't applied to the projection matrix
         IrisCompat.fixIrisShaders(matrixStack, camera, gameRenderer, minecraft);

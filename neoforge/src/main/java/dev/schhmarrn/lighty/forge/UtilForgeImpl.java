@@ -15,6 +15,7 @@
 package dev.schhmarrn.lighty.forge;
 
 import dev.schmarrn.lighty.UtilDefinition;
+import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.KeyMapping;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -28,6 +29,16 @@ import java.util.List;
 
 @EventBusSubscriber(value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class UtilForgeImpl implements UtilDefinition {
+    private static final IrisApi INSTANCE;
+    static {
+        IrisApi i;
+        try {
+            i = (IrisApi)Class.forName("net.irisshaders.iris.apiimpl.IrisApiV0Impl").getField("INSTANCE").get(null);
+        } catch (NoSuchFieldException | ClassNotFoundException | IllegalAccessException var1) {
+            i = null;
+        }
+        INSTANCE = i;
+    }
 
     private static final List<KeyMapping> MAPPINGS = new ArrayList<>();
 
@@ -40,6 +51,11 @@ public class UtilForgeImpl implements UtilDefinition {
     @Override
     public Path getConfigDir() {
         return FMLPaths.CONFIGDIR.get();
+    }
+
+    @Override
+    public boolean shadersEnabled() {
+        return INSTANCE != null && INSTANCE.isShaderPackInUse();
     }
 
     @SubscribeEvent

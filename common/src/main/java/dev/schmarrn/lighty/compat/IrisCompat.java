@@ -1,8 +1,8 @@
 package dev.schmarrn.lighty.compat;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.schmarrn.lighty.UtilDefinition;
 import dev.schmarrn.lighty.mixin.GameRendererAccessor;
-import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -13,18 +13,6 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 public class IrisCompat {
-    private static final IrisApi INSTANCE;
-
-    static {
-        IrisApi i;
-        try {
-            i = (IrisApi)Class.forName("net.irisshaders.iris.apiimpl.IrisApiV0Impl").getField("INSTANCE").get((Object)null);
-        } catch (NoSuchFieldException | ClassNotFoundException | IllegalAccessException var1) {
-            i = null;
-        }
-        INSTANCE = i;
-    }
-
     private static Matrix4f shaderFix(PoseStack stack, Camera camera, GameRenderer gameRenderer, Minecraft minecraft, LocalPlayer player) {
         // mostly taken from: https://github.com/IrisShaders/Iris/blob/multiloader-new/common/src/main/java/net/irisshaders/iris/mixin/MixinModelViewBobbing.java#L98-L134
         // which in turn is mostly taken from GameRenderer
@@ -39,7 +27,7 @@ public class IrisCompat {
 
         Matrix4f instance = stack.last().pose();
 
-        float f = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+        float f = minecraft.getTimer().getGameTimeDeltaPartialTick(false);
         float h = minecraft.options.screenEffectScale().get().floatValue();
         float i = Mth.lerp(f, player.oSpinningEffectIntensity, player.spinningEffectIntensity) * h * h;
         if (i > 0.0F) {
@@ -57,12 +45,8 @@ public class IrisCompat {
     }
 
     public static void fixIrisShaders(PoseStack stack, Camera camera, GameRenderer gr, Minecraft minecraft) {
-        if (IrisCompat.INSTANCE != null) {
-            if (IrisCompat.INSTANCE.isShaderPackInUse()) {
-                if (minecraft.player != null) {
-                    stack.last().pose().set(shaderFix(stack, camera, gr, minecraft, minecraft.player));
-                }
-            }
+        if (UtilDefinition.INSTANCE.shadersEnabled() && minecraft.player != null) {
+            stack.last().pose().set(shaderFix(stack, camera, gr, minecraft, minecraft.player));
         }
     }
 }

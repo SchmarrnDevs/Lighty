@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id 'eclipse'
     id 'idea'
-    id 'net.neoforged.gradle.userdev' version '7.0.142'
+    id 'net.neoforged.gradle.userdev' version '7.0.165'
 }
 
 version = "${mod_version}+${minecraft_version}"
@@ -10,6 +10,17 @@ group = rootProject.findProperty("maven_group")
 
 repositories {
     mavenLocal()
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 base {
@@ -48,7 +59,8 @@ dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
 
     compileOnly project(":common")
-    compileOnly(files(rootProject.getRootDir().path + "/iris_api.jar"))
+    implementation "maven.modrinth:iris:${iris_version}-neoforge"
+    implementation "maven.modrinth:sodium:${sodium_version}-neoforge"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
