@@ -31,28 +31,28 @@ public class CarpetRenderer implements OverlayRenderer {
                 pos = pos.above();
             }
             //NORTH
-            if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), level.getBlockState(pos.relative(Direction.SOUTH)), Direction.SOUTH)) {
+            if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), level, pos, Direction.SOUTH, pos.relative(Direction.SOUTH))) {
                 builder.addVertex(x, y + 1 / 16f, z + 1).setColor(data.color()).setUv(0, 1f / 16).setLight(lightmap).setNormal(0f, 0f, -1f);
                 builder.addVertex(x, y, z + 1).setColor(data.color()).setUv(0, 0).setLight(lightmap).setNormal(0f, 0f, -1f);
                 builder.addVertex(x + 1, y, z + 1).setColor(data.color()).setUv(1, 0).setLight(lightmap).setNormal(0f, 0f, -1f);
                 builder.addVertex(x + 1, y + 1 / 16f, z + 1).setColor(data.color()).setUv(1, 1f / 16).setLight(lightmap).setNormal(0f, 0f, -1f);
             }
             //EAST
-            if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), level.getBlockState(pos.relative(Direction.WEST)), Direction.WEST)) {
+            if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), level, pos, Direction.WEST, pos.relative(Direction.WEST))) {
                 builder.addVertex(x, y + 1/16f, z).setColor(data.color()).setUv(0,1f/16).setLight(lightmap).setNormal(-1f, 0f, 0f);
                 builder.addVertex(x, y, z).setColor(data.color()).setUv(0, 0).setLight(lightmap).setNormal(-1f, 0f, 0f);
                 builder.addVertex(x, y, z + 1).setColor(data.color()).setUv(1, 0).setLight(lightmap).setNormal(-1f, 0f, 0f);
                 builder.addVertex(x, y + 1/16f, z + 1).setColor(data.color()).setUv(1, 1f/16).setLight(lightmap).setNormal(-1f, 0f, 0f);
             }
             //SOUTH
-            if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), level.getBlockState(pos.relative(Direction.NORTH)), Direction.NORTH)) {
+            if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), level, pos, Direction.NORTH, pos.relative(Direction.NORTH))) {
                 builder.addVertex(x+1, y + 1/16f, z).setColor(data.color()).setUv(0,1f/16).setLight(lightmap).setNormal(0f, 0f, 1f);
                 builder.addVertex(x+1, y, z).setColor(data.color()).setUv(0, 0).setLight(lightmap).setNormal(0f, 0f, -1f);
                 builder.addVertex(x, y, z).setColor(data.color()).setUv(1, 0).setLight(lightmap).setNormal(0f, 0f, -1f);
                 builder.addVertex(x, y + 1/16f, z).setColor(data.color()).setUv(1, 1f/16).setLight(lightmap).setNormal(0f, 0f, -1f);
             }
             //WEST
-            if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), level.getBlockState(pos.relative(Direction.EAST)), Direction.EAST)) {
+            if (Block.shouldRenderFace(Blocks.STONE.defaultBlockState(), level, pos, Direction.EAST, pos.relative(Direction.EAST))) {
                 builder.addVertex(x+1, y + 1/16f, z+1).setColor(data.color()).setUv(0,1f/16).setLight(lightmap).setNormal(1f, 0f, 0f);
                 builder.addVertex(x+1, y, z+1).setColor(data.color()).setUv(0, 0).setLight(lightmap).setNormal(1f, 0f, 0f);
                 builder.addVertex(x+1, y, z).setColor(data.color()).setUv(1, 0).setLight(lightmap).setNormal(1f, 0f, 0f);
