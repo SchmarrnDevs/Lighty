@@ -40,6 +40,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -225,17 +226,13 @@ public class Compute {
         Camera camera = gameRenderer.getMainCamera();
 
         // fixes view-bobbing and hurt-tilt causing the overlay to move when playing with shaders
+        // applies bobbing effects to the matrixStack because it isn't applied to the projection matrix
         IrisCompat.fixIrisShaders(matrixStack, camera, gameRenderer, minecraft);
 
+        // Undo camera rotation
         matrixStack.last().pose().rotate(camera.rotation().conjugate(new Quaternionf()));
-        // only translate to the nearest SectionPos
-        matrixStack.translate(-(camera.getPosition().x % 16), -(camera.getPosition().y % 16), -(camera.getPosition().z % 16));
-        SectionPos camSectionPos = SectionPos.of(camera.getBlockPosition());
-        // Don't ask me *why* I need this offset if the camera has negative components
-        int dX = camSectionPos.getX() < 0 ? -16 : 0;
-        int dY = camSectionPos.getY() < 0 ? -16 : 0;
-        int dZ = camSectionPos.getZ() < 0 ? -16 : 0;
-        BlockPos camOrigin = camSectionPos.origin().subtract(new Vec3i(dX, dY, dZ));
+        // save camera position to be able to later translate the different subsections
+        Vec3 camPos = camera.getPosition();
 
         ShaderInstance shader = RenderSystem.getShader();
 
@@ -260,12 +257,14 @@ public class Compute {
                     var chunkSection = SectionPos.of(chunkPos, world.getMinSection() + i);
                     if (cachedBuffers.containsKey(chunkSection)) {
                         BufferHolder cachedBuffer = cachedBuffers.get(chunkSection);
-                        if (!cachedBuffer.isValid())
+                        // Only do the expensive frustum check if the buffer is valid
+                        if (!cachedBuffer.isValid()) {
                             continue;
+                        }
                         if (frustum.isVisible(AABB.encapsulatingFullBlocks(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16,16,16)))) {
-                            BlockPos origin = chunkSection.origin();
-                            BlockPos dPos = origin.subtract(camOrigin);
-                            cachedBuffer.draw(matrixStack.last().copy().pose().translate(dPos.getX(), dPos.getY(), dPos.getZ()), projectionMatrix, shader);
+                            Vec3 origin = new Vec3(chunkSection.origin().getX(), chunkSection.origin().getY(), chunkSection.origin().getZ());
+                            Vec3 dPos = origin.subtract(camPos);
+                            cachedBuffer.draw(matrixStack.last().copy().pose().translate((float)dPos.x(), (float)dPos.y(), (float)dPos.z()), projectionMatrix, shader);
                         }
                     } else {
                         toBeUpdated.add(chunkSection);
