@@ -248,6 +248,7 @@ public class Compute {
 
         RenderSystem.setShaderFog(new FogParameters(fogStart, renderDistance, FogShape.CYLINDER, 0.0f, 0.0f, 0.0f, 0.0f));
 
+        matrixStack.pushPose(); // required to fix mod incompats that only show in production
         for (int x = -computationDistance + 1; x < computationDistance; ++x) {
             for (int z = -computationDistance + 1; z < computationDistance; ++z) {
                 ChunkPos chunkPos = new ChunkPos(playerPos.x + x, playerPos.z + z);
@@ -270,6 +271,7 @@ public class Compute {
                 }
             }
         }
+        matrixStack.popPose(); // required to fix mod incompats that only show in production
 
         // Reset Fog stuff
         RenderSystem.setShaderFog(oldFog);
