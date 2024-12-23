@@ -155,8 +155,6 @@ public class Compute {
             return;
         }
 
-        playerPos = new ChunkPos(client.player.blockPosition());
-
         cachedBuffers.forEach(((sectionPos, bufferHolder) -> {
             if (outOfRange(sectionPos)) {
                 toBeRemoved.add(sectionPos);
@@ -203,13 +201,7 @@ public class Compute {
     public static void render(@Nullable Frustum frustum, PoseStack matrixStack, Matrix4f projectionMatrix) {
         if (!SMACH.isEnabled()) return;
 
-        OverlayRenderer renderer = Renderers.getRenderer();
-
         if (frustum == null) {
-            return;
-        }
-
-        if (playerPos == null) {
             return;
         }
 
@@ -220,10 +212,14 @@ public class Compute {
             return;
         }
 
+        OverlayRenderer renderer = Renderers.getRenderer();
         renderer.beforeRendering();
 
         GameRenderer gameRenderer = minecraft.gameRenderer;
         Camera camera = gameRenderer.getMainCamera();
+
+        // update player position
+        playerPos = new ChunkPos(camera.getBlockPosition());
 
         matrixStack.pushPose();
 
