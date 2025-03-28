@@ -28,7 +28,7 @@ public class LightyFabric implements ClientModInitializer {
     public void onInitializeClient() {
 
         ClientTickEvents.END_CLIENT_TICK.register(Compute::computeCache);
-        WorldRenderEvents.AFTER_TRANSLUCENT.register(context -> Compute.render(context.frustum(), context.matrixStack(), context.projectionMatrix()));
+        WorldRenderEvents.AFTER_TRANSLUCENT.register(context -> Compute.render(context.frustum()));
 
         ClientTickEvents.END_CLIENT_TICK.register(KeyBind::handleKeyBind);
 

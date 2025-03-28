@@ -1,6 +1,5 @@
 package dev.schmarrn.lighty.renderers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.ModeManager;
@@ -68,17 +67,15 @@ public class NumberRenderer implements OverlayRenderer {
         }
     }
 
-    public void beforeRendering() {
-        RenderType.cutout().setupRenderState();
-        RenderSystem.enableDepthTest();
-        RenderSystem.setShaderTexture(0, ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "textures/block/numbers.png"));
+    @Override
+    public RenderType getRenderType() {
+        return RenderType.cutout();
     }
 
-    public void afterRendering() {
-        RenderType.cutout().clearRenderState();
-        RenderSystem.disableDepthTest();
+    @Override
+    public ResourceLocation getTextureLocation() {
+        return ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "textures/block/numbers.png");
     }
-
     @Override
     public ResourceLocation getResourceLocation() {
         return ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "renderer_number");

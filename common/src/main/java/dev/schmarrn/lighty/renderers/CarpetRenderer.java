@@ -1,6 +1,5 @@
 package dev.schmarrn.lighty.renderers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.ModeManager;
@@ -63,15 +62,14 @@ public class CarpetRenderer implements OverlayRenderer {
         }
     }
 
-    public void beforeRendering() {
-        RenderType.translucent().setupRenderState();
-        RenderSystem.setShaderTexture(0, Config.CARPET_TEXTURE.getValue());
-        RenderSystem.enableDepthTest();
+    @Override
+    public RenderType getRenderType() {
+        return RenderType.translucent();
     }
 
-    public void afterRendering() {
-        RenderType.translucent().clearRenderState();
-        RenderSystem.disableDepthTest();
+    @Override
+    public ResourceLocation getTextureLocation() {
+        return Config.CARPET_TEXTURE.getValue();
     }
 
     @Override

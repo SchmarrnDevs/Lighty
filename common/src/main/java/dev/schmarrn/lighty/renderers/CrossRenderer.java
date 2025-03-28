@@ -1,6 +1,5 @@
 package dev.schmarrn.lighty.renderers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.ModeManager;
@@ -26,14 +25,14 @@ public class CrossRenderer implements OverlayRenderer {
         builder.addVertex(x2, y, z1).setColor(data.color()).setUv(1, 0).setLight(lightmap).setNormal(0f, 1f, 0f);
     }
 
-    public void beforeRendering() {
-        RenderType.cutout().setupRenderState();
-        RenderSystem.setShaderTexture(0, Config.CROSS_TEXTURE.getValue());
-        RenderSystem.enableDepthTest();
+    @Override
+    public RenderType getRenderType() {
+        return RenderType.cutout();
     }
 
-    public void afterRendering() {
-        RenderSystem.disableDepthTest();
+    @Override
+    public ResourceLocation getTextureLocation() {
+        return Config.CROSS_TEXTURE.getValue();
     }
 
     @Override

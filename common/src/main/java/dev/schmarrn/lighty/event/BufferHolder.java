@@ -14,52 +14,39 @@
 
 package dev.schmarrn.lighty.event;
 
+import com.mojang.blaze3d.buffers.BufferType;
 import com.mojang.blaze3d.buffers.BufferUsage;
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.MeshData;
-import com.mojang.blaze3d.vertex.VertexBuffer;
-import net.minecraft.client.renderer.CompiledShaderProgram;
-import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BufferHolder {
-    private final List<VertexBuffer> vertexBuffers;
+    // List because we can hold multiple gpuBuffers from different data providers
+    private final List<GpuBuffer> gpuBuffers;
 
     BufferHolder() {
-        vertexBuffers = new ArrayList<>();
+        gpuBuffers = new ArrayList<>();
     }
 
     boolean isValid() {
-        return !vertexBuffers.isEmpty();
+        return !gpuBuffers.isEmpty();
     }
 
     void close() {
-        for (var buffer : vertexBuffers) {
+        for (var buffer : gpuBuffers) {
             buffer.close();
         }
-        vertexBuffers.clear();
+        gpuBuffers.clear();
     }
 
     void upload(MeshData buffer) {
-        if (buffer == null) {
-            // Don't upload
-            return;
-        }
-
-        var vertexBuffer = new VertexBuffer(BufferUsage.DYNAMIC_WRITE);
-        vertexBuffer.bind();
-        vertexBuffer.upload(buffer);
-        VertexBuffer.unbind();
-
-        vertexBuffers.add(vertexBuffer);
+        gpuBuffers.add(RenderSystem.getDevice().createBuffer(() -> "lighty buffer test", BufferType.VERTICES, BufferUsage.STATIC_WRITE, buffer.vertexBuffer()));
     }
 
-    void draw(Matrix4f positionMatrix, Matrix4f projectionMatrix, CompiledShaderProgram shader) {
-        for (var vertexBuffer : vertexBuffers) {
-            vertexBuffer.bind();
-            vertexBuffer.drawWithShader(positionMatrix, projectionMatrix, shader);
-            VertexBuffer.unbind();
-        }
+    List<GpuBuffer> getGpuBuffers() {
+        return gpuBuffers;
     }
 }

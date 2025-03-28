@@ -13,5 +13,7 @@ public interface GameRendererAccessor {
     @Invoker("bobView")
     void callBobView(PoseStack poseStack, float h);
     @Accessor
-    int getConfusionAnimationTick();
+    float getSpinningEffectTime();
+    @Accessor
+    float getSpinningEffectSpeed();
 }

@@ -63,7 +63,7 @@ public class LightyForge {
         @SubscribeEvent
         public static void render(RenderLevelStageEvent event) {
             if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
-                Compute.render(event.getFrustum(), event.getPoseStack(), event.getProjectionMatrix());
+                Compute.render(event.getFrustum());
             }
         }
     }

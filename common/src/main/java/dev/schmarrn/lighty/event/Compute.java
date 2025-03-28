@@ -14,37 +14,34 @@
 
 package dev.schmarrn.lighty.event;
 
-import com.mojang.blaze3d.shaders.FogShape;
+import com.mojang.blaze3d.systems.GpuDevice;
+import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.DataProviders;
 import dev.schmarrn.lighty.Renderers;
 import dev.schmarrn.lighty.api.OverlayData;
 import dev.schmarrn.lighty.api.OverlayDataProvider;
 import dev.schmarrn.lighty.api.OverlayRenderer;
-import dev.schmarrn.lighty.compat.IrisCompat;
 import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.overlaystate.SMACH;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.CompiledShaderProgram;
-import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 
 import java.util.*;
 
@@ -59,7 +56,7 @@ public class Compute {
     private static final Map<SectionPos, BufferHolder> cachedBuffers = new HashMap<>();
     private static ChunkPos playerPos = null;
 
-    private static int computationDistance = Math.min(Config.OVERLAY_DISTANCE.getValue(), Minecraft.getInstance().options.renderDistance().get());
+    private static int computationDistance = Math.min(Config.OVERLAY_DISTANCE.getValue(), Minecraft.getInstance().options.renderDistance().get() + 1);
 
     private static boolean outOfRange(SectionPos pos) {
         int computationDistanceSquared = computationDistance * computationDistance;
@@ -80,7 +77,7 @@ public class Compute {
             vertexBuffer.close();
         });
         cachedBuffers.clear();
-        computationDistance = Math.min(Config.OVERLAY_DISTANCE.getValue(), Minecraft.getInstance().options.renderDistance().get());
+        computationDistance = Math.min(Config.OVERLAY_DISTANCE.getValue(), Minecraft.getInstance().options.renderDistance().get() + 1);
     }
 
     public static void updateBlockPos(BlockPos pos) {
@@ -132,7 +129,7 @@ public class Compute {
             buffer = new BufferHolder();
         }
         if (!overlayData.isEmpty()) {
-            buffer.upload(builder.build());
+            buffer.upload(builder.buildOrThrow());
         }
 
         return buffer;
@@ -199,7 +196,7 @@ public class Compute {
         toBeRemoved = new HashSet<>(INITIAL_HASHSET_CAPACITY);
     }
 
-    public static void render(@Nullable Frustum frustum, PoseStack matrixStack, Matrix4f projectionMatrix) {
+    public static void render(@Nullable Frustum frustum) {
         if (!SMACH.isEnabled()) return;
 
         if (frustum == null) {
@@ -222,29 +219,14 @@ public class Compute {
         // update player position
         playerPos = new ChunkPos(camera.getBlockPosition());
 
-        matrixStack.pushPose();
-
         // fixes view-bobbing and hurt-tilt causing the overlay to move when playing with shaders
         // applies bobbing effects to the matrixStack because it isn't applied to the projection matrix
-        IrisCompat.fixIrisShaders(matrixStack, camera, gameRenderer, minecraft);
+        //IrisCompat.fixIrisShaders(matrixStack, camera, gameRenderer, minecraft);
 
-        // Undo camera rotation
-        matrixStack.last().pose().rotate(camera.rotation().conjugate(new Quaternionf()));
         // save camera position to be able to later translate the different subsections
         Vec3 camPos = camera.getPosition();
 
-        CompiledShaderProgram shader = RenderSystem.getShader();
-        // The times 16 is just a magic number, chosen by trial and error.
-        // The fog shenanigans should fix a really annoying issue: https://github.com/SchmarrnDevs/Lighty/issues/47
-        // I hate this issue, multiply by FAC. Number chosen because FUCK YOU FOG, NOW WORK FOR GOD'S SAKE
-        float renderDistance = Minecraft.getInstance().gameRenderer.getRenderDistance() * 16f * 0xFAC;
-        float fogStart = renderDistance - Mth.clamp(renderDistance/10f, 4f, 64f);
-
-        FogParameters oldFog = RenderSystem.getShaderFog();
-
-        RenderSystem.setShaderFog(new FogParameters(fogStart, renderDistance, FogShape.CYLINDER, 0.0f, 0.0f, 0.0f, 0.0f));
-
-        matrixStack.pushPose(); // required to fix mod incompats that only show in production
+        List<RenderPass.Draw> drawList = new ArrayList<>();
         for (int x = -computationDistance + 1; x < computationDistance; ++x) {
             for (int z = -computationDistance + 1; z < computationDistance; ++z) {
                 ChunkPos chunkPos = new ChunkPos(playerPos.x + x, playerPos.z + z);
@@ -259,7 +241,19 @@ public class Compute {
                         if (frustum.isVisible(AABB.encapsulatingFullBlocks(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16,16,16)))) {
                             Vec3 origin = new Vec3(chunkSection.origin());
                             Vec3 dPos = origin.subtract(camPos);
-                            cachedBuffer.draw(matrixStack.last().copy().pose().translate((float)dPos.x(), (float)dPos.y(), (float)dPos.z()), projectionMatrix, shader);
+
+                            var gpuBuffers = cachedBuffer.getGpuBuffers();
+                            for (var gpuBuffer : gpuBuffers) {
+                                drawList.add(new RenderPass.Draw(
+                                        0,
+                                        gpuBuffer,
+                                        null,
+                                        null,
+                                        0,
+                                        gpuBuffer.size(),
+                                        uniformUploader -> uniformUploader.upload("ModelOffset", (float)dPos.x(), (float)dPos.y(), (float)dPos.z())
+                                ));
+                            }
                         }
                     } else {
                         toBeUpdated.add(chunkSection);
@@ -267,12 +261,20 @@ public class Compute {
                 }
             }
         }
-        matrixStack.popPose(); // required to fix mod incompats that only show in production
 
-        // Reset Fog stuff
-        RenderSystem.setShaderFog(oldFog);
-
-        matrixStack.popPose();
+        GpuDevice device = RenderSystem.getDevice();
+        RenderType renderType = renderer.getRenderType();
+        try (RenderPass pass = device.createCommandEncoder().createRenderPass(renderType.getRenderTarget().getColorTexture(), OptionalInt.empty(), renderType.getRenderTarget().getDepthTexture(), OptionalDouble.empty())) {
+            pass.setPipeline(renderType.getRenderPipeline());
+            GpuTexture tex = RenderSystem.getShaderTexture(0);
+            GpuTexture lightMapTexture = RenderSystem.getShaderTexture(2);
+            if (tex != null && lightMapTexture != null) {
+                pass.bindSampler("Sampler0", tex);
+                pass.bindSampler("Sampler2", lightMapTexture);
+            }
+            RenderSystem.AutoStorageIndexBuffer asib = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
+            pass.drawMultipleIndexed(drawList, asib.getBuffer(0), asib.type());
+        }
 
         renderer.afterRendering();
     }
