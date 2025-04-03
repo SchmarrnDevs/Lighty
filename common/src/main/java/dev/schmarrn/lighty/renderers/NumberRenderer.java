@@ -19,6 +19,7 @@ public class NumberRenderer implements OverlayRenderer {
     private static void renderDigit(BufferBuilder builder, int digit, float x, float y, float z, int color, int lightmap) {
         float startU = (0b11 & digit) / 4f;
         float startV = ((digit >> 2) & 0b11) / 4f;
+        float width = 0.25f;
 
         builder.addVertex(x, y, z)
                 .setColor(color)
@@ -27,17 +28,17 @@ public class NumberRenderer implements OverlayRenderer {
                 .setNormal(0f, 1f, 0f);
         builder.addVertex(x, y, z + dz)
                 .setColor(color)
-                .setUv(startU, startV + 0.25f)
+                .setUv(startU, startV + width)
                 .setLight(lightmap)
                 .setNormal(0f, 1f, 0f);
         builder.addVertex(x + dx, y, z + dz)
                 .setColor(color)
-                .setUv(startU + 0.25f, startV + 0.25f)
+                .setUv(startU + width, startV + width)
                 .setLight(lightmap)
                 .setNormal(0f, 1f, 0f);
         builder.addVertex(x + dx, y, z)
                 .setColor(color)
-                .setUv(startU + 0.25f, startV)
+                .setUv(startU + width, startV)
                 .setLight(lightmap)
                 .setNormal(0f, 1f, 0f);
     }

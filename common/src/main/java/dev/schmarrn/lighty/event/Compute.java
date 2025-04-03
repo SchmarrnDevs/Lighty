@@ -26,6 +26,7 @@ import dev.schmarrn.lighty.Renderers;
 import dev.schmarrn.lighty.api.OverlayData;
 import dev.schmarrn.lighty.api.OverlayDataProvider;
 import dev.schmarrn.lighty.api.OverlayRenderer;
+import dev.schmarrn.lighty.compat.IrisCompat;
 import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.overlaystate.SMACH;
 import net.minecraft.client.Camera;
@@ -98,7 +99,7 @@ public class Compute {
         toBeUpdated.add(pos);
     }
 
-    private static BufferHolder buildChunk(OverlayRenderer renderer, List<OverlayDataProvider> dataProviders, SectionPos chunkPos, Tesselator tesselator, ClientLevel world) {
+    private static BufferHolder buildChunk(OverlayRenderer renderer, List<OverlayDataProvider> dataProviders, SectionPos chunkPos, ClientLevel world) {
         List<OverlayData> overlayData = new ArrayList<>();
 
         for (int x = 0; x < 16; ++x) {
@@ -116,19 +117,19 @@ public class Compute {
             }
         }
 
-        BufferBuilder builder = renderer.beforeBuild(tesselator);
-        int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
-        // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
-        int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
-        for (var data : overlayData) {
-            renderer.build(world, data.pos(), data, builder, lightmap);
-        }
-
         BufferHolder buffer = cachedBuffers.get(chunkPos);
         if (buffer == null) {
             buffer = new BufferHolder();
         }
         if (!overlayData.isEmpty()) {
+            BufferBuilder builder = Tesselator.getInstance().begin(renderer.getRenderType().mode(), renderer.getRenderType().format());
+            int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
+            // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
+            int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
+            for (var data : overlayData) {
+                renderer.build(world, data.pos(), data, builder, lightmap);
+            }
+
             buffer.upload(builder.buildOrThrow());
         }
 
@@ -173,7 +174,7 @@ public class Compute {
                         // Ensure to have a clean state after building
                         vertexBuffer.close();
                     }
-                    return buildChunk(renderer, dataProviders, pos, Tesselator.getInstance(), world);
+                    return buildChunk(renderer, dataProviders, pos, world);
                 });
             }
         }
@@ -191,9 +192,7 @@ public class Compute {
             }
         }
 
-        // Instead of clear (which goes through every element, setting it null), just throw away the whole
-        // old hashset - should be faster in theory
-        toBeRemoved = new HashSet<>(INITIAL_HASHSET_CAPACITY);
+        toBeRemoved.clear();
     }
 
     public static void render(@Nullable Frustum frustum) {
@@ -211,7 +210,6 @@ public class Compute {
         }
 
         OverlayRenderer renderer = Renderers.getRenderer();
-        renderer.beforeRendering();
 
         GameRenderer gameRenderer = minecraft.gameRenderer;
         Camera camera = gameRenderer.getMainCamera();
@@ -219,9 +217,8 @@ public class Compute {
         // update player position
         playerPos = new ChunkPos(camera.getBlockPosition());
 
-        // fixes view-bobbing and hurt-tilt causing the overlay to move when playing with shaders
-        // applies bobbing effects to the matrixStack because it isn't applied to the projection matrix
-        //IrisCompat.fixIrisShaders(matrixStack, camera, gameRenderer, minecraft);
+        // fixes incompatible cached chunks when switching shaders on/off
+        IrisCompat.fixIrisShaders();
 
         // save camera position to be able to later translate the different subsections
         Vec3 camPos = camera.getPosition();
@@ -264,19 +261,15 @@ public class Compute {
 
         GpuDevice device = RenderSystem.getDevice();
         RenderType renderType = renderer.getRenderType();
+        GpuTexture tex = minecraft.getTextureManager().getTexture(renderer.getTextureLocation()).getTexture();
+        GpuTexture lightTexture = minecraft.gameRenderer.lightTexture().getTarget();
         try (RenderPass pass = device.createCommandEncoder().createRenderPass(renderType.getRenderTarget().getColorTexture(), OptionalInt.empty(), renderType.getRenderTarget().getDepthTexture(), OptionalDouble.empty())) {
             pass.setPipeline(renderType.getRenderPipeline());
-            GpuTexture tex = RenderSystem.getShaderTexture(0);
-            GpuTexture lightMapTexture = RenderSystem.getShaderTexture(2);
-            if (tex != null && lightMapTexture != null) {
-                pass.bindSampler("Sampler0", tex);
-                pass.bindSampler("Sampler2", lightMapTexture);
-            }
+            pass.bindSampler("Sampler0", tex);
+            pass.bindSampler("Sampler2", lightTexture);
             RenderSystem.AutoStorageIndexBuffer asib = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
             pass.drawMultipleIndexed(drawList, asib.getBuffer(0), asib.type());
         }
-
-        renderer.afterRendering();
     }
 
     private Compute() {}
