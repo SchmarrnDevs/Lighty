@@ -44,6 +44,7 @@ public class BufferHolder {
 
     void upload(MeshData buffer) {
         gpuBuffers.add(RenderSystem.getDevice().createBuffer(() -> "lighty buffer test", BufferType.VERTICES, BufferUsage.STATIC_WRITE, buffer.vertexBuffer()));
+        buffer.close();
     }
 
     List<GpuBuffer> getGpuBuffers() {
