@@ -36,24 +36,16 @@ public class SettingsScreen extends OptionsSubScreen {
         this.list.addBig(Config.OVERLAY_DISTANCE.getOptionInstance());
         this.list.addBig(Config.OVERLAY_BRIGHTNESS.getOptionInstance());
         this.list.addSmall(
-                new OptionInstance[]{
-                        Config.BLOCK_THRESHOLD.getOptionInstance(),
-                        Config.SKY_THRESHOLD.getOptionInstance(),
-                }
+                Config.BLOCK_THRESHOLD.getOptionInstance(),
+                Config.SKY_THRESHOLD.getOptionInstance()
         );
         this.list.addBig(Config.FARM_GROWTH_THRESHOLD.getOptionInstance());
         this.list.addBig(Config.FARM_UPROOT_THRESHOLD.getOptionInstance());
         this.list.addSmall(
-                new OptionInstance[]{
-                        Config.SHOW_SAFE.getOptionInstance(),
-                        Config.SHOW_SKYLIGHT_LEVEL.getOptionInstance()
-                }
+                Config.SHOW_SAFE.getOptionInstance(),
+                Config.SHOW_SKYLIGHT_LEVEL.getOptionInstance()
         );
-        this.list.addSmall(
-                new OptionInstance[]{
-                        Config.SHOULD_AUTO_ON.getOptionInstance()
-                }
-        );
+        this.list.addSmall(Config.SHOULD_AUTO_ON.getOptionInstance());
     }
 
     @Override

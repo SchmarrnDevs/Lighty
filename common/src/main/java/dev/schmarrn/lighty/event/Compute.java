@@ -161,14 +161,16 @@ public class Compute {
         }));
 
         HashSet<SectionPos> removeFromToBeUpdated = new HashSet<>(INITIAL_HASHSET_CAPACITY);
+        int sectionsComputeCounter = client.level.getSectionsCount() * Config.CHUNKS_PER_TICK.getValue();
         for (SectionPos sectionPos : toBeUpdated) {
             if (outOfRange(sectionPos)) {
                 toBeRemoved.add(sectionPos);
             } else {
-                if (!Minecraft.getInstance().levelRenderer.isSectionCompiled(sectionPos.origin())) {
+                if (sectionsComputeCounter <= 0 || !client.levelRenderer.isSectionCompiled(sectionPos.origin())) {
                     continue;
                 }
                 removeFromToBeUpdated.add(sectionPos);
+                sectionsComputeCounter--;
                 cachedBuffers.compute(sectionPos, (pos, vertexBuffer) -> {
                     if (vertexBuffer != null) {
                         // Ensure to have a clean state after building
@@ -193,6 +195,7 @@ public class Compute {
         }
 
         toBeRemoved.clear();
+
     }
 
     public static void render(@Nullable Frustum frustum) {

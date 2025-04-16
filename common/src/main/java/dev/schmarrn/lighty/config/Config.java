@@ -52,6 +52,7 @@ public class Config {
     public static final IntegerConfig FARM_UPROOT_THRESHOLD = new IntegerConfig("lighty.farm_uproot_threshold", 8, 0, 15);
 
     public static final BooleanConfig SHOW_SAFE = new BooleanConfig("lighty.show_safe", true);
+    public static final IntegerConfig CHUNKS_PER_TICK = new IntegerConfig("lighty.chunks_per_tick", 1024, 1, 1024);
 
     public static final ColorConfig OVERLAY_GREEN = new ColorConfig("lighty.overlay_green", 0x00FF00);
     public static final ColorConfig OVERLAY_ORANGE = new ColorConfig("lighty.overlay_orange", 0xFF6600);
