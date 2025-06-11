@@ -19,6 +19,7 @@ import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.blaze3d.vertex.VertexFormat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +27,13 @@ import java.util.List;
 public class BufferHolder {
     // List because we can hold multiple gpuBuffers from different data providers
     private final List<GpuBuffer> gpuBuffers;
+    private final List<GpuBuffer> indexBuffers;
+    private final List<VertexFormat.IndexType> indexTypes;
 
     BufferHolder() {
         gpuBuffers = new ArrayList<>();
+        indexBuffers = new ArrayList<>();
+        indexTypes = new ArrayList<>();
     }
 
     boolean isValid() {
@@ -39,15 +44,44 @@ public class BufferHolder {
         for (var buffer : gpuBuffers) {
             buffer.close();
         }
+        for (var buffer : indexBuffers) {
+            if (buffer != null) {
+                buffer.close();
+            }
+        }
         gpuBuffers.clear();
+        indexBuffers.clear();
+        indexTypes.clear();
     }
 
     void upload(MeshData buffer) {
-        gpuBuffers.add(RenderSystem.getDevice().createBuffer(() -> "lighty buffer test", BufferType.VERTICES, BufferUsage.STATIC_WRITE, buffer.vertexBuffer()));
+        gpuBuffers.add(RenderSystem.getDevice().createBuffer(() -> "lighty vertex buffer", BufferType.VERTICES, BufferUsage.STATIC_WRITE, buffer.vertexBuffer()));
+        if (buffer.indexBuffer() != null) {
+            indexBuffers.add(
+                    RenderSystem.getDevice().createBuffer(
+                            () -> "lighty index buffer",
+                            BufferType.INDICES,
+                            BufferUsage.STATIC_WRITE,
+                            buffer.indexBuffer()
+                    )
+            );
+            indexTypes.add(buffer.drawState().indexType());
+        } else {
+            indexBuffers.add(null);
+            indexTypes.add(null);
+        }
+
+
         buffer.close();
     }
 
     List<GpuBuffer> getGpuBuffers() {
         return gpuBuffers;
+    }
+    List<GpuBuffer> getIndexBuffers() {
+        return indexBuffers;
+    }
+    List<VertexFormat.IndexType> getIndexTypes() {
+        return indexTypes;
     }
 }

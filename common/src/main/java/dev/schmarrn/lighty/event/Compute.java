@@ -36,6 +36,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
@@ -243,12 +244,17 @@ public class Compute {
                             Vec3 dPos = origin.subtract(camPos);
 
                             var gpuBuffers = cachedBuffer.getGpuBuffers();
-                            for (var gpuBuffer : gpuBuffers) {
+                            var indexBuffers = cachedBuffer.getIndexBuffers();
+                            var indexTypes = cachedBuffer.getIndexTypes();
+                            for (int ii = 0; ii < gpuBuffers.size(); ++ii) {
+                                var gpuBuffer = gpuBuffers.get(ii);
+                                var indexBuffer = indexBuffers.get(ii);
+                                var indexType = indexTypes.get(ii);
                                 drawList.add(new RenderPass.Draw(
                                         0,
                                         gpuBuffer,
-                                        null,
-                                        null,
+                                        indexBuffer,
+                                        indexType,
                                         0,
                                         gpuBuffer.size(),
                                         uniformUploader -> uniformUploader.upload("ModelOffset", (float)dPos.x(), (float)dPos.y(), (float)dPos.z())
