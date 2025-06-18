@@ -1,6 +1,6 @@
 package dev.schmarrn.lighty.renderers;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.api.OverlayData;
@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 public class CarpetRenderer implements OverlayRenderer {
-    public void build(ClientLevel level, BlockPos pos, OverlayData data, BufferBuilder builder, int lightmap) {
+    public void build(ClientLevel level, BlockPos pos, OverlayData data, VertexConsumer builder, int lightmap) {
         float x = data.rPos().getX();
         float y = data.rPos().getY() + 1 + data.yOffset();
         float z = data.rPos().getZ();

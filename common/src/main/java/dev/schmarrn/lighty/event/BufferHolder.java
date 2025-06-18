@@ -17,18 +17,29 @@ package dev.schmarrn.lighty.event;
 import com.mojang.blaze3d.buffers.BufferType;
 import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.renderer.RenderType;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BufferHolder {
+    public record Data(GpuBuffer vertexBuffer, GpuBuffer indexBuffer, VertexFormat.IndexType indexType, int indexCount) {}
     // List because we can hold multiple gpuBuffers from different data providers
-    private final List<GpuBuffer> gpuBuffers;
+    private final List<Data> gpuBuffers;
+
+    private final ByteBufferBuilder sharedBuffer;
 
     BufferHolder() {
         gpuBuffers = new ArrayList<>();
+        // Got magic number from OutlineBufferSource:14
+        // Maybe better magic number at RenderBuffers:38 (786432)
+        sharedBuffer = new ByteBufferBuilder(1536);
     }
 
     boolean isValid() {
@@ -37,17 +48,42 @@ public class BufferHolder {
 
     void close() {
         for (var buffer : gpuBuffers) {
-            buffer.close();
+            buffer.vertexBuffer.close();
+            // Maybe you shouldn't close the index buffer.
+            // Causes Segmentation Faults in vanilla MC code.
+            //buffer.indexBuffer.close();
         }
         gpuBuffers.clear();
     }
 
-    void upload(MeshData buffer) {
-        gpuBuffers.add(RenderSystem.getDevice().createBuffer(() -> "lighty buffer test", BufferType.VERTICES, BufferUsage.STATIC_WRITE, buffer.vertexBuffer()));
-        buffer.close();
+    void upload(MeshData data, RenderType renderType) {
+        // Highly inspired by RenderType#draw
+        if (renderType.sortOnUpload()) {
+            data.sortQuads(sharedBuffer, RenderSystem.getProjectionType().vertexSorting());
+        }
+        RenderPipeline pipeline = renderType.getRenderPipeline();
+        renderType.setupRenderState();
+        GpuDevice device = RenderSystem.getDevice();
+
+        GpuBuffer vertexBuffer = device.createBuffer(() -> "Lighty vertex buffer for " + pipeline.getVertexFormat(), BufferType.VERTICES, BufferUsage.DYNAMIC_WRITE, data.vertexBuffer());
+        GpuBuffer indexBuffer;
+        VertexFormat.IndexType indexType;
+
+        if (data.indexBuffer() == null) {
+            RenderSystem.AutoStorageIndexBuffer asib = RenderSystem.getSequentialBuffer(data.drawState().mode());
+            indexBuffer = asib.getBuffer(data.drawState().indexCount());
+            indexType = asib.type();
+        } else {
+            indexBuffer = device.createBuffer(() -> "Lighty index buffer for" + pipeline.getVertexFormat(), BufferType.INDICES, BufferUsage.DYNAMIC_WRITE, data.indexBuffer());
+            indexType = data.drawState().indexType();
+        }
+
+        gpuBuffers.add(new Data(vertexBuffer, indexBuffer, indexType, data.drawState().indexCount()));
+        renderType.clearRenderState();
+        data.close();
     }
 
-    List<GpuBuffer> getGpuBuffers() {
+    List<Data> getGpuBuffers() {
         return gpuBuffers;
     }
 }

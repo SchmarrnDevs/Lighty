@@ -14,6 +14,8 @@
 
 package dev.schmarrn.lighty.event;
 
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -130,7 +132,7 @@ public class Compute {
                 renderer.build(world, data.pos(), data, builder, lightmap);
             }
 
-            buffer.upload(builder.buildOrThrow());
+            buffer.upload(builder.buildOrThrow(), renderer.getRenderType());
         }
 
         return buffer;
@@ -195,7 +197,6 @@ public class Compute {
         }
 
         toBeRemoved.clear();
-
     }
 
     public static void render(@Nullable Frustum frustum) {
@@ -213,6 +214,7 @@ public class Compute {
         }
 
         OverlayRenderer renderer = Renderers.getRenderer();
+        RenderType renderType = renderer.getRenderType();
 
         GameRenderer gameRenderer = minecraft.gameRenderer;
         Camera camera = gameRenderer.getMainCamera();
@@ -227,6 +229,11 @@ public class Compute {
         Vec3 camPos = camera.getPosition();
 
         List<RenderPass.Draw> drawList = new ArrayList<>();
+        // tracking the biggest *vertex* buffer, in case our data didn't return an *index* buffer as well
+        // See LevelRenderer#renderSectionLayer for the place of inspiration
+        int biggestBufferSize = 0;
+        RenderSystem.AutoStorageIndexBuffer asib = RenderSystem.getSequentialBuffer(renderType.mode());
+
         for (int x = -computationDistance + 1; x < computationDistance; ++x) {
             for (int z = -computationDistance + 1; z < computationDistance; ++z) {
                 ChunkPos chunkPos = new ChunkPos(playerPos.x + x, playerPos.z + z);
@@ -244,13 +251,21 @@ public class Compute {
 
                             var gpuBuffers = cachedBuffer.getGpuBuffers();
                             for (var gpuBuffer : gpuBuffers) {
+                                // If there is no index buffer
+                                if (gpuBuffer.indexBuffer() == null) {
+                                    // Try to reserve enough space to fit the vertex buffers
+                                    if (gpuBuffer.indexCount() > biggestBufferSize) {
+                                        biggestBufferSize = gpuBuffer.indexCount();
+                                    }
+                                }
+
                                 drawList.add(new RenderPass.Draw(
-                                        0,
-                                        gpuBuffer,
-                                        null,
-                                        null,
-                                        0,
-                                        gpuBuffer.size(),
+                                        0, // slot (whatever a slot is in this context)
+                                        gpuBuffer.vertexBuffer(),
+                                        gpuBuffer.indexBuffer(),
+                                        gpuBuffer.indexType(),
+                                        0, // first index
+                                        gpuBuffer.indexCount(),
                                         uniformUploader -> uniformUploader.upload("ModelOffset", (float)dPos.x(), (float)dPos.y(), (float)dPos.z())
                                 ));
                             }
@@ -263,16 +278,39 @@ public class Compute {
         }
 
         GpuDevice device = RenderSystem.getDevice();
-        RenderType renderType = renderer.getRenderType();
         GpuTexture tex = minecraft.getTextureManager().getTexture(renderer.getTextureLocation()).getTexture();
-        GpuTexture lightTexture = minecraft.gameRenderer.lightTexture().getTarget();
-        try (RenderPass pass = device.createCommandEncoder().createRenderPass(renderType.getRenderTarget().getColorTexture(), OptionalInt.empty(), renderType.getRenderTarget().getDepthTexture(), OptionalDouble.empty())) {
+        // Highly inspired by RenderType#draw
+        renderType.setupRenderState();
+
+        RenderTarget renderTarget = renderType.getRenderTarget();
+
+        // Index buffers/type for all the vertex data that didn't get its own IndexBuffer
+        // See LevelRenderer#renderSectionLayer for the place of inspiration
+        GpuBuffer baseIndexBuffer = biggestBufferSize == 0 ? null : asib.getBuffer(biggestBufferSize);
+        VertexFormat.IndexType baseIndexType = biggestBufferSize == 0 ? null : asib.type();
+
+        try (RenderPass pass = device
+                .createCommandEncoder()
+                .createRenderPass(
+                        renderTarget.getColorTexture(),
+                        OptionalInt.empty(),
+                        renderTarget.useDepth ? renderTarget.getDepthTexture() : null,
+                        OptionalDouble.empty())) {
+
             pass.setPipeline(renderType.getRenderPipeline());
+
             pass.bindSampler("Sampler0", tex);
-            pass.bindSampler("Sampler2", lightTexture);
-            RenderSystem.AutoStorageIndexBuffer asib = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
-            pass.drawMultipleIndexed(drawList, asib.getBuffer(0), asib.type());
+            for (int ii = 1; ii < 12; ++ii) {
+                GpuTexture sampler = RenderSystem.getShaderTexture(ii);
+                if (sampler != null) {
+                    pass.bindSampler("Sampler" + ii, sampler);
+                }
+            }
+
+            pass.drawMultipleIndexed(drawList, baseIndexBuffer, baseIndexType);
         }
+
+        renderType.clearRenderState();
     }
 
     private Compute() {}

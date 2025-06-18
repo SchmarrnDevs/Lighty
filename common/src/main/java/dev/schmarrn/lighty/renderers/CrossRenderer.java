@@ -1,6 +1,6 @@
 package dev.schmarrn.lighty.renderers;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.api.OverlayData;
@@ -12,7 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 
 public class CrossRenderer implements OverlayRenderer {
-    public void build(ClientLevel level, BlockPos pos, OverlayData data, BufferBuilder builder, int lightmap) {
+    public void build(ClientLevel level, BlockPos pos, OverlayData data, VertexConsumer builder, int lightmap) {
         float x1 = data.rPos().getX();
         float x2 = data.rPos().getX() + 1f;
         float y  = data.rPos().getY() + 1.005f + data.yOffset();

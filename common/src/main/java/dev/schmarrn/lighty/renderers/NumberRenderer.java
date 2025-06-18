@@ -1,6 +1,6 @@
 package dev.schmarrn.lighty.renderers;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.api.OverlayData;
@@ -16,7 +16,7 @@ public class NumberRenderer implements OverlayRenderer {
     private static final float dx = 0.25f;
     private static final float dz = 0.25f;
 
-    private static void renderDigit(BufferBuilder builder, int digit, float x, float y, float z, int color, int lightmap) {
+    private static void renderDigit(VertexConsumer builder, int digit, float x, float y, float z, int color, int lightmap) {
         float startU = (0b11 & digit) / 4f;
         float startV = ((digit >> 2) & 0b11) / 4f;
         float width = 0.25f;
@@ -43,7 +43,7 @@ public class NumberRenderer implements OverlayRenderer {
                 .setNormal(0f, 1f, 0f);
     }
 
-    private static void renderNumber(BufferBuilder builder, int number, float x, float y, float z, int color, int lightmap) {
+    private static void renderNumber(VertexConsumer builder, int number, float x, float y, float z, int color, int lightmap) {
         int oneDigit = number % 10;
         int tenDigit = number / 10;
 
@@ -55,7 +55,7 @@ public class NumberRenderer implements OverlayRenderer {
         }
     }
 
-    public void build(ClientLevel level, BlockPos pos, OverlayData data, BufferBuilder builder, int lightmap) {
+    public void build(ClientLevel level, BlockPos pos, OverlayData data, VertexConsumer builder, int lightmap) {
         float x1 = data.rPos().getX() + PXL * 5.25f;
         float y  = data.rPos().getY() + 1f + 0.005f + data.yOffset();
         float z1 = data.rPos().getZ() + PXL * 4f;
