@@ -49,32 +49,28 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class Compute {
-    // Based on some observations, the hashset size only exceeds around 400 elements
-    // when spectating through your world at max speed at an overlay distance of 2 chunks.
-    // That's why I chose 550 as a reasonable default - not too big (a section pos is just 3 ints after all),
-    // but it should be enough to avoid rehashing at a reasonable overlay distance
-    private static final int INITIAL_HASHSET_CAPACITY = 550;
-    private static HashSet<SectionPos> toBeUpdated = new HashSet<>(INITIAL_HASHSET_CAPACITY);
-    private static HashSet<SectionPos> toBeRemoved = new HashSet<>(INITIAL_HASHSET_CAPACITY);
+    private static SectionPos playerPos= SectionPos.of(0,0,0);
+
     private static final Map<SectionPos, BufferHolder> cachedBuffers = new HashMap<>();
-    private static ChunkPos playerPos = null;
+    private static final PriorityQueue<SectionPos> toBeUpdated = new PriorityQueue<>(
+            Comparator.comparingInt(self -> self.distManhattan(playerPos))
+    );
+    private static final HashSet<SectionPos> workingOnIt = new HashSet<>();
 
     private static int computationDistance = Math.min(Config.OVERLAY_DISTANCE.getValue(), Minecraft.getInstance().options.renderDistance().get() + 1);
 
     private static boolean outOfRange(SectionPos pos) {
         int computationDistanceSquared = computationDistance * computationDistance;
-        if (playerPos == null) {
-            return true;
-        }
         // squared X and Z
-        int sqX = (pos.x() - playerPos.x) * (pos.x() - playerPos.x);
-        int sqZ =  (pos.z() - playerPos.z) * (pos.z() - playerPos.z);
+        int sqX = (pos.x() - playerPos.x()) * (pos.x() - playerPos.x());
+        int sqZ =  (pos.z() - playerPos.z()) * (pos.z() - playerPos.z());
 
         return sqX > computationDistanceSquared || sqZ > computationDistanceSquared;
     }
 
     public static void clear() {
-        toBeUpdated = new HashSet<>(INITIAL_HASHSET_CAPACITY);
+        toBeUpdated.clear();
+        workingOnIt.clear();
         cachedBuffers.forEach((sectionPos, vertexBuffer) -> {
             // Important to avoid a Memory leak!
             vertexBuffer.close();
@@ -99,6 +95,7 @@ public class Compute {
         }
 
         toBeUpdated.add(pos);
+        workingOnIt.add(pos);
     }
 
     private static BufferHolder buildChunk(OverlayRenderer renderer, List<OverlayDataProvider> dataProviders, SectionPos chunkPos, ClientLevel world) {
@@ -156,47 +153,46 @@ public class Compute {
             return;
         }
 
-        cachedBuffers.forEach(((sectionPos, bufferHolder) -> {
-            if (outOfRange(sectionPos)) {
-                toBeRemoved.add(sectionPos);
+        // Remove any buffer that's outside the overlay distance
+        for (var it = cachedBuffers.entrySet().iterator(); it.hasNext();) {
+            var entry = it.next();
+            if (outOfRange(entry.getKey())) {
+                entry.getValue().close();
+                it.remove();
             }
-        }));
+        }
 
-        HashSet<SectionPos> removeFromToBeUpdated = new HashSet<>(INITIAL_HASHSET_CAPACITY);
-        int sectionsComputeCounter = client.level.getSectionsCount() * Config.CHUNKS_PER_TICK.getValue();
-        for (SectionPos sectionPos : toBeUpdated) {
-            if (outOfRange(sectionPos)) {
-                toBeRemoved.add(sectionPos);
-            } else {
-                if (sectionsComputeCounter <= 0 || !client.levelRenderer.isSectionCompiled(sectionPos.origin())) {
+        // Compute at maximum as many chunks as specified
+        List<SectionPos> keepInUpdate = new ArrayList<>();
+        for (int ii = client.level.getSectionsCount() * Config.CHUNKS_PER_TICK.getValue(); ii > 0;) {
+            // get the next section pos
+            SectionPos sectionPos = toBeUpdated.poll();
+            workingOnIt.remove(sectionPos);
+            if (sectionPos == null) {
+                // There is no more work to do, go home early!
+                break;
+            }
+
+            if (!outOfRange(sectionPos)) {
+                if (!client.levelRenderer.isSectionCompiled(sectionPos.origin())) {
+                    // chunk data isn't ready yet, keep in queue
+                    keepInUpdate.add(sectionPos);
                     continue;
                 }
-                removeFromToBeUpdated.add(sectionPos);
-                sectionsComputeCounter--;
-                cachedBuffers.compute(sectionPos, (pos, vertexBuffer) -> {
-                    if (vertexBuffer != null) {
+                // we do some work now, reduce the counter
+                --ii;
+                cachedBuffers.compute(sectionPos, (pos, bufferHolder) -> {
+                    if (bufferHolder != null) {
                         // Ensure to have a clean state after building
-                        vertexBuffer.close();
+                        bufferHolder.close();
                     }
                     return buildChunk(renderer, dataProviders, pos, world);
                 });
             }
         }
 
-        // Don't know how to remove stuff while iterating over it in java, so this has to suffice.
-        for (SectionPos pos : removeFromToBeUpdated) {
-            toBeUpdated.remove(pos);
-        }
-
-        for (SectionPos sectionPos : toBeRemoved) {
-            toBeUpdated.remove(sectionPos);
-            var buf = cachedBuffers.remove(sectionPos);
-            if (buf != null) {
-                buf.close();
-            }
-        }
-
-        toBeRemoved.clear();
+        toBeUpdated.addAll(keepInUpdate);
+        workingOnIt.addAll(keepInUpdate);
     }
 
     public static void render(@Nullable Frustum frustum) {
@@ -220,7 +216,7 @@ public class Compute {
         Camera camera = gameRenderer.getMainCamera();
 
         // update player position
-        playerPos = new ChunkPos(camera.getBlockPosition());
+        playerPos = SectionPos.of(camera.getBlockPosition());
 
         // fixes incompatible cached chunks when switching shaders on/off
         IrisCompat.fixIrisShaders();
@@ -236,9 +232,13 @@ public class Compute {
 
         for (int x = -computationDistance + 1; x < computationDistance; ++x) {
             for (int z = -computationDistance + 1; z < computationDistance; ++z) {
-                ChunkPos chunkPos = new ChunkPos(playerPos.x + x, playerPos.z + z);
+                ChunkPos chunkPos = new ChunkPos(playerPos.x() + x, playerPos.z() + z);
                 for (int i = 0; i < world.getSectionsCount(); ++i) {
                     var chunkSection = SectionPos.of(chunkPos, world.getMinSectionY() + i);
+                    if (!minecraft.levelRenderer.isSectionCompiled(chunkSection.origin())) {
+                        // Don't bother doing anything if the chunk isn't rendered yet
+                        continue;
+                    }
                     if (cachedBuffers.containsKey(chunkSection)) {
                         BufferHolder cachedBuffer = cachedBuffers.get(chunkSection);
                         // Only do the expensive frustum check if the buffer is valid
@@ -271,7 +271,10 @@ public class Compute {
                             }
                         }
                     } else {
-                        toBeUpdated.add(chunkSection);
+                        if (!workingOnIt.contains(chunkSection)) {
+                            toBeUpdated.add(chunkSection);
+                            workingOnIt.add(chunkSection);
+                        }
                     }
                 }
             }

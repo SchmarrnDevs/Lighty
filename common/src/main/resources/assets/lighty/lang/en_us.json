@@ -26,7 +26,7 @@
   "lighty.options.sky_threshold": "Sky Threshold",
   "lighty.options.sky_threshold.tooltip": "If the block light level is below the value specified in 'Block Threshold' and the sky light level is less than or equal to %d, the overlay is red. Otherwise, it is orange.",
   "lighty.options.overlay_distance": "Overlay Distance",
-  "lighty.options.overlay_distance.tooltip": "The radius of the area covered by the light overlay, in chunks. Defaults to 2. High overlay distance may impact performance severally.",
+  "lighty.options.overlay_distance.tooltip": "The radius of the area covered by the light overlay, in chunks. Defaults to 2.",
   "lighty.options.overlay_brightness": "Overlay Brightness",
   "lighty.options.overlay_brightness.tooltip": "The brightness of the rendered overlay. Defaults to 10. Especially useful when using shaders.",
   "lighty.options.show_safe": "Show Safe Spots",
@@ -34,5 +34,7 @@
   "lighty.options.show_skylight_level": "Show Skylight Level",
   "lighty.options.show_skylight_level.tooltip": "If on, Number Mode shows both block-light and sky-light levels. (Default: ON)",
   "lighty.options.auto_on": "Auto-On",
-  "lighty.options.auto_on.tooltip": "If on, the overlay gets enabled when holding an item of certain type. (Default: OFF, Default items: minecraft:torch, minecraft:soul_torch, minecraft:lantern, minecraft:soul_lantern)"
+  "lighty.options.auto_on.tooltip": "If on, the overlay gets enabled when holding an item of certain type. (Default: OFF, Default items: minecraft:torch, minecraft:soul_torch, minecraft:lantern, minecraft:soul_lantern)",
+  "lighty.options.chunks_per_tick": "Chunks per Tick",
+  "lighty.options.chunks_per_tick.tooltip": "Specifies how many chunks to compute per tick. A high number may impact performance severally. (Default: 4)"
 }

@@ -45,7 +45,10 @@ public class SettingsScreen extends OptionsSubScreen {
                 Config.SHOW_SAFE.getOptionInstance(),
                 Config.SHOW_SKYLIGHT_LEVEL.getOptionInstance()
         );
-        this.list.addSmall(Config.SHOULD_AUTO_ON.getOptionInstance());
+        this.list.addSmall(
+                Config.SHOULD_AUTO_ON.getOptionInstance(),
+                Config.CHUNKS_PER_TICK.getOptionInstance()
+        );
     }
 
     @Override
