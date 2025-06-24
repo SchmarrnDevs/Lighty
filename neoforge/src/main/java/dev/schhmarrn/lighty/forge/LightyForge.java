@@ -26,7 +26,7 @@ import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
-@Mod(Lighty.MOD_ID)
+@Mod(value = Lighty.MOD_ID, dist = Dist.CLIENT)
 public class LightyForge {
 
     public LightyForge() {
