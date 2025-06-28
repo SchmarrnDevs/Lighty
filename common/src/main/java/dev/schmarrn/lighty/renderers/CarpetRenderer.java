@@ -7,7 +7,7 @@ import dev.schmarrn.lighty.api.OverlayData;
 import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -63,8 +63,8 @@ public class CarpetRenderer implements OverlayRenderer {
     }
 
     @Override
-    public RenderType getRenderType() {
-        return RenderType.translucent();
+    public ChunkSectionLayer getChunkSectionLayer() {
+        return ChunkSectionLayer.TRANSLUCENT;
     }
 
     @Override

@@ -14,8 +14,6 @@
 
 package dev.schmarrn.lighty.event;
 
-import com.mojang.blaze3d.buffers.BufferType;
-import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.GpuDevice;
@@ -24,6 +22,7 @@ import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +33,10 @@ public class BufferHolder {
     private final List<Data> gpuBuffers;
 
     private final ByteBufferBuilder sharedBuffer;
+
+    private static final int BUFFER_TYPE_VERTEX = 40;
+    private static final int BUFFER_TYPE_INDEX = 72;
+
 
     BufferHolder() {
         gpuBuffers = new ArrayList<>();
@@ -56,30 +59,28 @@ public class BufferHolder {
         gpuBuffers.clear();
     }
 
-    void upload(MeshData data, RenderType renderType) {
-        // Highly inspired by RenderType#draw
-        if (renderType.sortOnUpload()) {
+    void upload(MeshData data, ChunkSectionLayer chunkSectionLayer) {
+        // Unsure if required
+        if (chunkSectionLayer.sortOnUpload()) {
             data.sortQuads(sharedBuffer, RenderSystem.getProjectionType().vertexSorting());
         }
-        RenderPipeline pipeline = renderType.getRenderPipeline();
-        renderType.setupRenderState();
+        RenderPipeline pipeline = chunkSectionLayer.pipeline();
+
         GpuDevice device = RenderSystem.getDevice();
 
-        GpuBuffer vertexBuffer = device.createBuffer(() -> "Lighty vertex buffer for " + pipeline.getVertexFormat(), BufferType.VERTICES, BufferUsage.DYNAMIC_WRITE, data.vertexBuffer());
+        GpuBuffer vertexBuffer = device.createBuffer(() -> "Lighty vertex buffer for " + pipeline.getVertexFormat(), BUFFER_TYPE_VERTEX, data.vertexBuffer());
         GpuBuffer indexBuffer;
         VertexFormat.IndexType indexType;
 
         if (data.indexBuffer() == null) {
-            RenderSystem.AutoStorageIndexBuffer asib = RenderSystem.getSequentialBuffer(data.drawState().mode());
-            indexBuffer = asib.getBuffer(data.drawState().indexCount());
-            indexType = asib.type();
+            indexBuffer = null;
+            indexType = null;
         } else {
-            indexBuffer = device.createBuffer(() -> "Lighty index buffer for" + pipeline.getVertexFormat(), BufferType.INDICES, BufferUsage.DYNAMIC_WRITE, data.indexBuffer());
+            indexBuffer = device.createBuffer(() -> "Lighty index buffer for" + pipeline.getVertexFormat(), BUFFER_TYPE_INDEX, data.indexBuffer());
             indexType = data.drawState().indexType();
         }
 
         gpuBuffers.add(new Data(vertexBuffer, indexBuffer, indexType, data.drawState().indexCount()));
-        renderType.clearRenderState();
         data.close();
     }
 

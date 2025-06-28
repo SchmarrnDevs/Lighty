@@ -27,7 +27,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-@EventBusSubscriber(value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(value = Dist.CLIENT)
 public class UtilForgeImpl implements UtilDefinition {
     private static final IrisApi INSTANCE;
     static {

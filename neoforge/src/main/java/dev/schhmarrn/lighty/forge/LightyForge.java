@@ -38,7 +38,7 @@ public class LightyForge {
      * This is an inner class to prevent server crashes if this mod is installed on a dedicated server.
      * It's also an EventListener for all events that are {@linkplain net.neoforged.fml.event.IModBusEvent ModBusEvents}. ModBusEvents are events that are gameload events (fired during game loading or resource reload) and don't have game context.
      */
-    @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber(value = Dist.CLIENT)
     private static class ClassLoadingProtection {
 
         @SubscribeEvent
@@ -53,7 +53,6 @@ public class LightyForge {
      */
     @EventBusSubscriber(value = Dist.CLIENT, modid = Lighty.MOD_ID)
     private static class ClassLoadingProtection2 {
-
         @SubscribeEvent
         public static void clientTick(ClientTickEvent.Post event) {
             Compute.computeCache(Minecraft.getInstance());
@@ -61,10 +60,8 @@ public class LightyForge {
         }
 
         @SubscribeEvent
-        public static void render(RenderLevelStageEvent event) {
-            if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
-                Compute.render(event.getFrustum());
-            }
+        public static void render(RenderLevelStageEvent.AfterTripwireBlocks event) {
+            Compute.render(event.getFrustum());
         }
     }
 }

@@ -15,12 +15,14 @@
 package dev.schmarrn.lighty.event;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.DataProviders;
@@ -34,17 +36,19 @@ import dev.schmarrn.lighty.overlaystate.SMACH;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.DynamicUniforms;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.util.*;
 
@@ -121,7 +125,7 @@ public class Compute {
             buffer = new BufferHolder();
         }
         if (!overlayData.isEmpty()) {
-            BufferBuilder builder = Tesselator.getInstance().begin(renderer.getRenderType().mode(), renderer.getRenderType().format());
+            BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
             int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
             // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
             int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
@@ -129,7 +133,7 @@ public class Compute {
                 renderer.build(world, data.pos(), data, builder, lightmap);
             }
 
-            buffer.upload(builder.buildOrThrow(), renderer.getRenderType());
+            buffer.upload(builder.buildOrThrow(), renderer.getChunkSectionLayer());
         }
 
         return buffer;
@@ -210,7 +214,6 @@ public class Compute {
         }
 
         OverlayRenderer renderer = Renderers.getRenderer();
-        RenderType renderType = renderer.getRenderType();
 
         GameRenderer gameRenderer = minecraft.gameRenderer;
         Camera camera = gameRenderer.getMainCamera();
@@ -224,96 +227,107 @@ public class Compute {
         // save camera position to be able to later translate the different subsections
         Vec3 camPos = camera.getPosition();
 
-        List<RenderPass.Draw> drawList = new ArrayList<>();
+        List<RenderPass.Draw<GpuBufferSlice[]>> drawList = new ArrayList<>();
+        List<DynamicUniforms.Transform> transforms = new ArrayList<>();
         // tracking the biggest *vertex* buffer, in case our data didn't return an *index* buffer as well
         // See LevelRenderer#renderSectionLayer for the place of inspiration
         int biggestBufferSize = 0;
-        RenderSystem.AutoStorageIndexBuffer asib = RenderSystem.getSequentialBuffer(renderType.mode());
 
-        for (int x = -computationDistance + 1; x < computationDistance; ++x) {
-            for (int z = -computationDistance + 1; z < computationDistance; ++z) {
-                ChunkPos chunkPos = new ChunkPos(playerPos.x() + x, playerPos.z() + z);
-                for (int i = 0; i < world.getSectionsCount(); ++i) {
-                    var chunkSection = SectionPos.of(chunkPos, world.getMinSectionY() + i);
-                    if (!minecraft.levelRenderer.isSectionCompiled(chunkSection.origin())) {
-                        // Don't bother doing anything if the chunk isn't rendered yet
-                        continue;
-                    }
-                    if (cachedBuffers.containsKey(chunkSection)) {
-                        BufferHolder cachedBuffer = cachedBuffers.get(chunkSection);
-                        // Only do the expensive frustum check if the buffer is valid
-                        if (!cachedBuffer.isValid()) {
-                            continue;
-                        }
-                        if (frustum.isVisible(AABB.encapsulatingFullBlocks(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16,16,16)))) {
-                            Vec3 origin = new Vec3(chunkSection.origin());
-                            Vec3 dPos = origin.subtract(camPos);
+        Vector4f unitColorModulator = new Vector4f(1.0F, 1.0F, 1.0F, 1.0F);
+        Matrix4f textureMatrix = new Matrix4f();
 
-                            var gpuBuffers = cachedBuffer.getGpuBuffers();
-                            for (var gpuBuffer : gpuBuffers) {
-                                // If there is no index buffer
-                                if (gpuBuffer.indexBuffer() == null) {
-                                    // Try to reserve enough space to fit the vertex buffers
-                                    if (gpuBuffer.indexCount() > biggestBufferSize) {
-                                        biggestBufferSize = gpuBuffer.indexCount();
-                                    }
-                                }
+        for (var section : minecraft.levelRenderer.getVisibleSections()) {
+            SectionPos chunkSection = SectionPos.of(section.getRenderOrigin());
+            if (cachedBuffers.containsKey(chunkSection)) {
+                BufferHolder cachedBuffer = cachedBuffers.get(chunkSection);
+                // Only continue if the buffer is valid
+                if (!cachedBuffer.isValid()) {
+                    continue;
+                }
+                Vec3 origin = new Vec3(chunkSection.origin());
+                Vec3 dPos = origin.subtract(camPos);
 
-                                drawList.add(new RenderPass.Draw(
-                                        0, // slot (whatever a slot is in this context)
-                                        gpuBuffer.vertexBuffer(),
-                                        gpuBuffer.indexBuffer(),
-                                        gpuBuffer.indexType(),
-                                        0, // first index
-                                        gpuBuffer.indexCount(),
-                                        uniformUploader -> uniformUploader.upload("ModelOffset", (float)dPos.x(), (float)dPos.y(), (float)dPos.z())
-                                ));
-                            }
-                        }
-                    } else {
-                        if (!workingOnIt.contains(chunkSection)) {
-                            toBeUpdated.add(chunkSection);
-                            workingOnIt.add(chunkSection);
+                var gpuBuffers = cachedBuffer.getGpuBuffers();
+                for (var gpuBuffer : gpuBuffers) {
+                    // If there is no index buffer
+                    if (gpuBuffer.indexBuffer() == null) {
+                        // Try to reserve enough space to fit the vertex buffers
+                        if (gpuBuffer.indexCount() > biggestBufferSize) {
+                            biggestBufferSize = gpuBuffer.indexCount();
                         }
                     }
+
+                    int currentTransformationIndex = transforms.size();
+                    transforms.add(
+                            new DynamicUniforms.Transform(
+                                    RenderSystem.getModelViewMatrix(),
+                                    unitColorModulator,
+                                    new Vector3f((float)dPos.x(), (float)dPos.y(), (float)dPos.z()),
+                                    textureMatrix,
+                                    1.0F // Line Width
+                            )
+                    );
+
+                    drawList.add(new RenderPass.Draw<>(
+                            0, // slot (whatever a slot is in this context)
+                            gpuBuffer.vertexBuffer(),
+                            gpuBuffer.indexBuffer(),
+                            gpuBuffer.indexType(),
+                            0, // first index
+                            gpuBuffer.indexCount(),
+                            (bufferSlice, uniformUploader) -> uniformUploader.upload("DynamicTransforms", bufferSlice[currentTransformationIndex])
+                    ));
+                }
+            } else {
+                if (!workingOnIt.contains(chunkSection)) {
+                    toBeUpdated.add(chunkSection);
+                    workingOnIt.add(chunkSection);
                 }
             }
         }
 
         GpuDevice device = RenderSystem.getDevice();
-        GpuTexture tex = minecraft.getTextureManager().getTexture(renderer.getTextureLocation()).getTexture();
-        // Highly inspired by RenderType#draw
-        renderType.setupRenderState();
+        GpuTextureView tex = minecraft.getTextureManager().getTexture(renderer.getTextureLocation()).getTextureView();
 
-        RenderTarget renderTarget = renderType.getRenderTarget();
+        ChunkSectionLayer chunkSectionLayer = renderer.getChunkSectionLayer();
+        RenderTarget renderTarget = chunkSectionLayer.outputTarget();
 
+        RenderSystem.AutoStorageIndexBuffer asib = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
         // Index buffers/type for all the vertex data that didn't get its own IndexBuffer
         // See LevelRenderer#renderSectionLayer for the place of inspiration
         GpuBuffer baseIndexBuffer = biggestBufferSize == 0 ? null : asib.getBuffer(biggestBufferSize);
         VertexFormat.IndexType baseIndexType = biggestBufferSize == 0 ? null : asib.type();
 
+        GpuBufferSlice[] dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransforms(transforms.toArray(new DynamicUniforms.Transform[0]));
+
         try (RenderPass pass = device
                 .createCommandEncoder()
                 .createRenderPass(
-                        renderTarget.getColorTexture(),
+                        () -> "Lighty Render Pass for" + chunkSectionLayer.label(),
+                        renderTarget.getColorTextureView(),
                         OptionalInt.empty(),
-                        renderTarget.useDepth ? renderTarget.getDepthTexture() : null,
-                        OptionalDouble.empty())) {
+                        renderTarget.getDepthTextureView(),
+                        OptionalDouble.empty()
+                )
+        ) {
+            RenderSystem.bindDefaultUniforms(pass);
+            pass.bindSampler("Sampler2", minecraft.gameRenderer.lightTexture().getTextureView());
 
-            pass.setPipeline(renderType.getRenderPipeline());
-
-            pass.bindSampler("Sampler0", tex);
-            for (int ii = 1; ii < 12; ++ii) {
-                GpuTexture sampler = RenderSystem.getShaderTexture(ii);
-                if (sampler != null) {
-                    pass.bindSampler("Sampler" + ii, sampler);
-                }
+            if (chunkSectionLayer == ChunkSectionLayer.TRANSLUCENT) {
+                drawList = drawList.reversed();
             }
 
-            pass.drawMultipleIndexed(drawList, baseIndexBuffer, baseIndexType);
-        }
+            pass.setPipeline(chunkSectionLayer.pipeline());
+            pass.bindSampler("Sampler0", tex);
 
-        renderType.clearRenderState();
+            pass.drawMultipleIndexed(
+                    drawList,
+                    baseIndexBuffer,
+                    baseIndexType,
+                    List.of("DynamicTransforms"),
+                    dynamicTransforms
+            );
+        }
     }
 
     private Compute() {}
