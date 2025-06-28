@@ -26,7 +26,7 @@
   "lighty.options.sky_threshold": "Próg Światła Nieba",
   "lighty.options.sky_threshold.tooltip": "Jeśli poziom światła bloku jest poniżej wartości określonej w 'Progu Blokowym', a poziom światła nieba jest mniejszy lub równy %d, nakładka jest czerwona. W przeciwnym razie jest pomarańczowa.",
   "lighty.options.overlay_distance": "Zasięg Nakładki",
-  "lighty.options.overlay_distance.tooltip": "Promień obszaru pokrytego nakładką świetlną, w chunkach. Domyślnie 2. Duży zasięg nakładki może poważnie wpłynąć na wydajność.",
+  "lighty.options.overlay_distance.tooltip": "Promień obszaru pokrytego nakładką świetlną, w chunkach. Domyślnie 2.",
   "lighty.options.overlay_brightness": "Jasność Nakładki",
   "lighty.options.overlay_brightness.tooltip": "Jasność renderowanej nakładki. Domyślnie 10. Szczególnie przydatne przy użyciu shaderów.",
   "lighty.options.show_safe": "Pokaż Bezpieczne Miejsca",
@@ -34,5 +34,7 @@
   "lighty.options.show_skylight_level": "Pokaż Poziom Światła Nieba",
   "lighty.options.show_skylight_level.tooltip": "Jeśli włączone, Tryb Liczbowy pokazuje zarówno poziomy światła bloków, jak i światła nieba. (Domyślnie: Wł.)",
   "lighty.options.auto_on": "Auto-Włączanie",
-  "lighty.options.auto_on.tooltip": "Jeśli włączone, nakładka włącza się podczas trzymania przedmiotu określonego typu. (Domyślnie: Wył., Domyślne przedmioty: minecraft:torch, minecraft:soul_torch, minecraft:lantern, minecraft:soul_lantern)"
+  "lighty.options.auto_on.tooltip": "Jeśli włączone, nakładka włącza się podczas trzymania przedmiotu określonego typu. (Domyślnie: Wył., Domyślne przedmioty: minecraft:torch, minecraft:soul_torch, minecraft:lantern, minecraft:soul_lantern)",
+  "lighty.options.chunks_per_tick": "Chunki na tick",
+  "lighty.options.chunks_per_tick.tooltip": "Określa, ile chunków ma być obliczane na tick. Wysoka liczba może poważnie wpłynąć na wydajność. (Domyślnie: 4)"
 }
