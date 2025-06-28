@@ -1,13 +1,13 @@
-package dev.schmarrn.lighty;
+package dev.schmarrn.lighty.core;
 
+import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.config.Config;
-import dev.schmarrn.lighty.event.Compute;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
 
-public class Renderers {
+public class RendererRegistry {
     private static final HashMap<ResourceLocation, OverlayRenderer> RENDERERS = new HashMap<>();
 
     private static OverlayRenderer renderer;
@@ -28,7 +28,7 @@ public class Renderers {
             return;
         }
 
-        Renderers.renderer = renderer;
+        RendererRegistry.renderer = renderer;
         Config.LAST_USED_RENDERER.setValue(rl);
         Compute.clear();
     }

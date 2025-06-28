@@ -2,7 +2,7 @@ package dev.schmarrn.lighty.compat;
 
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.UtilDefinition;
-import dev.schmarrn.lighty.event.Compute;
+import dev.schmarrn.lighty.core.Compute;
 
 public class IrisCompat {
     private static boolean wereShadersOn = UtilDefinition.INSTANCE.shadersEnabled();

@@ -14,7 +14,7 @@
 
 package dev.schmarrn.lighty.mixin;
 
-import dev.schmarrn.lighty.event.Compute;
+import dev.schmarrn.lighty.core.Compute;
 import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LightLayer;

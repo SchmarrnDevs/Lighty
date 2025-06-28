@@ -15,9 +15,8 @@
 package dev.schmarrn.lighty.ui;
 
 import dev.schmarrn.lighty.config.Config;
-import dev.schmarrn.lighty.event.Compute;
+import dev.schmarrn.lighty.core.Compute;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.screens.options.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;

@@ -1,9 +1,8 @@
 package dev.schmarrn.lighty.mixin;
 
-import dev.schmarrn.lighty.event.Compute;
+import dev.schmarrn.lighty.core.Compute;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;

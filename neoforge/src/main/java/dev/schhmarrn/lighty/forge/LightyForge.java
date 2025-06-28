@@ -15,7 +15,8 @@
 package dev.schhmarrn.lighty.forge;
 
 import dev.schmarrn.lighty.Lighty;
-import dev.schmarrn.lighty.event.Compute;
+import dev.schmarrn.lighty.core.LightyRenderer;
+import dev.schmarrn.lighty.core.Compute;
 import dev.schmarrn.lighty.event.KeyBind;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
@@ -61,7 +62,7 @@ public class LightyForge {
 
         @SubscribeEvent
         public static void render(RenderLevelStageEvent.AfterTripwireBlocks event) {
-            Compute.render(event.getFrustum());
+            LightyRenderer.render();
         }
     }
 }

@@ -15,6 +15,8 @@
 package dev.schmarrn.lighty;
 
 import dev.schmarrn.lighty.config.Config;
+import dev.schmarrn.lighty.core.DataProviderRegistry;
+import dev.schmarrn.lighty.core.RendererRegistry;
 import dev.schmarrn.lighty.dataproviders.BaseDataProvider;
 import dev.schmarrn.lighty.dataproviders.FarmlandDataProvider;
 import dev.schmarrn.lighty.event.KeyBind;
@@ -49,7 +51,7 @@ public class Lighty {
      * Called after Lighty Modes are registered
      */
     public static void postLoad() {
-        DataProviders.setLastActiveProviders();
-        Renderers.setLastUsedRenderer();
+        DataProviderRegistry.setLastActiveProviders();
+        RendererRegistry.setLastUsedRenderer();
     }
 }

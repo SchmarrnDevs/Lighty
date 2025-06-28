@@ -14,7 +14,7 @@
 
 package dev.schmarrn.lighty.ui;
 
-import dev.schmarrn.lighty.Renderers;
+import dev.schmarrn.lighty.core.RendererRegistry;
 import dev.schmarrn.lighty.event.KeyBind;
 import dev.schmarrn.lighty.overlaystate.SMACH;
 import net.minecraft.client.Minecraft;
@@ -63,7 +63,7 @@ public class LightyScreen extends Screen {
         adder.addChild(Button.builder(
                 Component.translatable(
                         "lighty.selected",
-                        Component.translatable("modeSwitcher." + Renderers.getRenderer().getResourceLocation().toString().replace(":", "."))
+                        Component.translatable("modeSwitcher." + RendererRegistry.getRenderer().getResourceLocation().toString().replace(":", "."))
                 ),
                 button -> Minecraft.getInstance().setScreen(new ModeSelectionScreen(this))
         ).tooltip(Tooltip.create(Component.translatable("lighty.selected.tooltip"))).build());

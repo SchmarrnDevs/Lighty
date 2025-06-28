@@ -14,8 +14,8 @@
 
 package dev.schmarrn.lighty.api;
 
-import dev.schmarrn.lighty.DataProviders;
-import dev.schmarrn.lighty.Renderers;
+import dev.schmarrn.lighty.core.DataProviderRegistry;
+import dev.schmarrn.lighty.core.RendererRegistry;
 import dev.schmarrn.lighty.ui.ModeButtonRegister;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -33,7 +33,7 @@ public class ModeManager {
      * @param dataProvider Your OverlayDataProvider to be registered
      */
     public static void registerDataProvider(ResourceLocation rl, OverlayDataProvider dataProvider) {
-        DataProviders.put(rl, dataProvider);
+        DataProviderRegistry.put(rl, dataProvider);
     }
 
     /**
@@ -48,11 +48,11 @@ public class ModeManager {
      * @param renderer Your OverlayRenderer to be registered
      */
     public static void registerRenderer(ResourceLocation rl, OverlayRenderer renderer) {
-        Renderers.put(rl, renderer);
+        RendererRegistry.put(rl, renderer);
 
         ModeButtonRegister.addButton(
                 Component.translatable("modeSwitcher." + rl.getNamespace() + "." + rl.getPath()),
-                Component.translatable("modeSwitcher." + rl.getNamespace() + "." + rl.getPath() + ".tooltip"), button -> Renderers.loadRenderer(rl)
+                Component.translatable("modeSwitcher." + rl.getNamespace() + "." + rl.getPath() + ".tooltip"), button -> RendererRegistry.loadRenderer(rl)
         );
     }
 

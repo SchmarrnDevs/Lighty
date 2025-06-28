@@ -1,5 +1,6 @@
-package dev.schmarrn.lighty;
+package dev.schmarrn.lighty.core;
 
+import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.OverlayDataProvider;
 import dev.schmarrn.lighty.config.Config;
 import net.minecraft.resources.ResourceLocation;
@@ -8,7 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class DataProviders {
+public class DataProviderRegistry {
     private static final HashMap<ResourceLocation, OverlayDataProvider> DATA_PROVIDERS = new HashMap<>();
 
     private static final List<OverlayDataProvider> ACTIVE_PROVIDERS = new ArrayList<>();

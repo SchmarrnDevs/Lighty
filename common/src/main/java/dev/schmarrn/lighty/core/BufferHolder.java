@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dev.schmarrn.lighty.event;
+package dev.schmarrn.lighty.core;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
@@ -21,7 +21,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
 import java.util.ArrayList;
@@ -60,7 +59,6 @@ public class BufferHolder {
     }
 
     void upload(MeshData data, ChunkSectionLayer chunkSectionLayer) {
-        // Unsure if required
         if (chunkSectionLayer.sortOnUpload()) {
             data.sortQuads(sharedBuffer, RenderSystem.getProjectionType().vertexSorting());
         }
