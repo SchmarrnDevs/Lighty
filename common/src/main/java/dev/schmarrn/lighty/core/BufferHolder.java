@@ -15,21 +15,22 @@
 package dev.schmarrn.lighty.core;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.MeshData;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import dev.schmarrn.lighty.Lighty;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.chunk.SectionBuffers;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
-public class BufferHolder {
-    public record Data(GpuBuffer vertexBuffer, GpuBuffer indexBuffer, VertexFormat.IndexType indexType, int indexCount) {}
+public class BufferHolder implements AutoCloseable {
     // List because we can hold multiple gpuBuffers from different data providers
-    private final List<Data> gpuBuffers;
+    private final Map<String, SectionBuffers> overlayBuffers;
 
     private final ByteBufferBuilder sharedBuffer;
 
@@ -38,51 +39,109 @@ public class BufferHolder {
 
 
     BufferHolder() {
-        gpuBuffers = new ArrayList<>();
+        this.overlayBuffers = new HashMap<>();
         // Got magic number from OutlineBufferSource:14
         // Maybe better magic number at RenderBuffers:38 (786432)
-        sharedBuffer = new ByteBufferBuilder(1536);
+        this.sharedBuffer = new ByteBufferBuilder(1536);
     }
 
     boolean isValid() {
-        return !gpuBuffers.isEmpty();
+        return !this.overlayBuffers.isEmpty();
     }
 
-    void close() {
-        for (var buffer : gpuBuffers) {
-            buffer.vertexBuffer.close();
-            // Maybe you shouldn't close the index buffer.
-            // Causes Segmentation Faults in vanilla MC code.
-            //buffer.indexBuffer.close();
-        }
-        gpuBuffers.clear();
+    @Override
+    public void close() {
+        this.overlayBuffers.values().forEach(SectionBuffers::close);
+        this.overlayBuffers.clear();
     }
 
-    void upload(MeshData data, ChunkSectionLayer chunkSectionLayer) {
+    void upload(MeshData data, ChunkSectionLayer chunkSectionLayer, String dataProviderKey) {
         if (chunkSectionLayer.sortOnUpload()) {
             data.sortQuads(sharedBuffer, RenderSystem.getProjectionType().vertexSorting());
         }
-        RenderPipeline pipeline = chunkSectionLayer.pipeline();
 
+        // See CompiledSectionMesh::uploadMeshLayer (1.21.6) for place of inspiration
+        SectionBuffers previous = this.overlayBuffers.get(dataProviderKey);
         GpuDevice device = RenderSystem.getDevice();
+        CommandEncoder commandEncoder = device.createCommandEncoder();
 
-        GpuBuffer vertexBuffer = device.createBuffer(() -> "Lighty vertex buffer for " + pipeline.getVertexFormat(), BUFFER_TYPE_VERTEX, data.vertexBuffer());
-        GpuBuffer indexBuffer;
-        VertexFormat.IndexType indexType;
+        if (previous != null) {
+            // If there already are buffers, we'll try to re-use them
+            if (previous.getVertexBuffer().size() < data.vertexBuffer().remaining()) {
+                // If the previous buffer is too small, we delete it and create a new, bigger one
+                previous.getVertexBuffer().close();
+                previous.setVertexBuffer(
+                        device.createBuffer(
+                                () -> "Lighty vertex buffer for " + dataProviderKey,
+                                BUFFER_TYPE_VERTEX,
+                                data.vertexBuffer()
+                        )
+                );
+            } else if (!previous.getVertexBuffer().isClosed()) {
+                // Else, if we can still write to the vertex buffer (at least I think that's what this means)
+                commandEncoder.writeToBuffer(previous.getVertexBuffer().slice(), data.vertexBuffer());
+            } else {
+                // Interestingly, Minecraft code doesn't contain any else here, so dunno when both statements would fail,
+                // or if they'd even fail.
+                // I'll put a log statement here, just for funsies
+                Lighty.LOGGER.info("I am curious whether this will ever trigger (BufferHolder::upload)");
+            }
 
-        if (data.indexBuffer() == null) {
-            indexBuffer = null;
-            indexType = null;
+            ByteBuffer indexBuffer = data.indexBuffer();
+            if (indexBuffer != null) {
+                if (previous.getIndexBuffer() != null && previous.getIndexBuffer().size() >= indexBuffer.remaining()) {
+                    if (!previous.getIndexBuffer().isClosed()) {
+                        commandEncoder.writeToBuffer(previous.getIndexBuffer().slice(), indexBuffer);
+                    }
+                } else {
+                    if (previous.getIndexBuffer() != null) {
+                        previous.getIndexBuffer().close();
+                    }
+
+                    previous.setIndexBuffer(
+                            device.createBuffer(
+                                    () -> "Lighty index buffer for" + dataProviderKey,
+                                    BUFFER_TYPE_INDEX,
+                                    indexBuffer
+                            )
+                    );
+                }
+            } else if (previous.getIndexBuffer() != null) {
+                // If the previous index buffer isn't null, but the current one is, delete the previous one
+                previous.getIndexBuffer().close();
+                previous.setIndexBuffer(null);
+            }
+
+            previous.setIndexCount(data.drawState().indexCount());
+            previous.setIndexType(data.drawState().indexType());
         } else {
-            indexBuffer = device.createBuffer(() -> "Lighty index buffer for" + pipeline.getVertexFormat(), BUFFER_TYPE_INDEX, data.indexBuffer());
-            indexType = data.drawState().indexType();
+            // there are no previous buffers, create new ones
+            GpuBuffer vertexBuffer = device.createBuffer(
+                    () -> "Lighty vertex buffer for " + dataProviderKey,
+                    BUFFER_TYPE_VERTEX,
+                    data.vertexBuffer()
+            );
+
+            ByteBuffer indexBuffer = data.indexBuffer();
+            GpuBuffer gpuIndexBuffer = indexBuffer != null
+                    ? device.createBuffer(
+                            () -> "Lighty index buffer for" + dataProviderKey,
+                            BUFFER_TYPE_INDEX,
+                            indexBuffer
+                    ) : null;
+
+            this.overlayBuffers.put(dataProviderKey, new SectionBuffers(
+                    vertexBuffer,
+                    gpuIndexBuffer,
+                    data.drawState().indexCount(),
+                    data.drawState().indexType()
+            ));
         }
 
-        gpuBuffers.add(new Data(vertexBuffer, indexBuffer, indexType, data.drawState().indexCount()));
         data.close();
     }
 
-    List<Data> getGpuBuffers() {
-        return gpuBuffers;
+    Map<String, SectionBuffers> getGpuBuffers() {
+        return this.overlayBuffers;
     }
 }

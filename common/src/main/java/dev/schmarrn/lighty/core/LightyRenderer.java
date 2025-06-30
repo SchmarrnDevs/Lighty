@@ -67,12 +67,12 @@ public class LightyRenderer {
 
                 // Prepare the render data
                 var gpuBuffers = cachedBuffer.getGpuBuffers();
-                for (var gpuBuffer : gpuBuffers) {
+                for (var gpuBuffer : gpuBuffers.values()) {
                     // If there is no index buffer available...
-                    if (gpuBuffer.indexBuffer() == null) {
+                    if (gpuBuffer.getIndexBuffer() == null) {
                         // ... try to reserve enough space to fit the vertex buffers
-                        if (gpuBuffer.indexCount() > biggestBufferSize) {
-                            biggestBufferSize = gpuBuffer.indexCount();
+                        if (gpuBuffer.getIndexCount() > biggestBufferSize) {
+                            biggestBufferSize = gpuBuffer.getIndexCount();
                         }
                     }
 
@@ -91,11 +91,11 @@ public class LightyRenderer {
 
                     drawList.add(new RenderPass.Draw<>(
                             0, // slot (whatever a slot is in this context)
-                            gpuBuffer.vertexBuffer(),
-                            gpuBuffer.indexBuffer(),
-                            gpuBuffer.indexType(),
+                            gpuBuffer.getVertexBuffer(),
+                            gpuBuffer.getIndexBuffer(),
+                            gpuBuffer.getIndexType(),
                             0, // first index
-                            gpuBuffer.indexCount(),
+                            gpuBuffer.getIndexCount(),
                             (bufferSlice, uniformUploader) -> uniformUploader.upload("DynamicTransforms", bufferSlice[currentTransformationIndex])
                     ));
                 }

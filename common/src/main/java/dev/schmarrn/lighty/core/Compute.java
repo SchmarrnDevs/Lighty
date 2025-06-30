@@ -96,7 +96,7 @@ public class Compute {
     }
 
     private static BufferHolder buildChunk(OverlayRenderer renderer, List<OverlayDataProvider> dataProviders, SectionPos sPos, ClientLevel level) {
-        List<OverlayData> overlayData = new ArrayList<>();
+        Map<String, List<OverlayData>> overlayData = new HashMap<>();
 
         for (int x = 0; x < 16; ++x) {
             for (int y = 0; y < 16; ++y) {
@@ -106,28 +106,28 @@ public class Compute {
                     for (var dataProvider : dataProviders) {
                         var data = dataProvider.compute(level, pos, new Vec3i(x, y, z));
                         if (data.valid()) {
-                            overlayData.add(data);
+                            overlayData.putIfAbsent(dataProvider.getResourceLocation().toString(), new ArrayList<>());
+                            overlayData.get(dataProvider.getResourceLocation().toString()).add(data);
                         }
                     }
                 }
             }
         }
 
-        BufferHolder buffer = cachedBuffers.get(sPos);
-        if (buffer == null) {
-            buffer = new BufferHolder();
-        }
-        if (!overlayData.isEmpty()) {
-            BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-            int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
-            // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
-            int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
-            for (var data : overlayData) {
-                renderer.build(level, data.pos(), data, builder, lightmap);
-            }
+        BufferHolder buffer = cachedBuffers.getOrDefault(sPos, new BufferHolder());
+        overlayData.forEach((key, dataList) -> {
+            if (!dataList.isEmpty()) {
+                BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+                int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
+                // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
+                int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
+                for (var data : dataList) {
+                    renderer.build(level, data.pos(), data, builder, lightmap);
+                }
 
-            buffer.upload(builder.buildOrThrow(), renderer.getChunkSectionLayer());
-        }
+                buffer.upload(builder.buildOrThrow(), renderer.getChunkSectionLayer(), key);
+            }
+        });
 
         return buffer;
     }
