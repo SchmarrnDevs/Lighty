@@ -1,6 +1,7 @@
 package dev.schmarrn.lighty.overlaystate;
 
 import dev.schmarrn.lighty.config.Config;
+import dev.schmarrn.lighty.core.Compute;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
@@ -13,6 +14,7 @@ public class SMACH {
             if (state == State.AUTO || state == State.OVERRIDE) {
                 // if auto_on is disabled, but we somehow got stuck inside of one of the auto_on states, reset to OFF
                 state = State.OFF;
+                whenSwitchingToOff();
             }
             return;
         }
@@ -47,6 +49,7 @@ public class SMACH {
                 // in both cases AUTO and OVERRIDE, if we let go of the item, we reset to state OFF
                 if (!holdsItem) {
                     state = State.OFF;
+                    whenSwitchingToOff();
                 }
             }
         }
@@ -56,7 +59,10 @@ public class SMACH {
     public static void toggle() {
         switch (state) {
             case OFF -> state = State.ON;
-            case ON -> state = State.OFF;
+            case ON -> {
+                state = State.OFF;
+                whenSwitchingToOff();
+            }
             case AUTO -> state = State.OVERRIDE;
             case OVERRIDE -> state = State.AUTO;
         }
@@ -68,5 +74,10 @@ public class SMACH {
 
     public static boolean isEnabled() {
         return state == State.AUTO || state == State.ON;
+    }
+
+    private static void whenSwitchingToOff() {
+        // TODO: find a more elegant solution
+        Compute.clear();
     }
 }
