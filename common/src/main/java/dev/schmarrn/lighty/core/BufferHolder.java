@@ -56,9 +56,9 @@ public class BufferHolder implements AutoCloseable {
     }
 
     void upload(MeshData data, ChunkSectionLayer chunkSectionLayer, String dataProviderKey) {
-        if (chunkSectionLayer.sortOnUpload()) {
-            data.sortQuads(sharedBuffer, RenderSystem.getProjectionType().vertexSorting());
-        }
+        //if (chunkSectionLayer.sortOnUpload()) {
+        //    data.sortQuads(sharedBuffer, RenderSystem.getProjectionType().vertexSorting());
+        //}
 
         // See CompiledSectionMesh::uploadMeshLayer (1.21.6) for place of inspiration
         SectionBuffers previous = this.overlayBuffers.get(dataProviderKey);
@@ -134,7 +134,7 @@ public class BufferHolder implements AutoCloseable {
                     vertexBuffer,
                     gpuIndexBuffer,
                     data.drawState().indexCount(),
-                    data.drawState().indexType()
+                    gpuIndexBuffer != null ? data.drawState().indexType() : null
             ));
         }
 
