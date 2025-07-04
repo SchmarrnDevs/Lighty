@@ -18,10 +18,8 @@ import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.MeshData;
 import dev.schmarrn.lighty.Lighty;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.chunk.SectionBuffers;
 
 import java.nio.ByteBuffer;
@@ -31,8 +29,7 @@ import java.util.Map;
 public class BufferHolder implements AutoCloseable {
     // List because we can hold multiple gpuBuffers from different data providers
     private final Map<String, SectionBuffers> overlayBuffers;
-
-    private final ByteBufferBuilder sharedBuffer;
+    private final Map<String, Boolean> isValid;
 
     private static final int BUFFER_TYPE_VERTEX = 40;
     private static final int BUFFER_TYPE_INDEX = 72;
@@ -40,13 +37,11 @@ public class BufferHolder implements AutoCloseable {
 
     BufferHolder() {
         this.overlayBuffers = new HashMap<>();
-        // Got magic number from OutlineBufferSource:14
-        // Maybe better magic number at RenderBuffers:38 (786432)
-        this.sharedBuffer = new ByteBufferBuilder(1536);
+        this.isValid = new HashMap<>();
     }
 
-    boolean isValid() {
-        return !this.overlayBuffers.isEmpty();
+    boolean isValid(String key) {
+        return this.isValid.getOrDefault(key, false);
     }
 
     @Override
@@ -55,11 +50,11 @@ public class BufferHolder implements AutoCloseable {
         this.overlayBuffers.clear();
     }
 
-    void upload(MeshData data, ChunkSectionLayer chunkSectionLayer, String dataProviderKey) {
-        //if (chunkSectionLayer.sortOnUpload()) {
-        //    data.sortQuads(sharedBuffer, RenderSystem.getProjectionType().vertexSorting());
-        //}
-
+    void upload(MeshData data, String dataProviderKey) {
+        if (data == null) {
+            this.isValid.put(dataProviderKey, false);
+            return;
+        }
         // See CompiledSectionMesh::uploadMeshLayer (1.21.6) for place of inspiration
         SectionBuffers previous = this.overlayBuffers.get(dataProviderKey);
         GpuDevice device = RenderSystem.getDevice();
@@ -113,7 +108,7 @@ public class BufferHolder implements AutoCloseable {
             }
 
             previous.setIndexCount(data.drawState().indexCount());
-            previous.setIndexType(data.drawState().indexType());
+            previous.setIndexType(indexBuffer != null ? data.drawState().indexType() : null);
         } else {
             // there are no previous buffers, create new ones
             GpuBuffer vertexBuffer = device.createBuffer(
@@ -139,6 +134,7 @@ public class BufferHolder implements AutoCloseable {
         }
 
         data.close();
+        this.isValid.put(dataProviderKey, true);
     }
 
     Map<String, SectionBuffers> getGpuBuffers() {

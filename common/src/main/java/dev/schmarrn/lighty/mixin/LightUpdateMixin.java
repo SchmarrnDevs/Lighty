@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class LightUpdateMixin {
     @Inject(method = "onLightUpdate", at = @At("TAIL"))
     private void lighty$onBlockUpdate(LightLayer lightLayer, SectionPos sectionPos, CallbackInfo ci) {
-        Compute.updateSubChunk(sectionPos);
+        Compute.updateSection(sectionPos);
     }
 
     @Inject(method = "updateViewRadius", at = @At("TAIL"))

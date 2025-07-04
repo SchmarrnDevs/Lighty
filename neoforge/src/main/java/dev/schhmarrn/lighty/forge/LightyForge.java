@@ -19,6 +19,7 @@ import dev.schmarrn.lighty.core.LightyRenderer;
 import dev.schmarrn.lighty.core.Compute;
 import dev.schmarrn.lighty.event.KeyBind;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -26,6 +27,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.event.level.ChunkEvent;
 
 @Mod(value = Lighty.MOD_ID, dist = Dist.CLIENT)
 public class LightyForge {
@@ -62,7 +64,7 @@ public class LightyForge {
 
         @SubscribeEvent
         public static void render(RenderLevelStageEvent.AfterTripwireBlocks event) {
-            LightyRenderer.render();
+            LightyRenderer.render(event.getFrustum());
         }
     }
 }

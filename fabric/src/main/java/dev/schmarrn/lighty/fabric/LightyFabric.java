@@ -20,6 +20,7 @@ import dev.schmarrn.lighty.fabric.api.LightyModesRegistration;
 import dev.schmarrn.lighty.core.Compute;
 import dev.schmarrn.lighty.event.KeyBind;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -29,7 +30,7 @@ public class LightyFabric implements ClientModInitializer {
     public void onInitializeClient() {
 
         ClientTickEvents.END_CLIENT_TICK.register(Compute::computeCache);
-        WorldRenderEvents.AFTER_TRANSLUCENT.register(context -> LightyRenderer.render());
+        WorldRenderEvents.AFTER_TRANSLUCENT.register(context -> LightyRenderer.render(context.frustum()));
 
         ClientTickEvents.END_CLIENT_TICK.register(KeyBind::handleKeyBind);
 

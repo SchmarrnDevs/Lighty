@@ -15,7 +15,11 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.DynamicUniforms;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.chunk.SectionBuffers;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -34,7 +38,125 @@ public class LightyRenderer {
     // TODO? Maybe integrate Lighty render code more tightly into Minecraft render code, but wait if there are major changes in next versions until I do so
     private record Data(List<RenderPass.Draw<GpuBufferSlice[]>> drawList, int maxIndicesRequired, GpuBufferSlice[] dynamicTransforms) {}
 
-    private static Data prepareData(Minecraft minecraft){
+    private static int addData(SectionPos chunkSection, SectionBuffers gpuBuffer, Vec3 camPos, int biggestBufferSize, List<RenderPass.Draw<GpuBufferSlice[]>> drawList, List<DynamicUniforms.Transform> transforms) {
+        // Calculate the translation required to place the section at its right place
+        Vec3 origin = new Vec3(chunkSection.origin());
+        Vec3 dPos = origin.subtract(camPos);
+
+        // Prepare the render data
+        // If there is no index buffer available...
+        if (gpuBuffer.getIndexBuffer() == null) {
+            // ... try to reserve enough space to fit the vertex buffers
+            if (gpuBuffer.getIndexCount() > biggestBufferSize) {
+                biggestBufferSize = gpuBuffer.getIndexCount();
+            }
+        }
+
+        // Get index of the current transform,
+        // which is the size of the list *before* adding the transform to the list
+        int currentTransformationIndex = transforms.size();
+        transforms.add(
+                new DynamicUniforms.Transform(
+                        RenderSystem.getModelViewMatrix(),
+                        UNIT_COLOR_MODULATOR,
+                        new Vector3f((float)dPos.x(), (float)dPos.y(), (float)dPos.z()),
+                        DEFAULT_TEXTURE_MATRIX,
+                        1.0F // Line Width
+                )
+        );
+
+        drawList.add(new RenderPass.Draw<>(
+                0, // slot (whatever a slot is in this context)
+                gpuBuffer.getVertexBuffer(),
+                gpuBuffer.getIndexBuffer(),
+                gpuBuffer.getIndexType(),
+                0, // first index
+                gpuBuffer.getIndexCount(),
+                (bufferSlice, uniformUploader) -> uniformUploader.upload("DynamicTransforms", bufferSlice[currentTransformationIndex])
+        ));
+        return biggestBufferSize;
+    }
+
+    private static int goThroughEachBuffer(Minecraft minecraft, Camera camera, Vec3 camPos, Frustum frustum, List<RenderPass.Draw<GpuBufferSlice[]>> drawList, List<DynamicUniforms.Transform> transforms) {
+        int biggestBufferSize = 0;
+        for (var entry : Compute.cachedBuffers.entrySet()) {
+            SectionPos chunkSection = entry.getKey();
+            BufferHolder cachedBuffer = entry.getValue();
+
+            for (var bufferEntry : cachedBuffer.getGpuBuffers().entrySet()) {
+                String key = bufferEntry.getKey();
+                if (!cachedBuffer.isValid(key)) {
+                    continue;
+                }
+                if (!frustum.isVisible(
+                        AABB.encapsulatingFullBlocks(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16, 16, 16))
+                )) {
+                    continue;
+                }
+                // Only continue if the buffer is valid
+                biggestBufferSize = addData(chunkSection, bufferEntry.getValue(), camPos, biggestBufferSize, drawList, transforms);
+            }
+        }
+        return biggestBufferSize;
+    }
+
+    private static int goThroughEachSection(Minecraft minecraft, Camera camera, Vec3 camPos, Frustum frustum, List<RenderPass.Draw<GpuBufferSlice[]>> drawList, List<DynamicUniforms.Transform> transforms) {
+        ChunkPos cameraChunkPos = new ChunkPos(camera.getBlockPosition());
+        int biggestBufferSize = 0;
+
+        for (int xx = -Compute.computationDistance + 1; xx < Compute.computationDistance; ++xx) {
+            for (int zz = -Compute.computationDistance + 1; zz < Compute.computationDistance; ++zz) {
+                ChunkPos chunkPos = new ChunkPos(cameraChunkPos.x + xx, cameraChunkPos.z + zz);
+
+                for (int ii = 0; ii < minecraft.level.getSectionsCount(); ++ii) {
+                    SectionPos chunkSection = SectionPos.of(chunkPos, ii + minecraft.level.getMinSectionY());
+                    if (!minecraft.levelRenderer.isSectionCompiled(chunkSection.origin())) {
+                        // Don't bother doing anything if the chunk isn't rendered yet
+                        continue;
+                    }
+
+                    if (Compute.cachedBuffers.containsKey(chunkSection)) {
+                        BufferHolder cachedBuffer = Compute.cachedBuffers.get(chunkSection);
+                        for (var entry : cachedBuffer.getGpuBuffers().entrySet()) {
+                            String key = entry.getKey();
+                            if (!cachedBuffer.isValid(key)) {
+                                continue;
+                            }
+                            if (!frustum.isVisible(
+                                    AABB.encapsulatingFullBlocks(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16, 16, 16))
+                            )) {
+                                continue;
+                            }
+                            // Only continue if the buffer is valid
+                            biggestBufferSize = addData(chunkSection, entry.getValue(), camPos, biggestBufferSize, drawList, transforms);
+                        }
+                    }
+                }
+            }
+        }
+        return biggestBufferSize;
+    }
+
+    private static int goThroughVisibleSections(Minecraft minecraft, Camera camera, Vec3 camPos, Frustum frustum, List<RenderPass.Draw<GpuBufferSlice[]>> drawList, List<DynamicUniforms.Transform> transforms) {
+        int biggestBufferSize = 0;
+        for (var sections : minecraft.levelRenderer.getVisibleSections()) {
+            var chunkSection = SectionPos.of(sections.getRenderOrigin());
+            if (Compute.cachedBuffers.containsKey(chunkSection)) {
+                BufferHolder cachedBuffer = Compute.cachedBuffers.get(chunkSection);
+                for (var entry : cachedBuffer.getGpuBuffers().entrySet()) {
+                    String key = entry.getKey();
+                    if (!cachedBuffer.isValid(key)) {
+                        continue;
+                    }
+                    // Only continue if the buffer is valid
+                    biggestBufferSize = addData(chunkSection, entry.getValue(), camPos, biggestBufferSize, drawList, transforms);
+                }
+            }
+        }
+        return biggestBufferSize;
+    }
+
+    private static Data prepareData(Minecraft minecraft, Frustum frustum){
         // Get some basic stuff
         Camera camera = minecraft.gameRenderer.getMainCamera();
 
@@ -50,71 +172,19 @@ public class LightyRenderer {
 
         // tracking the biggest *vertex* buffer, in case our data didn't return an *index* buffer as well
         // See LevelRenderer#renderSectionLayer (1.21.5) for the place of inspiration
-        int biggestBufferSize = 0;
+        int biggestBufferSize = goThroughEachSection(minecraft, camera, camPos, frustum, drawList, transforms);
 
-        for (var section : minecraft.levelRenderer.getVisibleSections()) {
-            SectionPos chunkSection = SectionPos.of(section.getRenderOrigin());
-
-            if (Compute.cachedBuffers.containsKey(chunkSection)) {
-                BufferHolder cachedBuffer = Compute.cachedBuffers.get(chunkSection);
-                // Only continue if the buffer is valid
-                if (!cachedBuffer.isValid()) {
-                    continue;
-                }
-                // Calculate the translation required to place the section at its right place
-                Vec3 origin = new Vec3(chunkSection.origin());
-                Vec3 dPos = origin.subtract(camPos);
-
-                // Prepare the render data
-                var gpuBuffers = cachedBuffer.getGpuBuffers();
-                for (var gpuBuffer : gpuBuffers.values()) {
-                    // If there is no index buffer available...
-                    if (gpuBuffer.getIndexBuffer() == null) {
-                        // ... try to reserve enough space to fit the vertex buffers
-                        if (gpuBuffer.getIndexCount() > biggestBufferSize) {
-                            biggestBufferSize = gpuBuffer.getIndexCount();
-                        }
-                    }
-
-                    // Get index of the current transform,
-                    // which is the size of the list *before* adding the transform to the list
-                    int currentTransformationIndex = transforms.size();
-                    transforms.add(
-                            new DynamicUniforms.Transform(
-                                    RenderSystem.getModelViewMatrix(),
-                                    UNIT_COLOR_MODULATOR,
-                                    new Vector3f((float)dPos.x(), (float)dPos.y(), (float)dPos.z()),
-                                    DEFAULT_TEXTURE_MATRIX,
-                                    1.0F // Line Width
-                            )
-                    );
-
-                    drawList.add(new RenderPass.Draw<>(
-                            0, // slot (whatever a slot is in this context)
-                            gpuBuffer.getVertexBuffer(),
-                            gpuBuffer.getIndexBuffer(),
-                            gpuBuffer.getIndexType(),
-                            0, // first index
-                            gpuBuffer.getIndexCount(),
-                            (bufferSlice, uniformUploader) -> uniformUploader.upload("DynamicTransforms", bufferSlice[currentTransformationIndex])
-                    ));
-                }
-            } else {
-                // Chunk data doesn't exist in our cache, queue computation
-                Compute.updateSubChunk(chunkSection);
-            }
-        }
         GpuBufferSlice[] dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransforms(transforms.toArray(new DynamicUniforms.Transform[0]));
         return new Data(drawList, biggestBufferSize, dynamicTransforms);
     }
 
-    public static void render() {
+    public static void render(Frustum frustum) {
         if (!SMACH.isEnabled()) return;
 
         // Get required data
         Minecraft minecraft = Minecraft.getInstance();
         OverlayRenderer renderer = RendererRegistry.getRenderer();
-        Data data = prepareData(minecraft);
+        Data data = prepareData(minecraft, frustum);
 
         // Do the rendering
         GpuDevice device = RenderSystem.getDevice();
