@@ -1,11 +1,6 @@
 package dev.schmarrn.lighty.api;
 
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.Frustum;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.world.WorldClient;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -58,19 +53,15 @@ public abstract class LightyMode<K, V> {
      * This method gets called for each BlockPos that needs to be re-computed.
      *
      * @param world Provide Access to a `ClientWorld` instance.
-     * @param pos The position that need re-computing.
+	 * @param x The x position of the block that need re-computing.
+	 * @param y The y position of the block that need re-computing.
+	 * @param z The z position of the block that need re-computing.
      */
-    public abstract void compute(ClientWorld world, BlockPos pos);
+    public abstract void compute(WorldClient world, int x, int y, int z);
 
     /**
      * Implement the render method to display the data which you've stored in `cache` in `compute()`.<br/>
      * This method is most likely to change with Lighty 2.0.0
-     *
-     * @param worldRenderContext Access to camera and matrixStack
-     * @param world useful for rendering blocks
-     * @param frustum use frustum.isVisible to skip non visible blocks
-     * @param provider you need to call provider.draw() at the end
-     * @param client use the client to get different renderers
      */
-    public abstract void render(WorldRenderContext worldRenderContext, ClientWorld world, Frustum frustum, VertexConsumerProvider.Immediate provider, MinecraftClient client);
+    public abstract void render(float partialTicks);
 }

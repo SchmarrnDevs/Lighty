@@ -1,52 +1,54 @@
 package dev.schmarrn.lighty.event;
 
-import dev.schmarrn.lighty.ModeLoader;
+import dev.schmarrn.lighty.SMACH;
 import dev.schmarrn.lighty.ui.ModeSwitcherScreen;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.options.components.KeyBindingComponent;
+import net.minecraft.client.gui.options.components.OptionsCategory;
+import net.minecraft.client.gui.options.data.OptionsPages;
+import net.minecraft.client.input.InputDevice;
+import net.minecraft.client.option.GameSettings;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import org.lwjgl.glfw.GLFW;
+import org.jetbrains.annotations.Nullable;
+import org.lwjgl.input.Keyboard;
 
 public class KeyBind {
-    private static final KeyBinding enableKeyBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-            "key.lighty.enable",
-            InputUtil.Type.KEYSYM,
-            GLFW.GLFW_KEY_F7,
-            "category.lighty"
-    ));
-    private static final KeyBinding toggleKeyBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-            "key.lighty.toggle",
-            InputUtil.Type.KEYSYM,
-            GLFW.GLFW_KEY_F8,
-            "category.lighty"
-    ));
+	public static KeyBinding enable;
+	public static KeyBinding toggle;
 
-    private static boolean oldKeyState = false;
-    private static boolean oldToggleState = false;
+	private static boolean oldEnableState = false;
+	private static boolean oldToggleState = false;
 
-    public static void handleKeyBind(MinecraftClient client) {
-        // Get new key states
-        boolean newKeyState = KeyBind.enableKeyBind.isPressed();
-        boolean newToggleState = KeyBind.toggleKeyBind.isPressed();
+	public static void callback(InputDevice currentInputDevice) {
+		Minecraft minecraft = Minecraft.getMinecraft();
+		@Nullable Screen currentScreen = minecraft.currentScreen;
 
-        // Check for rising edges
-        if (newToggleState && !KeyBind.oldToggleState) {
-            ModeLoader.toggle();
-        }
-        if (newKeyState && !KeyBind.oldKeyState) {
-            client.setScreen(new ModeSwitcherScreen());
-        }
+		if (enable.isPressed() && !oldEnableState && currentScreen == null) {
+			minecraft.displayScreen(new ModeSwitcherScreen());
+		}
+		if (toggle.isPressed() && !oldToggleState) {
+			SMACH.toggle();
+		}
 
-        // old state is new state
-        KeyBind.oldKeyState = newKeyState;
-        KeyBind.oldToggleState = newToggleState;
-    }
+		oldEnableState = enable.isPressed();
+		oldToggleState = toggle.isPressed();
+	}
 
-    public static void init() {
-        ClientTickEvents.END_CLIENT_TICK.register(KeyBind::handleKeyBind);
-    }
+	public static void init() {
+		enable = new KeyBinding("key.lighty.enable")
+			.setDefault(InputDevice.keyboard, Keyboard.KEY_F6);
+		toggle = new KeyBinding("key.lighty.toggle")
+			.setDefault(InputDevice.keyboard, Keyboard.KEY_F7);
+	}
 
-    private KeyBind() {}
+	public static void register() {
+		GameSettings.keys.add(enable);
+		GameSettings.keys.add(toggle);
+
+		OptionsPages.CONTROLS
+			.withComponent(new OptionsCategory("category.lighty")
+				.withComponent(new KeyBindingComponent(enable))
+				.withComponent(new KeyBindingComponent(toggle)));
+	}
 }

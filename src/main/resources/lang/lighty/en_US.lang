@@ -1,0 +1,39 @@
+key.lighty.enable=Open Light Overlay Menu
+key.lighty.toggle=Toggle Light Overlay
+category.lighty=Lighty
+
+gui.lighty.modeSwitcher.title=Lighty Mode Switcher
+gui.lighty.modeSwitcher.toggle=Overlay: %s
+gui.lighty.modeSwitcher.on=ON
+gui.lighty.modeSwitcher.off=OFF
+gui.lighty.modeSwitcher.done=Done
+
+gui.modeSwitcher.lighty.carpet_mode=Carpet Mode
+gui.modeSwitcher.lighty.carpet_mode.tooltip=Original, carpet like overlay.
+
+gui.modeSwitcher.lighty.cross_mode=Boring Cross Mode
+gui.modeSwitcher.lighty.cross_mode.tooltip=Classic light overlay style.
+
+gui.modeSwitcher.lighty.number_mode=Number Mode
+gui.modeSwitcher.lighty.number_mode.tooltip=For the nerds!\nDisplays as: 1. BlockLightLevel, 2. SkyLightLevel.
+
+gui.lighty.options.title=Lighty Settings
+gui.lighty.options.general.title=Global
+gui.lighty.options.modes.title=Mode Specifics
+
+gui.lighty.options.toggle=Toggle
+gui.lighty.options.visual=Visuals
+gui.lighty.options.advanced=Advanced
+gui.lighty.options.page.advanced.button.open_folder=Open Config File For More...
+
+options.lighty.options.block_threshold=Block Threshold
+options.lighty.options.sky_threshold=Sky Threshold
+options.lighty.options.overlay_distance=Overlay Distance
+options.lighty.options.overlay_brightness=Overlay Brightness
+options.lighty.options.show_safe=Show Safe Spots
+options.lighty.options.show_skylight_level=Show Skylight Level
+options.lighty.options.show_above_hitbox=Always Show Above Hitbox
+options.lighty.options.auto_on=Auto-On
+options.lighty.options.overlay_transparency=Overlay Transparency
+options.lighty.options.flat_carpet=Render Flat
+options.lighty.options.overlay_line_thickness=Line Thickness

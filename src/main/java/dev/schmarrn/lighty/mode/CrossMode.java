@@ -15,15 +15,13 @@ import net.minecraft.core.block.Blocks;
 import net.minecraft.core.util.collection.Pair;
 import org.lwjgl.opengl.GL11;
 
-public class CarpetMode extends LightyMode<Provider.Pos, Pair<Double, Integer>> {
-
-	private static final float TEXTURE_SIZE = 16;
+public class CrossMode extends LightyMode<Provider.Pos, Pair<Double, Integer>> {
 
 	public static void init() {
-		ModeManager.registerMode(Lighty.MOD_ID+".carpet_mode", new CarpetMode());
+		ModeManager.registerMode(Lighty.MOD_ID+".cross_mode", new CrossMode());
 		ModeManager.addOptions(
-				() -> new OptionsCategory("gui.modeSwitcher."+Lighty.MOD_ID+".carpet_mode")
-						.withComponent(Config.FLAT_CARPET.getOptionInstance())
+				() -> new OptionsCategory("gui.modeSwitcher."+Lighty.MOD_ID+".cross_mode")
+						.withComponent(Config.OVERLAY_LINE_THICKNESS.getOptionInstance())
 		);
 	}
 
@@ -55,6 +53,7 @@ public class CarpetMode extends LightyMode<Provider.Pos, Pair<Double, Integer>> 
 		GL11.glPushMatrix();
 		if (Config.OVERLAY_TRANSPARENCY.getValue() < 100)
 			GL11.glEnable(GL11.GL_BLEND);
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
 
 		if (LightmapHelper.isLightmapEnabled()) {
 			Integer light = Config.OVERLAY_BRIGHTNESS.getValue();
@@ -62,34 +61,32 @@ public class CarpetMode extends LightyMode<Provider.Pos, Pair<Double, Integer>> 
 		}
 
 		cache.forEach((pos, data) -> {
-			double x = pos.x -camera.getX(partialTicks);
-			double y = pos.y + data.getLeft() + 0.01 -camera.getY(partialTicks);
-			double z = pos.z -camera.getZ(partialTicks);
+			double x = pos.x + 0.44 - camera.getX(partialTicks);
+			double y = pos.y + data.getLeft() + 0.01 - camera.getY(partialTicks);
+			double z = pos.z + 0.562 - camera.getZ(partialTicks);
 
 			GL11.glPushMatrix();
 			GL11.glTranslated(x, y, z);
-			GL11.glScalef(1f/16f, -1f/16f, 1f/16f);
 			GL11.glRotated(90, 1, 0, 0);
+			GL11.glRotated(45, 0, 0, 1);
+			GL11.glScalef(2.85f/32f, -2.85f/32f, 2.85f/32f);
 
-			//if (Config.FLAT_CARPET.getValue()) {
-				Minecraft.getMinecraft().textureManager.loadTexture(Config.CARPET_TEXTURE.getValue()).bind();
-				drawTexture(0, 0, 0, 0, 0, 16, 16, data.getRight());
-			//} else {
-
-			//}
+			drawCross(data.getRight());
 
 			GL11.glPopMatrix();
 		});
+
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		if (Config.OVERLAY_TRANSPARENCY.getValue() < 100)
 			GL11.glDisable(GL11.GL_BLEND);
 		GL11.glPopMatrix();
 	}
 
-	private static void drawTexture(float x, float y, float z, float u, float v, float width, float height, int color) {
+	private static void drawCross(int color) {
+		GL11.glLineWidth(Config.OVERLAY_LINE_THICKNESS.getValue());
+
 		Tessellator tessellator = Tessellator.instance;
-
-		tessellator.startDrawingQuads();
-
+		tessellator.startDrawing(GL11.GL_LINES);
 		tessellator.setColorRGBA(
 			(color >> 16) & 0xFF,
 			(color >> 8) & 0xFF,
@@ -97,10 +94,11 @@ public class CarpetMode extends LightyMode<Provider.Pos, Pair<Double, Integer>> 
 			(int) (2.55 * Config.OVERLAY_TRANSPARENCY.getValue())
 		);
 
-		tessellator.addVertexWithUV(x, y + height, z, u / TEXTURE_SIZE, (v + height) / TEXTURE_SIZE);
-		tessellator.addVertexWithUV(x + width, y + height, z, (u + width) / TEXTURE_SIZE, (v + height) / TEXTURE_SIZE);
-		tessellator.addVertexWithUV(x + width, y, z, (u + width) / TEXTURE_SIZE, v / TEXTURE_SIZE);
-		tessellator.addVertexWithUV(x, y, z, u / TEXTURE_SIZE, v / TEXTURE_SIZE);
+		tessellator.addVertex(-8, 1, 0);
+		tessellator.addVertex(+8, 1, 0);
+
+		tessellator.addVertex(0, 1 - 8, 0);
+		tessellator.addVertex(0, 1 + 8, 0);
 
 		tessellator.draw();
 	}

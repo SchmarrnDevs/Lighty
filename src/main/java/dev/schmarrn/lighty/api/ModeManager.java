@@ -1,9 +1,11 @@
 package dev.schmarrn.lighty.api;
 
 import dev.schmarrn.lighty.ModeLoader;
+import dev.schmarrn.lighty.ui.LightyConfigScreen;
 import dev.schmarrn.lighty.ui.ModeSwitcherScreen;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.options.components.OptionsComponent;
+
+import java.util.function.Supplier;
 
 /**
  * Used for registering your LightyModes.
@@ -18,13 +20,22 @@ public class ModeManager {
      * @param id Used to generate the translatable text resource locations
      * @param mode Your LightyMode to be registered
      */
-    public static void registerMode(Identifier id, LightyMode<?, ?> mode) {
+    public static void registerMode(String id, LightyMode<?, ?> mode) {
         ModeLoader.put(id, mode);
 
         ModeSwitcherScreen.addButton(
-                new TranslatableText("modeSwitcher." + id.getNamespace() + "." + id.getPath()),
-                new TranslatableText("modeSwitcher." + id.getNamespace() + "." + id.getPath() + ".tooltip"), button -> ModeLoader.loadMode(id)
+			"gui.modeSwitcher."+id,
+			"gui.modeSwitcher."+id+".tooltip", () -> ModeLoader.loadMode(id)
         );
+    }
+
+    /**
+     * Adds options to the lighty config screens modes section.
+     * This must be called the `afterGameStart` entrypoint.
+     */
+    @SafeVarargs
+    public static void addOptions(Supplier<OptionsComponent>... components) {
+        LightyConfigScreen.addModeOption(components);
     }
 
     private ModeManager() {}

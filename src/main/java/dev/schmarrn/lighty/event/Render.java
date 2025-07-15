@@ -1,32 +1,20 @@
 package dev.schmarrn.lighty.event;
 
 import dev.schmarrn.lighty.ModeLoader;
+import dev.schmarrn.lighty.SMACH;
 import dev.schmarrn.lighty.api.LightyMode;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.Frustum;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.world.ClientWorld;
 
 public class Render {
-    private static final VertexConsumerProvider.Immediate provider = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-    private static final MinecraftClient client = MinecraftClient.getInstance();
+	public static void renderOverlay(float partialTicks) {
+		if (!SMACH.isEnabled()) return;
 
-    public static void renderOverlay(WorldRenderContext worldRenderContext) {
-        LightyMode<?, ?> mode = ModeLoader.getCurrentMode();
-        if (mode == null) return;
+		LightyMode<?, ?> mode = ModeLoader.getCurrentMode();
+		assert mode != null;
 
-        ClientWorld world = client.world;
-        Frustum frustum = worldRenderContext.frustum();
+		mode.render(partialTicks);
+	}
 
-        if (world == null || frustum == null) {
-            return;
-        }
+	public static void init() {
 
-        // Render
-        mode.render(worldRenderContext, world, frustum, provider, client);
-    }
-
-    private Render() {}
+	}
 }
