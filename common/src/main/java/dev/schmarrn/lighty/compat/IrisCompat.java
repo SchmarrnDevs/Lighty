@@ -1,9 +1,5 @@
 package dev.schmarrn.lighty.compat;
 
-import dev.schmarrn.lighty.Lighty;
-import dev.schmarrn.lighty.UtilDefinition;
-import dev.schmarrn.lighty.core.Compute;
-
 import java.util.ServiceLoader;
 
 public interface IrisCompat {
