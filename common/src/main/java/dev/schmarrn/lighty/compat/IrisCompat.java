@@ -4,14 +4,15 @@ import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.UtilDefinition;
 import dev.schmarrn.lighty.core.Compute;
 
-public class IrisCompat {
-    private static boolean wereShadersOn = UtilDefinition.INSTANCE.shadersEnabled();
-    public static void fixIrisShaders() {
-        if (wereShadersOn ^ UtilDefinition.INSTANCE.shadersEnabled()) {
-            // If shaders were switched on/off, we need to re-compute the overlay
-            Lighty.LOGGER.info("Iris shader state changed, need to re-compute Lighty overlay.");
-            wereShadersOn = UtilDefinition.INSTANCE.shadersEnabled();
-            Compute.clear();
-        }
+import java.util.ServiceLoader;
+
+public interface IrisCompat {
+    IrisCompat INSTANCE = load();
+
+    void fixIrisShaders();
+    boolean hasIris();
+    void registerPipelines();
+    static IrisCompat load() {
+        return ServiceLoader.load(IrisCompat.class).findFirst().orElseThrow(() -> new IllegalStateException("No valid ServiceImpl found"));
     }
 }

@@ -2,6 +2,7 @@ package dev.schmarrn.lighty.core;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderPass;
@@ -161,7 +162,7 @@ public class LightyRenderer {
         Camera camera = minecraft.gameRenderer.getMainCamera();
 
         // fixes incompatible cached chunks when switching shaders on/off
-        IrisCompat.fixIrisShaders();
+        IrisCompat.INSTANCE.fixIrisShaders();
 
         // save camera position to be able to later translate the different sections
         Vec3 camPos = camera.getPosition();
@@ -191,8 +192,8 @@ public class LightyRenderer {
         // Get the texture specified in the overlay
         GpuTextureView tex = minecraft.getTextureManager().getTexture(renderer.getTextureLocation()).getTextureView();
 
-        ChunkSectionLayer chunkSectionLayer = renderer.getChunkSectionLayer();
-        RenderTarget renderTarget = chunkSectionLayer.outputTarget();
+        RenderPipeline pipeline = renderer.getPipeline();
+        RenderTarget renderTarget = minecraft.getMainRenderTarget();
 
         RenderSystem.AutoStorageIndexBuffer asib = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
         // Index buffers/type for all the vertex data that didn't get its own IndexBuffer
@@ -200,11 +201,10 @@ public class LightyRenderer {
         GpuBuffer baseIndexBuffer = data.maxIndicesRequired == 0 ? null : asib.getBuffer(data.maxIndicesRequired);
         VertexFormat.IndexType baseIndexType = data.maxIndicesRequired == 0 ? null : asib.type();
 
-
         try (RenderPass pass = device
                 .createCommandEncoder()
                 .createRenderPass(
-                        () -> "Lighty Render Pass for" + chunkSectionLayer.label(),
+                        () -> "Lighty Render Pass for" + pipeline.getLocation(),
                         renderTarget.getColorTextureView(),
                         OptionalInt.empty(),
                         renderTarget.getDepthTextureView(),
@@ -214,11 +214,11 @@ public class LightyRenderer {
             RenderSystem.bindDefaultUniforms(pass);
             pass.bindSampler("Sampler2", minecraft.gameRenderer.lightTexture().getTextureView());
 
-            pass.setPipeline(chunkSectionLayer.pipeline());
+            pass.setPipeline(pipeline);
             pass.bindSampler("Sampler0", tex);
 
             pass.drawMultipleIndexed(
-                    chunkSectionLayer == ChunkSectionLayer.TRANSLUCENT ? data.drawList.reversed() : data.drawList,
+                    pipeline == LightyPipelines.TERRAIN_TRANSLUCENT ? data.drawList.reversed() : data.drawList,
                     baseIndexBuffer,
                     baseIndexType,
                     List.of("DynamicTransforms"),

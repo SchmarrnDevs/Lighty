@@ -1,11 +1,13 @@
 package dev.schmarrn.lighty.renderers;
 
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.api.OverlayData;
 import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.config.Config;
+import dev.schmarrn.lighty.core.LightyPipelines;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.BlockPos;
@@ -69,8 +71,8 @@ public class NumberRenderer implements OverlayRenderer {
     }
 
     @Override
-    public ChunkSectionLayer getChunkSectionLayer() {
-        return ChunkSectionLayer.CUTOUT;
+    public RenderPipeline getPipeline() {
+        return LightyPipelines.TERRAIN_CUTOUT;
     }
 
     @Override

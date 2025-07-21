@@ -27,8 +27,6 @@ public interface UtilDefinition {
 
     Path getConfigDir();
 
-    boolean shadersEnabled();
-
     static UtilDefinition load() {
         return ServiceLoader.load(UtilDefinition.class).findFirst().orElseThrow(() -> new IllegalStateException("No valid ServiceImpl found"));
     }

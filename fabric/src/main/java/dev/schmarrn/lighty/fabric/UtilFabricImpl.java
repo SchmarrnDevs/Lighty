@@ -23,16 +23,6 @@ import net.minecraft.client.KeyMapping;
 import java.nio.file.Path;
 
 public class UtilFabricImpl implements UtilDefinition {
-    private static final IrisApi INSTANCE;
-    static {
-        IrisApi i;
-        try {
-            i = (IrisApi)Class.forName("net.irisshaders.iris.apiimpl.IrisApiV0Impl").getField("INSTANCE").get(null);
-        } catch (NoSuchFieldException | ClassNotFoundException | IllegalAccessException var1) {
-            i = null;
-        }
-        INSTANCE = i;
-    }
 
     @Override
     public KeyMapping registerKeyBinding(KeyMapping mapping) {
@@ -42,10 +32,5 @@ public class UtilFabricImpl implements UtilDefinition {
     @Override
     public Path getConfigDir() {
         return FabricLoader.getInstance().getConfigDir();
-    }
-
-    @Override
-    public boolean shadersEnabled() {
-        return INSTANCE != null && INSTANCE.isShaderPackInUse();
     }
 }
