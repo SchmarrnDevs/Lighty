@@ -67,6 +67,6 @@ public class MixinRenderPipelines {
                 .build();
 
         // Try registering with Iris
-        //IrisCompat.INSTANCE.registerPipelines();
+        IrisCompat.INSTANCE.registerPipelines();
     }
 }
