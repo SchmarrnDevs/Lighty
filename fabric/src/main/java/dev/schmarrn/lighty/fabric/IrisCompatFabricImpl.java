@@ -56,8 +56,10 @@ public class IrisCompatFabricImpl implements IrisCompat {
 
     @Override
     public void registerPipelines() {
-        irisAPI.assignPipeline(LightyPipelines.TERRAIN_TRANSLUCENT, IrisProgram.TRANSLUCENT);
-        irisAPI.assignPipeline(LightyPipelines.TERRAIN_CUTOUT, IrisProgram.TERRAIN_CUTOUT);
+        if (isIrisLoaded) {
+            irisAPI.assignPipeline(LightyPipelines.TERRAIN_TRANSLUCENT, IrisProgram.TRANSLUCENT);
+            irisAPI.assignPipeline(LightyPipelines.TERRAIN_CUTOUT, IrisProgram.TERRAIN_CUTOUT);
+        }
     }
 
     public boolean shadersEnabled() {
