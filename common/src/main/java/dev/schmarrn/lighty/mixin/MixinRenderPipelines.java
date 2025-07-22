@@ -38,7 +38,16 @@ public class MixinRenderPipelines {
                 .add("Normal", VertexFormatElement.NORMAL)
                 .build();
 
-        LightyPipelines.TERRAIN_SNIPPET = RenderPipeline.builder(MATRICES_FOG_SNIPPET)
+        LightyPipelines.TERRAIN_TRANSLUCENT_SNIPPET = RenderPipeline.builder(MATRICES_FOG_SNIPPET)
+                .withVertexShader("core/terrain")
+                .withFragmentShader("core/terrain")
+                .withSampler("Sampler0")
+                .withSampler("Sampler2")
+                .withVertexFormat(LightyPipelines.POSITION_COLOR_TEXTURE_LIGHT_NORMAL, VertexFormat.Mode.QUADS)
+                .withBlend(BlendFunction.TRANSLUCENT)
+                .buildSnippet();
+
+        LightyPipelines.TERRAIN_CUTOUT_SNIPPET = RenderPipeline.builder(MATRICES_FOG_SNIPPET)
                 .withVertexShader("core/terrain")
                 .withFragmentShader("core/terrain")
                 .withSampler("Sampler0")
@@ -48,16 +57,16 @@ public class MixinRenderPipelines {
                 .buildSnippet();
 
 
-        LightyPipelines.TERRAIN_TRANSLUCENT = RenderPipeline.builder(LightyPipelines.TERRAIN_SNIPPET)
+        LightyPipelines.TERRAIN_TRANSLUCENT = RenderPipeline.builder(LightyPipelines.TERRAIN_TRANSLUCENT_SNIPPET)
                 .withLocation(Lighty.MOD_ID + "pipeline/translucent")
                 .build();
 
-        LightyPipelines.TERRAIN_CUTOUT = RenderPipeline.builder(LightyPipelines.TERRAIN_SNIPPET)
+        LightyPipelines.TERRAIN_CUTOUT = RenderPipeline.builder(LightyPipelines.TERRAIN_CUTOUT_SNIPPET)
                 .withLocation(Lighty.MOD_ID + "pipeline/cutout")
                 .withShaderDefine("ALPHA_CUTOUT", 0.1F)
                 .build();
 
         // Try registering with Iris
-        IrisCompat.INSTANCE.registerPipelines();
+        //IrisCompat.INSTANCE.registerPipelines();
     }
 }

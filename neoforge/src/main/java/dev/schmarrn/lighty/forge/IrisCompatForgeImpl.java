@@ -1,17 +1,16 @@
-package dev.schmarrn.lighty.fabric;
+package dev.schmarrn.lighty.forge;
 
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.compat.IrisCompat;
 import dev.schmarrn.lighty.core.Compute;
 import dev.schmarrn.lighty.core.LightyPipelines;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.irisshaders.iris.api.v0.IrisProgram;
+import net.neoforged.fml.ModList;
 
 import java.util.Objects;
 
-public class IrisCompatImpl implements IrisCompat {
+public class IrisCompatForgeImpl implements IrisCompat {
     private static final String SODIUM_ID = "sodium";
     private static final String IRIS_ID = "iris";
 
@@ -23,14 +22,13 @@ public class IrisCompatImpl implements IrisCompat {
     private static IrisApi irisAPI = null;
 
     static {
-        FabricLoader.getInstance().getAllMods().stream().toList().forEach((mc -> {
-            ModMetadata meta = mc.getMetadata();
-            if (Objects.equals(meta.getId(), SODIUM_ID)) {
-                sodiumVersion = meta.getVersion().getFriendlyString();
+        ModList.get().getMods().stream().toList().forEach((modInfo -> {
+            if (Objects.equals(modInfo.getModId(), SODIUM_ID)) {
+                sodiumVersion = modInfo.getVersion().toString();
                 isSodiumLoaded = true;
             }
-            else if (Objects.equals(meta.getId(), IRIS_ID)) {
-                irisVersion = meta.getVersion().getFriendlyString();
+            else if (Objects.equals(modInfo.getModId(), IRIS_ID)) {
+                irisVersion = modInfo.getVersion().toString();
                 isIrisLoaded = true;
                 irisAPI = IrisApi.getInstance();
             }
@@ -56,8 +54,9 @@ public class IrisCompatImpl implements IrisCompat {
 
     @Override
     public void registerPipelines() {
-        irisAPI.assignPipeline(LightyPipelines.TERRAIN_TRANSLUCENT, IrisProgram.TRANSLUCENT);
-        irisAPI.assignPipeline(LightyPipelines.TERRAIN_CUTOUT, IrisProgram.TERRAIN_CUTOUT);
+        // this fix doesn't work in neoforge, idk why
+        //irisAPI.assignPipeline(LightyPipelines.TERRAIN_TRANSLUCENT, IrisProgram.TRANSLUCENT);
+        //irisAPI.assignPipeline(LightyPipelines.TERRAIN_CUTOUT, IrisProgram.TERRAIN_CUTOUT);
     }
 
     public boolean shadersEnabled() {
