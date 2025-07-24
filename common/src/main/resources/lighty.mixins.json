@@ -6,7 +6,8 @@
   "compatibilityLevel": "JAVA_8",
   "client": [
     "BlockPlacedMixin",
-    "LightUpdateMixin"
+    "LightUpdateMixin",
+    "RenderPipelinesMixin"
   ],
   "injectors": {
     "defaultRequire": 1

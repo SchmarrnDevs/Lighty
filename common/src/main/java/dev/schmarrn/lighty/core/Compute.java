@@ -15,7 +15,6 @@
 package dev.schmarrn.lighty.core;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.api.OverlayData;
@@ -115,7 +114,7 @@ public class Compute {
         }
 
         overlayData.forEach((key, dataList) -> {
-            BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+            BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, LightyPipelines.POSITION_COLOR_TEXTURE_LIGHT_NORMAL);
             int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
             // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
             int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
