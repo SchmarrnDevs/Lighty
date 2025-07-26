@@ -114,7 +114,7 @@ public class Compute {
         }
 
         overlayData.forEach((key, dataList) -> {
-            BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, LightyPipelines.POSITION_COLOR_TEXTURE_LIGHT_NORMAL);
+            BufferBuilder builder = Tesselator.getInstance().begin(renderer.getVertexFormatMode(), renderer.getVertexFormat());
             int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
             // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
             int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);

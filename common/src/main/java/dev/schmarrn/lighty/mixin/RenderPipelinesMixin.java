@@ -11,7 +11,9 @@ import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.UtilDefinition;
 import dev.schmarrn.lighty.core.LightyPipelines;
 import net.minecraft.client.renderer.RenderPipelines;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,6 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(RenderPipelines.class)
 public class RenderPipelinesMixin {
 
+    @Shadow @Final public static RenderPipeline.Snippet GLOBALS_SNIPPET;
     @Unique
     private static final BlendFunction LIGHTY_BLEND = new BlendFunction(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ZERO);
 
@@ -30,6 +33,12 @@ public class RenderPipelinesMixin {
         RenderPipeline.Snippet FOG_SNIPPET = RenderPipeline.builder().withUniform("Fog", UniformType.UNIFORM_BUFFER).buildSnippet();
         RenderPipeline.Snippet MATRICES_FOG_SNIPPET = RenderPipeline.builder(MATRICES_PROJECTION_SNIPPET, FOG_SNIPPET).buildSnippet();
 
+        LightyPipelines.POSITION_COLOR_NORMAL = VertexFormat.builder()
+                .add("Position", VertexFormatElement.POSITION)
+                .add("Color", VertexFormatElement.COLOR)
+                .add("Normal", VertexFormatElement.NORMAL)
+                .padding(1)
+                .build();
         LightyPipelines.POSITION_COLOR_TEXTURE_LIGHT_NORMAL = VertexFormat.builder()
                 .add("Position", VertexFormatElement.POSITION)
                 .add("Color", VertexFormatElement.COLOR)
@@ -56,6 +65,14 @@ public class RenderPipelinesMixin {
                 .withBlend(LIGHTY_BLEND)
                 .buildSnippet();
 
+        LightyPipelines.LINES_SNIPPET = RenderPipeline.builder(MATRICES_FOG_SNIPPET, GLOBALS_SNIPPET)
+                .withVertexShader("core/rendertype_lines")
+                .withFragmentShader("core/rendertype_lines")
+                .withBlend(BlendFunction.TRANSLUCENT)
+                .withCull(false)
+                .withVertexFormat(LightyPipelines.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES)
+                .buildSnippet();
+
 
         LightyPipelines.TERRAIN_TRANSLUCENT = RenderPipeline.builder(LightyPipelines.TERRAIN_TRANSLUCENT_SNIPPET)
                 .withLocation(Lighty.MOD_ID + "pipeline/translucent")
@@ -64,6 +81,10 @@ public class RenderPipelinesMixin {
         LightyPipelines.TERRAIN_CUTOUT = RenderPipeline.builder(LightyPipelines.TERRAIN_CUTOUT_SNIPPET)
                 .withLocation(Lighty.MOD_ID + "pipeline/cutout")
                 .withShaderDefine("ALPHA_CUTOUT", 0.1F)
+                .build();
+
+        LightyPipelines.LINES = RenderPipeline.builder(LightyPipelines.LINES_SNIPPET)
+                .withLocation(Lighty.MOD_ID + "pipeline/lines")
                 .build();
 
         // If Iris is loaded, register the pipelines with iris as well

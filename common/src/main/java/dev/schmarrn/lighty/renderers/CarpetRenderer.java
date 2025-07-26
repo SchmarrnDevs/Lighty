@@ -2,6 +2,7 @@ package dev.schmarrn.lighty.renderers;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.api.OverlayData;
@@ -66,6 +67,16 @@ public class CarpetRenderer implements OverlayRenderer {
     @Override
     public RenderPipeline getPipeline() {
         return LightyPipelines.TERRAIN_TRANSLUCENT;
+    }
+
+    @Override
+    public VertexFormat getVertexFormat() {
+        return LightyPipelines.POSITION_COLOR_TEXTURE_LIGHT_NORMAL;
+    }
+
+    @Override
+    public VertexFormat.Mode getVertexFormatMode() {
+        return VertexFormat.Mode.QUADS;
     }
 
     @Override

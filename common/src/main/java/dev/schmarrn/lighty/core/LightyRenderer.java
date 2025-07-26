@@ -21,6 +21,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -54,11 +55,13 @@ public class LightyRenderer {
         // Get index of the current transform,
         // which is the size of the list *before* adding the transform to the list
         int currentTransformationIndex = transforms.size();
+        Matrix4f modelViewMatrix = new Matrix4f(RenderSystem.getModelViewMatrix());
+        modelViewMatrix.translate((float)dPos.x(), (float)dPos.y(), (float)dPos.z());
         transforms.add(
                 new DynamicUniforms.Transform(
-                        RenderSystem.getModelViewMatrix(),
+                        modelViewMatrix,
                         UNIT_COLOR_MODULATOR,
-                        new Vector3f((float)dPos.x(), (float)dPos.y(), (float)dPos.z()),
+                        new Vector3f(),
                         DEFAULT_TEXTURE_MATRIX,
                         1.0F // Line Width
                 )

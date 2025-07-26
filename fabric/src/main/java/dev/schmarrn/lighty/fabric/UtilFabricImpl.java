@@ -56,6 +56,7 @@ public class UtilFabricImpl implements UtilDefinition {
         if (IRIS != null) {
             IRIS.assignPipeline(LightyPipelines.TERRAIN_TRANSLUCENT, IrisProgram.TRANSLUCENT);
             IRIS.assignPipeline(LightyPipelines.TERRAIN_CUTOUT, IrisProgram.TERRAIN_CUTOUT);
+            IRIS.assignPipeline(LightyPipelines.LINES, IrisProgram.LINES);
         }
     }
 }
