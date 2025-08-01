@@ -46,6 +46,26 @@ public class CarpetMode extends LightyMode<Provider.Pos, Pair<Double, Integer>> 
 		cache.put(new Provider.Pos(x, y+1, z), Pair.of(offset, color));
 	}
 
+	private static boolean shouldRenderSideFace(int x, int y, int z, WorldClient world, double originalHeight) {
+		Block<?> block = world.getBlock(x, y, z);
+		if (originalHeight > 0.0) {
+			// the original block is a snow layer
+			if (block != null && block.id() == Blocks.LAYER_SNOW.id()) {
+				// if the other block is a snow layer,
+				// we should render the face if we are strictly above the neighbor
+				return originalHeight > block.getBlockBoundsFromState(world, x, y, z).maxY;
+			} else {
+				// if the other block is no snow layer, but air,
+				// we should render the side.
+				return block == null;
+			}
+		}
+		// if it isn't a snow layer,
+		// check whether there is a neighboring overlay,
+		// and if not, we render the side face.
+		return Provider.isBlocked(x, y, z, world);
+	}
+
 	@Override
 	public void render(float partialTicks) {
 		Minecraft minecraft = Minecraft.getMinecraft();
@@ -67,16 +87,49 @@ public class CarpetMode extends LightyMode<Provider.Pos, Pair<Double, Integer>> 
 			double z = pos.z -camera.getZ(partialTicks);
 
 			GL11.glPushMatrix();
-			GL11.glTranslated(x, y, z);
-			GL11.glScalef(1f/16f, -1f/16f, 1f/16f);
-			GL11.glRotated(90, 1, 0, 0);
 
-			//if (Config.FLAT_CARPET.getValue()) {
-				Minecraft.getMinecraft().textureManager.loadTexture(Config.CARPET_TEXTURE.getValue()).bind();
+			Minecraft.getMinecraft().textureManager.loadTexture(Config.CARPET_TEXTURE.getValue()).bind();
+			if (Config.FLAT_CARPET.getValue()) {
+				GL11.glTranslated(x, y, z);
+				GL11.glScalef(1f/16f, -1f/16f, 1f/16f);
+				GL11.glRotated(90, 1, 0, 0);
 				drawTexture(0, 0, 0, 0, 0, 16, 16, data.getRight());
-			//} else {
+			} else {
+				// undo the slight upwards translation
+				GL11.glTranslated(x, y - 0.01, z);
+				GL11.glScalef(1f/16f, -1f/16f, 1f/16f);
+				GL11.glRotated(90, 1, 0, 0);
+				drawTexture(0, 0, 1, 0, 0, 16, 16, data.getRight());
+				WorldClient world = minecraft.currentWorld;
 
-			//}
+				GL11.glRotated(-90, 1, 0, 0);
+
+				// check the neighboring spawnable spots
+				// if the neighbor isn't spawnable, draw the overlay
+				if (shouldRenderSideFace(pos.x, pos.y, pos.z + 1, world, data.getLeft())) {
+					GL11.glPushMatrix();
+					drawTexture(0,-1,16,0,0, 16, 1, data.getRight());
+					GL11.glPopMatrix();
+				}
+				if (shouldRenderSideFace(pos.x, pos.y, pos.z - 1, world, data.getLeft())) {
+					GL11.glPushMatrix();
+					GL11.glRotated(180, 0, 1, 0);
+					drawTexture(-16,-1,0,0,0, 16, 1, data.getRight());
+					GL11.glPopMatrix();
+				}
+				if (shouldRenderSideFace(pos.x + 1, pos.y, pos.z, world, data.getLeft())) {
+					GL11.glPushMatrix();
+					GL11.glRotated(90, 0, 1, 0);
+					drawTexture(-16,-1,16,0,0, 16, 1, data.getRight());
+					GL11.glPopMatrix();
+				}
+				if (shouldRenderSideFace(pos.x - 1, pos.y, pos.z, world, data.getLeft())) {
+					GL11.glPushMatrix();
+					GL11.glRotated(-90, 0, 1, 0);
+					drawTexture(0,-1,0,0,0, 16, 1, data.getRight());
+					GL11.glPopMatrix();
+				}
+			}
 
 			GL11.glPopMatrix();
 		});
