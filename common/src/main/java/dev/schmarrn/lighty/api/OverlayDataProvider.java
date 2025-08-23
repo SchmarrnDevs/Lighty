@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.chunk.LevelChunk;
 
 public interface OverlayDataProvider {
+    @Deprecated
     default OverlayData compute(ClientLevel level, BlockPos pos, Vec3i rPos) {
         return OverlayData.INVALID;
     }
