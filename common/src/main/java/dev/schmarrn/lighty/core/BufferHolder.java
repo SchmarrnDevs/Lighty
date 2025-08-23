@@ -20,27 +20,23 @@ import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.MeshData;
 import dev.schmarrn.lighty.Lighty;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.renderer.chunk.SectionBuffers;
+import net.minecraft.resources.ResourceLocation;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.Map;
 
 public class BufferHolder implements AutoCloseable {
     // List because we can hold multiple gpuBuffers from different data providers
-    private final Map<String, SectionBuffers> overlayBuffers;
-    private final Map<String, Boolean> isValid;
+    private final Map<ResourceLocation, SectionBuffers> overlayBuffers = new Object2ObjectOpenHashMap<>();
+    private final Map<ResourceLocation, Boolean> isValid = new Object2BooleanOpenHashMap<>();
 
     private static final int BUFFER_TYPE_VERTEX = 40;
     private static final int BUFFER_TYPE_INDEX = 72;
 
-
-    BufferHolder() {
-        this.overlayBuffers = new HashMap<>();
-        this.isValid = new HashMap<>();
-    }
-
-    boolean isValid(String key) {
+    boolean isValid(ResourceLocation key) {
         return this.isValid.getOrDefault(key, false);
     }
 
@@ -50,7 +46,7 @@ public class BufferHolder implements AutoCloseable {
         this.overlayBuffers.clear();
     }
 
-    void upload(MeshData data, String dataProviderKey) {
+    void upload(MeshData data, ResourceLocation dataProviderKey) {
         if (data == null) {
             this.isValid.put(dataProviderKey, false);
             return;
@@ -137,7 +133,7 @@ public class BufferHolder implements AutoCloseable {
         this.isValid.put(dataProviderKey, true);
     }
 
-    Map<String, SectionBuffers> getGpuBuffers() {
+    Map<ResourceLocation, SectionBuffers> getGpuBuffers() {
         return this.overlayBuffers;
     }
 }

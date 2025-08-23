@@ -17,11 +17,11 @@ import net.minecraft.client.renderer.DynamicUniforms;
 import net.minecraft.client.renderer.chunk.SectionBuffers;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.SectionPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
-import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -86,7 +86,7 @@ public class LightyRenderer {
             BufferHolder cachedBuffer = entry.getValue();
 
             for (var bufferEntry : cachedBuffer.getGpuBuffers().entrySet()) {
-                String key = bufferEntry.getKey();
+                ResourceLocation key = bufferEntry.getKey();
                 if (!cachedBuffer.isValid(key)) {
                     continue;
                 }
@@ -120,7 +120,7 @@ public class LightyRenderer {
                     if (Compute.cachedBuffers.containsKey(chunkSection)) {
                         BufferHolder cachedBuffer = Compute.cachedBuffers.get(chunkSection);
                         for (var entry : cachedBuffer.getGpuBuffers().entrySet()) {
-                            String key = entry.getKey();
+                            ResourceLocation key = entry.getKey();
                             if (!cachedBuffer.isValid(key)) {
                                 continue;
                             }
@@ -146,7 +146,7 @@ public class LightyRenderer {
             if (Compute.cachedBuffers.containsKey(chunkSection)) {
                 BufferHolder cachedBuffer = Compute.cachedBuffers.get(chunkSection);
                 for (var entry : cachedBuffer.getGpuBuffers().entrySet()) {
-                    String key = entry.getKey();
+                    ResourceLocation key = entry.getKey();
                     if (!cachedBuffer.isValid(key)) {
                         continue;
                     }
