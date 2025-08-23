@@ -96,23 +96,32 @@ public class Compute {
     }
 
     private static BufferHolder buildChunk(OverlayRenderer renderer, List<OverlayDataProvider> dataProviders, SectionPos sPos, ClientLevel level, BufferHolder buffer) {
-        Map<ResourceLocation, List<OverlayData>> overlayData = new Object2ObjectOpenHashMap<>();
+        // Instantiation is slow and may not be needed for an empty chunk.
+        Map<ResourceLocation, List<OverlayData>> overlayData = null;
+        BlockPos sectionOrigin = sPos.origin();
 
         for (int x = 0; x < 16; ++x) {
             for (int y = 0; y < 16; ++y) {
                 for (int z = 0; z < 16; ++z) {
-                    BlockPos pos = sPos.origin().offset(x, y, z);
+                    BlockPos pos = sectionOrigin.offset(x, y, z);
 
                     for (var dataProvider : dataProviders) {
                         var data = dataProvider.compute(level, pos, new Vec3i(x, y, z));
-                        overlayData.putIfAbsent(dataProvider.getResourceLocation(), new ArrayList<>());
-                        if (data.valid()) {
-                            overlayData.get(dataProvider.getResourceLocation()).add(data);
-                        }
+                        if (!data.valid())
+                            continue;
+                        var defaultList = new ArrayList<OverlayData>();
+                        if (overlayData == null)
+                            overlayData = new Object2ObjectOpenHashMap<>();
+                        var dataList = overlayData.putIfAbsent(dataProvider.getResourceLocation(), defaultList);
+                        if (dataList == null) dataList = defaultList;
+                        dataList.add(data);
                     }
                 }
             }
         }
+
+        if (overlayData == null)
+            return buffer;
 
         overlayData.forEach((key, dataList) -> {
             BufferBuilder builder = Tesselator.getInstance().begin(renderer.getVertexFormatMode(), renderer.getVertexFormat());

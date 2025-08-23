@@ -14,7 +14,5 @@ import net.minecraft.core.Vec3i;
  * @param yOffset ... how much to offset the overlay in y direction, useful for snow etc
  */
 public record OverlayData(boolean valid, int color, int skyNumber, int blockNumber, BlockPos pos, Vec3i rPos, float yOffset) {
-    public static OverlayData invalid() {
-        return new OverlayData(false, 0, 0, 0, BlockPos.ZERO, BlockPos.ZERO, 0.0f);
-    }
+    public static final OverlayData INVALID = new OverlayData(false, 0, 0, 0, BlockPos.ZERO, BlockPos.ZERO, 0.0f);
 }

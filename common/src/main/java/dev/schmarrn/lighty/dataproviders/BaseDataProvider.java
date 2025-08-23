@@ -16,21 +16,21 @@ public class BaseDataProvider implements OverlayDataProvider {
         BlockState blockState = level.getBlockState(pos);
 
         if (LightyHelper.isBlocked(blockState, pos, level)) {
-            return OverlayData.invalid();
+            return OverlayData.INVALID;
         }
 
         int blockLightLevel = level.getBrightness(LightLayer.BLOCK, posUp);
         int skyLightLevel = level.getBrightness(LightLayer.SKY, posUp);
 
         if (LightyHelper.isSafe(blockLightLevel) && !Config.SHOW_SAFE.getValue()) {
-            return OverlayData.invalid();
+            return OverlayData.INVALID;
         }
 
         int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
         float offset = LightyHelper.getOffset(blockState, pos, level);
         if (offset == -1f) {
-            return OverlayData.invalid();
+            return OverlayData.INVALID;
         }
 
         return new OverlayData(true, color, skyLightLevel, blockLightLevel, pos, rPos, offset);

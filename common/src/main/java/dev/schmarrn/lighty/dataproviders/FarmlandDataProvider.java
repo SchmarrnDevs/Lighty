@@ -19,7 +19,7 @@ public class FarmlandDataProvider implements OverlayDataProvider {
         BlockState blockState = level.getBlockState(pos);
 
         if (!(blockState.getBlock() instanceof FarmBlock)) {
-            return OverlayData.invalid();
+            return OverlayData.INVALID;
         }
 
         int blockLightLevel = level.getBrightness(LightLayer.BLOCK, posUp);
