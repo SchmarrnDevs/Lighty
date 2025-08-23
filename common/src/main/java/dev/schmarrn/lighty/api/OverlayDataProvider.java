@@ -11,6 +11,7 @@ public interface OverlayDataProvider {
     default OverlayData compute(ClientLevel level, BlockPos pos, Vec3i rPos) {
         return OverlayData.INVALID;
     }
+
     default OverlayData compute(ClientLevel level, LevelChunk chunk, BlockPos pos, Vec3i rPos) {
         return this.compute(level, pos, rPos);
     }

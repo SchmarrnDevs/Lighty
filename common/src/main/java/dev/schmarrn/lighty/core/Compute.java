@@ -101,6 +101,7 @@ public class Compute {
         Map<ResourceLocation, List<OverlayData>> overlayData = null;
         BlockPos sectionOrigin = sPos.origin();
         LevelChunk computationChunk = level.getChunkAt(sectionOrigin);
+        buffer.invalidateBuffer();
 
         for (int x = 0; x < 16; ++x) {
             for (int y = 0; y < 16; ++y) {

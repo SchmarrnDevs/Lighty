@@ -17,10 +17,6 @@ public class BaseDataProvider implements OverlayDataProvider {
         ModeManager.registerDataProvider(dp.getResourceLocation(), dp);
     }
 
-    public OverlayData compute(ClientLevel level, BlockPos pos, Vec3i rPos) {
-        return compute(level, level.getChunkAt(pos), pos, rPos);
-    }
-
     public OverlayData compute(ClientLevel level, LevelChunk chunk, BlockPos pos, Vec3i rPos) {
         BlockState blockState = chunk.getBlockState(pos);
 
