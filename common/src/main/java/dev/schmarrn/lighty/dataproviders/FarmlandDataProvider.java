@@ -15,12 +15,13 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class FarmlandDataProvider implements OverlayDataProvider {
     public OverlayData compute(ClientLevel level, BlockPos pos, Vec3i rPos) {
-        BlockPos posUp = pos.above();
         BlockState blockState = level.getBlockState(pos);
 
         if (!(blockState.getBlock() instanceof FarmBlock)) {
             return OverlayData.INVALID;
         }
+
+        BlockPos posUp = pos.above();
 
         int blockLightLevel = level.getBrightness(LightLayer.BLOCK, posUp);
         int skyLightLevel = level.getBrightness(LightLayer.SKY, posUp);

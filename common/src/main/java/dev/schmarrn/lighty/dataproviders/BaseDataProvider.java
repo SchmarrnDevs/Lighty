@@ -12,26 +12,25 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class BaseDataProvider implements OverlayDataProvider {
     public OverlayData compute(ClientLevel level, BlockPos pos, Vec3i rPos) {
-        BlockPos posUp = pos.above();
         BlockState blockState = level.getBlockState(pos);
 
         if (LightyHelper.isBlocked(blockState, pos, level)) {
             return OverlayData.INVALID;
         }
 
+        BlockPos posUp = pos.above();
         int blockLightLevel = level.getBrightness(LightLayer.BLOCK, posUp);
-        int skyLightLevel = level.getBrightness(LightLayer.SKY, posUp);
-
         if (LightyHelper.isSafe(blockLightLevel) && !Config.SHOW_SAFE.getValue()) {
             return OverlayData.INVALID;
         }
-
-        int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
         float offset = LightyHelper.getOffset(blockState, pos, level);
         if (offset == -1f) {
             return OverlayData.INVALID;
         }
+
+        int skyLightLevel = level.getBrightness(LightLayer.SKY, posUp);
+        int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
         return new OverlayData(true, color, skyLightLevel, blockLightLevel, pos, rPos, offset);
     }
