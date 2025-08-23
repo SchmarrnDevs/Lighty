@@ -30,6 +30,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.*;
 
@@ -99,6 +100,7 @@ public class Compute {
         // Instantiation is slow and may not be needed for an empty chunk.
         Map<ResourceLocation, List<OverlayData>> overlayData = null;
         BlockPos sectionOrigin = sPos.origin();
+        LevelChunk computationChunk = level.getChunkAt(sectionOrigin);
 
         for (int x = 0; x < 16; ++x) {
             for (int y = 0; y < 16; ++y) {
@@ -106,7 +108,7 @@ public class Compute {
                     BlockPos pos = sectionOrigin.offset(x, y, z);
 
                     for (var dataProvider : dataProviders) {
-                        var data = dataProvider.compute(level, pos, new Vec3i(x, y, z));
+                        var data = dataProvider.compute(level, computationChunk, pos, new Vec3i(x, y, z));
                         if (!data.valid())
                             continue;
                         var defaultList = new ArrayList<OverlayData>();
