@@ -20,7 +20,7 @@ public class BaseDataProvider implements OverlayDataProvider {
 
         BlockPos posUp = pos.above();
         int blockLightLevel = level.getBrightness(LightLayer.BLOCK, posUp);
-        if (LightyHelper.isSafe(blockLightLevel) && !Config.SHOW_SAFE.getValue()) {
+        if (!Config.SHOW_SAFE.getValue() && LightyHelper.isSafe(blockLightLevel)) {
             return OverlayData.INVALID;
         }
 

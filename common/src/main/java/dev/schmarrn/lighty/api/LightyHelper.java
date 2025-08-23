@@ -25,20 +25,19 @@ public class LightyHelper {
 
     private static boolean protectedIsValidSpawnCheck(BlockState block, BlockPos pos, ClientLevel world) {
         // One exception is magma, because that predicate uses the entity without null check
-        if (block.getBlock() instanceof MagmaBlock) {
+        if (block.getBlock() instanceof MagmaBlock)
             return true;
-        } else {
-            try {
-                return block.isValidSpawn(world, pos, null);
-            } catch (NullPointerException | IllegalArgumentException e) {
-                ResourceLocation rl = BuiltInRegistries.BLOCK.getKey(block.getBlock());
-                if (!invalidBlocks.contains(rl)) {
-                    invalidBlocks.add(rl);
-                    Lighty.LOGGER.error(e.getMessage());
-                    Lighty.LOGGER.error("Cannot check `isValidSpawn` on Block {} because it uses entity checks. The overlay might not be accurate for that block.", rl);
-                }
-                return true;
+
+        try {
+            return block.isValidSpawn(world, pos, null);
+        } catch (NullPointerException | IllegalArgumentException e) {
+            ResourceLocation rl = BuiltInRegistries.BLOCK.getKey(block.getBlock());
+            if (!invalidBlocks.contains(rl)) {
+                invalidBlocks.add(rl);
+                Lighty.LOGGER.error(e.getMessage());
+                Lighty.LOGGER.error("Cannot check `isValidSpawn` on Block {} because it uses entity checks. The overlay might not be accurate for that block.", rl);
             }
+            return true;
         }
     }
 

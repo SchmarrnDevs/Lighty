@@ -203,26 +203,26 @@ public class Compute {
             }
 
             // as long as the section is in range...
-            if (!outOfRange(sectionPos)) {
-                // ... and the section is already compiled...
-                //if (!minecraft.levelRenderer.isSectionCompiled(sectionPos.origin())) {
-                //    // chunk data isn't ready yet, keep in queue
-                //    keepInUpdate.add(sectionPos);
-                //    continue;
-                //}
-                // ... we compute the new buffers, reduce the counter!
-                --ii;
-                cachedBuffers.compute(
-                        sectionPos,
-                        (pos, bufferHolder) -> buildChunk(
-                                renderer,
-                                dataProviders,
-                                pos,
-                                minecraft.level,
-                                bufferHolder != null ? bufferHolder : new BufferHolder()
-                        )
-                );
-            }
+            if (outOfRange(sectionPos))
+                continue;
+            // ... and the section is already compiled...
+            //if (!minecraft.levelRenderer.isSectionCompiled(sectionPos.origin())) {
+            //    // chunk data isn't ready yet, keep in queue
+            //    keepInUpdate.add(sectionPos);
+            //    continue;
+            //}
+            // ... we compute the new buffers, reduce the counter!
+            --ii;
+            cachedBuffers.compute(
+                    sectionPos,
+                    (pos, bufferHolder) -> buildChunk(
+                            renderer,
+                            dataProviders,
+                            pos,
+                            minecraft.level,
+                            bufferHolder != null ? bufferHolder : new BufferHolder()
+                    )
+            );
         }
     }
 
