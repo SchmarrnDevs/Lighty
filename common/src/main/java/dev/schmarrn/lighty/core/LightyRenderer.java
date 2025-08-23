@@ -117,44 +117,46 @@ public class LightyRenderer {
                         continue;
                     }
 
-                    if (Compute.cachedBuffers.containsKey(chunkSection)) {
-                        BufferHolder cachedBuffer = Compute.cachedBuffers.get(chunkSection);
-                        for (var entry : cachedBuffer.getGpuBuffers().entrySet()) {
-                            ResourceLocation key = entry.getKey();
-                            if (!cachedBuffer.isValid(key)) {
-                                continue;
-                            }
-                            if (!frustum.isVisible(
-                                    AABB.encapsulatingFullBlocks(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16, 16, 16))
-                            )) {
-                                continue;
-                            }
-                            // Only continue if the buffer is valid
-                            biggestBufferSize = addData(chunkSection, entry.getValue(), camPos, biggestBufferSize, drawList, transforms);
+                    BufferHolder cachedBuffer = Compute.cachedBuffers.get(chunkSection);
+                    if (cachedBuffer == null)
+                        continue;
+                    for (var entry : cachedBuffer.getGpuBuffers().entrySet()) {
+                        ResourceLocation key = entry.getKey();
+                        if (!cachedBuffer.isValid(key)) {
+                            continue;
                         }
+                        if (!frustum.isVisible(
+                                AABB.encapsulatingFullBlocks(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16, 16, 16))
+                        )) {
+                            continue;
+                        }
+                        // Only continue if the buffer is valid
+                        biggestBufferSize = addData(chunkSection, entry.getValue(), camPos, biggestBufferSize, drawList, transforms);
                     }
                 }
             }
         }
+
         return biggestBufferSize;
     }
 
     private static int goThroughVisibleSections(Minecraft minecraft, Camera camera, Vec3 camPos, Frustum frustum, List<RenderPass.Draw<GpuBufferSlice[]>> drawList, List<DynamicUniforms.Transform> transforms) {
         int biggestBufferSize = 0;
-        for (var sections : minecraft.levelRenderer.getVisibleSections()) {
-            var chunkSection = SectionPos.of(sections.getRenderOrigin());
-            if (Compute.cachedBuffers.containsKey(chunkSection)) {
-                BufferHolder cachedBuffer = Compute.cachedBuffers.get(chunkSection);
-                for (var entry : cachedBuffer.getGpuBuffers().entrySet()) {
-                    ResourceLocation key = entry.getKey();
-                    if (!cachedBuffer.isValid(key)) {
-                        continue;
-                    }
-                    // Only continue if the buffer is valid
-                    biggestBufferSize = addData(chunkSection, entry.getValue(), camPos, biggestBufferSize, drawList, transforms);
+        for (var section : minecraft.levelRenderer.getVisibleSections()) {
+            SectionPos sectionPos = SectionPos.of(section.getSectionNode());
+            BufferHolder cachedBuffer = Compute.cachedBuffers.get(sectionPos);
+            if (cachedBuffer == null)
+                continue;
+            for (var entry : cachedBuffer.getGpuBuffers().entrySet()) {
+                ResourceLocation key = entry.getKey();
+                if (!cachedBuffer.isValid(key)) {
+                    continue;
                 }
+                // Only continue if the buffer is valid
+                biggestBufferSize = addData(sectionPos, entry.getValue(), camPos, biggestBufferSize, drawList, transforms);
             }
         }
+
         return biggestBufferSize;
     }
 
