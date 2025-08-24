@@ -40,8 +40,8 @@ public class BufferHolder implements AutoCloseable {
         return this.isValid.getOrDefault(key, false);
     }
 
-    public void invalidateBuffer() {
-        isValid.replaceAll((k, v) -> false);
+    public void invalidateBuffer(ResourceLocation key) {
+        this.isValid.put(key, false);
     }
 
     @Override

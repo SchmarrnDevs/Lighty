@@ -22,13 +22,13 @@ import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.overlaystate.SMACH;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 
@@ -97,36 +97,30 @@ public class Compute {
     }
 
     private static BufferHolder buildChunk(OverlayRenderer renderer, List<OverlayDataProvider> dataProviders, SectionPos sPos, ClientLevel level, BufferHolder buffer) {
-        // Instantiation is slow and may not be needed for an empty chunk.
-        Map<ResourceLocation, List<OverlayData>> overlayData = null;
         BlockPos sectionOrigin = sPos.origin();
         LevelChunk computationChunk = level.getChunkAt(sectionOrigin);
-        buffer.invalidateBuffer();
 
-        for (int x = 0; x < 16; ++x) {
-            for (int y = 0; y < 16; ++y) {
-                for (int z = 0; z < 16; ++z) {
-                    BlockPos pos = sectionOrigin.offset(x, y, z);
+        for (var dataProvider : dataProviders) {
+            var dataList = new ObjectArrayList<OverlayData>();
 
-                    for (var dataProvider : dataProviders) {
+            for (int x = 0; x < 16; ++x) {
+                for (int y = 0; y < 16; ++y) {
+                    for (int z = 0; z < 16; ++z) {
+                        BlockPos pos = sectionOrigin.offset(x, y, z);
                         var data = dataProvider.compute(level, computationChunk, pos, new Vec3i(x, y, z));
-                        if (!data.valid())
+                        if (!data.valid()) {
                             continue;
-                        var defaultList = new ArrayList<OverlayData>();
-                        if (overlayData == null)
-                            overlayData = new Object2ObjectOpenHashMap<>();
-                        var dataList = overlayData.putIfAbsent(dataProvider.getResourceLocation(), defaultList);
-                        if (dataList == null) dataList = defaultList;
+                        }
                         dataList.add(data);
                     }
                 }
             }
-        }
 
-        if (overlayData == null)
-            return buffer;
+            if (dataList.isEmpty()) {
+                buffer.invalidateBuffer(dataProvider.getResourceLocation());
+                continue;
+            }
 
-        overlayData.forEach((key, dataList) -> {
             BufferBuilder builder = Tesselator.getInstance().begin(renderer.getVertexFormatMode(), renderer.getVertexFormat());
             int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
             // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
@@ -137,8 +131,8 @@ public class Compute {
 
             // builder.build() can return null if there wasn't any data added
             // in that case, the buffer automatically gets set as invalid
-            buffer.upload(builder.build(), key);
-        });
+            buffer.upload(builder.build(), dataProvider.getResourceLocation());
+        }
 
         return buffer;
     }
