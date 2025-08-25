@@ -118,7 +118,7 @@ public class Compute {
                 }
             }
 
-            if (dataList == null || dataList.isEmpty()) {
+            if (dataList == null) {
                 buffer.invalidateBuffer(dataProvider.getResourceLocation());
                 continue;
             }
