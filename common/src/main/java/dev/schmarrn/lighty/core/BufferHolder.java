@@ -30,13 +30,13 @@ import java.util.Map;
 
 public class BufferHolder implements AutoCloseable {
     // List because we can hold multiple gpuBuffers from different data providers
-    private final Map<ResourceLocation, SectionBuffers> overlayBuffers = new Object2ObjectOpenHashMap<>(2);
-    private final Map<ResourceLocation, Boolean> isValid = new Object2BooleanOpenHashMap<>(2);
+    private final Map<ResourceLocation, SectionBuffers> overlayBuffers = new Object2ObjectOpenHashMap<>();
+    private final Map<ResourceLocation, Boolean> isValid = new Object2BooleanOpenHashMap<>();
 
     private static final int BUFFER_TYPE_VERTEX = 40;
     private static final int BUFFER_TYPE_INDEX = 72;
 
-    public boolean isValid(ResourceLocation key) {
+    boolean isValid(ResourceLocation key) {
         return this.isValid.getOrDefault(key, false);
     }
 
