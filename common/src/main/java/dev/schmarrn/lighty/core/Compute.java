@@ -88,7 +88,7 @@ public class Compute {
     }
 
     public static void updateSection(SectionPos sPos) {
-        if (outOfRange(sPos)) {
+        if (outOfRange(sPos) || !Minecraft.getInstance().levelRenderer.isSectionCompiled(sPos.origin())) {
             return;
         }
 

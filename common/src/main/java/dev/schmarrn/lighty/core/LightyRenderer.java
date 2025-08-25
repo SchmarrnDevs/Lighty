@@ -112,10 +112,6 @@ public class LightyRenderer {
 
                 for (int ii = 0; ii < minecraft.level.getSectionsCount(); ++ii) {
                     SectionPos chunkSection = SectionPos.of(chunkPos, ii + minecraft.level.getMinSectionY());
-                    if (!minecraft.levelRenderer.isSectionCompiled(chunkSection.origin())) {
-                        // Don't bother doing anything if the chunk isn't rendered yet
-                        continue;
-                    }
 
                     BufferHolder cachedBuffer = Compute.cachedBuffers.get(chunkSection);
                     if (cachedBuffer == null)
