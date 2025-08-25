@@ -101,7 +101,7 @@ public class Compute {
         LevelChunk computationChunk = level.getChunkAt(sectionOrigin);
 
         for (var dataProvider : dataProviders) {
-            var dataList = new ObjectArrayList<OverlayData>();
+            var dataList = new ObjectArrayList<OverlayData>(512);
 
             for (int x = 0; x < 16; ++x) {
                 for (int y = 0; y < 16; ++y) {
