@@ -20,6 +20,7 @@ import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.MeshData;
 import dev.schmarrn.lighty.Lighty;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.renderer.chunk.SectionBuffers;
@@ -31,7 +32,7 @@ import java.util.Map;
 public class BufferHolder implements AutoCloseable {
     // List because we can hold multiple gpuBuffers from different data providers
     private final Map<ResourceLocation, SectionBuffers> overlayBuffers = new Object2ObjectOpenHashMap<>();
-    private final Map<ResourceLocation, Boolean> isValid = new Object2BooleanOpenHashMap<>();
+    private final Object2BooleanMap<ResourceLocation> isValid = new Object2BooleanOpenHashMap<>();
 
     private static final int BUFFER_TYPE_VERTEX = 40;
     private static final int BUFFER_TYPE_INDEX = 72;
