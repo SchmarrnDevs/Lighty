@@ -22,6 +22,7 @@ import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.overlaystate.SMACH;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
@@ -100,7 +101,7 @@ public class Compute {
         LevelChunk computationChunk = level.getChunkAt(sectionOrigin);
 
         for (var dataProvider : dataProviders) {
-            var dataList = new OverlayData[4096];
+            var dataList = new ObjectArrayList<OverlayData>();
 
             for (int x = 0; x < 16; ++x) {
                 for (int y = 0; y < 16; ++y) {
@@ -110,9 +111,14 @@ public class Compute {
                         if (!data.valid()) {
                             continue;
                         }
-                        dataList[(x << 8) | (y << 4) | z] = data;
+                        dataList.add(data);
                     }
                 }
+            }
+
+            if (dataList.isEmpty()) {
+                buffer.invalidateBuffer(dataProvider.getResourceLocation());
+                continue;
             }
 
             BufferBuilder builder = Tesselator.getInstance().begin(renderer.getVertexFormatMode(), renderer.getVertexFormat());
@@ -120,8 +126,6 @@ public class Compute {
             // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
             int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
             for (var data : dataList) {
-                if (data == null)
-                    continue;
                 renderer.build(level, data.pos(), data, builder, lightmap);
             }
 
