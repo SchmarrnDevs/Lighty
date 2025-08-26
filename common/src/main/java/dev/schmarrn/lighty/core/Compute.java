@@ -43,7 +43,7 @@ public class Compute {
 
     /// Cache of all computed GpuBuffers and so on.
     /// Gets used in LightyRenderer.
-    static final Map<SectionPos, BufferHolder> cachedBuffers = new Object2ObjectOpenHashMap<>();
+    static final Object2ObjectOpenHashMap<SectionPos, BufferHolder> cachedBuffers = new Object2ObjectOpenHashMap<>();
 
     /// TreeSet used to create a priority hierarchy, while still
     /// avoiding duplicate entries.
@@ -184,11 +184,12 @@ public class Compute {
         OverlayRenderer renderer = RendererRegistry.getRenderer();
 
         // Remove any buffer that's outside the overlay distance
-        for (var it = cachedBuffers.entrySet().iterator(); it.hasNext();) {
-            var entry = it.next();
+        var cacheIterator = Compute.cachedBuffers.object2ObjectEntrySet().fastIterator();
+        while (cacheIterator.hasNext()) {
+            var entry = cacheIterator.next();
             if (outOfRange(entry.getKey())) {
                 entry.getValue().close();
-                it.remove();
+                cacheIterator.remove();
             }
         }
 

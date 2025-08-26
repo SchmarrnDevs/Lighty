@@ -81,20 +81,23 @@ public class LightyRenderer {
 
     private static int goThroughEachBuffer(Minecraft minecraft, Camera camera, Vec3 camPos, Frustum frustum, List<RenderPass.Draw<GpuBufferSlice[]>> drawList, List<DynamicUniforms.Transform> transforms) {
         int biggestBufferSize = 0;
-        for (var entry : Compute.cachedBuffers.entrySet()) {
+        var cacheIterator = Compute.cachedBuffers.object2ObjectEntrySet().fastIterator();
+        while (cacheIterator.hasNext()) {
+            var entry = cacheIterator.next();
             SectionPos chunkSection = entry.getKey();
             BufferHolder cachedBuffer = entry.getValue();
+            var gpuBuffers = cachedBuffer.getGpuBuffers();
+            var bufferIterator = gpuBuffers.object2ObjectEntrySet().fastIterator();
+            while (bufferIterator.hasNext()) {
+                var bufferEntry = bufferIterator.next();
+                if (!cachedBuffer.isValid(bufferEntry.getKey()))
+                    continue;
 
-            for (var bufferEntry : cachedBuffer.getGpuBuffers().entrySet()) {
-                ResourceLocation key = bufferEntry.getKey();
-                if (!cachedBuffer.isValid(key)) {
+                var sectionOrigin = chunkSection.origin();
+                var chunkBoundaries = AABB.encapsulatingFullBlocks(sectionOrigin.offset(-1, -1, -1), sectionOrigin.offset(16, 16, 16));
+                if (!frustum.isVisible(chunkBoundaries))
                     continue;
-                }
-                if (!frustum.isVisible(
-                        AABB.encapsulatingFullBlocks(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16, 16, 16))
-                )) {
-                    continue;
-                }
+
                 // Only continue if the buffer is valid
                 biggestBufferSize = addData(chunkSection, bufferEntry.getValue(), camPos, biggestBufferSize, drawList, transforms);
             }
@@ -169,7 +172,7 @@ public class LightyRenderer {
 
         // tracking the biggest *vertex* buffer, in case our data didn't return an *index* buffer as well
         // See LevelRenderer#renderSectionLayer (1.21.5) for the place of inspiration
-        int biggestBufferSize = goThroughEachSection(minecraft, camera, camPos, frustum, drawList, transforms);
+        int biggestBufferSize = goThroughEachBuffer(minecraft, camera, camPos, frustum, drawList, transforms);
 
         GpuBufferSlice[] dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransforms(transforms.toArray(new DynamicUniforms.Transform[0]));
         return new Data(drawList, biggestBufferSize, dynamicTransforms);

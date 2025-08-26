@@ -27,11 +27,10 @@ import net.minecraft.client.renderer.chunk.SectionBuffers;
 import net.minecraft.resources.ResourceLocation;
 
 import java.nio.ByteBuffer;
-import java.util.Map;
 
 public class BufferHolder implements AutoCloseable {
     // List because we can hold multiple gpuBuffers from different data providers
-    private final Map<ResourceLocation, SectionBuffers> overlayBuffers = new Object2ObjectOpenHashMap<>();
+    private final Object2ObjectOpenHashMap<ResourceLocation, SectionBuffers> overlayBuffers = new Object2ObjectOpenHashMap<>();
     private final Object2BooleanMap<ResourceLocation> isValid = new Object2BooleanOpenHashMap<>();
 
     private static final int BUFFER_TYPE_VERTEX = 40;
@@ -138,7 +137,7 @@ public class BufferHolder implements AutoCloseable {
         this.isValid.put(dataProviderKey, true);
     }
 
-    Map<ResourceLocation, SectionBuffers> getGpuBuffers() {
+    Object2ObjectOpenHashMap<ResourceLocation, SectionBuffers> getGpuBuffers() {
         return this.overlayBuffers;
     }
 }
