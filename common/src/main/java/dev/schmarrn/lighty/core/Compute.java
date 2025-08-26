@@ -29,7 +29,6 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.*;
@@ -140,11 +139,10 @@ public class Compute {
     }
 
     private static void queueNewChunksSlow(Minecraft minecraft) {
-        for (int xx = -Compute.computationDistance + 1; xx < Compute.computationDistance; ++xx) {
-            for (int zz = -Compute.computationDistance + 1; zz < Compute.computationDistance; ++zz) {
-                ChunkPos chunkPos = new ChunkPos(playerPos.chunk().x + xx, playerPos.chunk().z + zz);
-                for (int ii = 0; ii < minecraft.level.getSectionsCount(); ++ii) {
-                    SectionPos chunkSection = SectionPos.of(chunkPos, ii + minecraft.level.getMinSectionY());
+        for (int yy = minecraft.level.getMinSectionY(); yy < minecraft.level.getSectionsCount() + minecraft.level.getMinSectionY(); ++yy) {
+            for (int xx = 1 - Compute.computationDistance; xx < Compute.computationDistance; ++xx) {
+                for (int zz = 1 - Compute.computationDistance; zz < Compute.computationDistance; ++zz) {
+                    SectionPos chunkSection = SectionPos.of(playerPos.x() + xx, yy, playerPos.z() + zz);
                     if (!cachedBuffers.containsKey(chunkSection) && minecraft.levelRenderer.isSectionCompiled(chunkSection.origin())) {
                         toBeUpdated.add(chunkSection);
                     }
