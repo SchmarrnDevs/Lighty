@@ -69,10 +69,9 @@ public class Compute {
 
     public static void clear() {
         toBeUpdated.clear();
-        cachedBuffers.forEach((sectionPos, vertexBuffer) -> {
-            // Important to avoid a Memory leak!
-            vertexBuffer.close();
-        });
+        // Important to avoid a Memory leak!
+        cachedBuffers.values().forEach(BufferHolder::close);
+
         cachedBuffers.clear();
         computationDistance = Math.min(Config.OVERLAY_DISTANCE.getValue(), Minecraft.getInstance().options.renderDistance().get() + 1);
     }
