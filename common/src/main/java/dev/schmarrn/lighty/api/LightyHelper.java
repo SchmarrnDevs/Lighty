@@ -26,8 +26,9 @@ public class LightyHelper {
 
     private static boolean protectedIsValidSpawnCheck(BlockState block, BlockPos pos, LevelChunk chunk) {
         // One exception is magma, because that predicate uses the entity without null check
-        if (block.getBlock() instanceof MagmaBlock)
+        if (block.getBlock() instanceof MagmaBlock) {
             return true;
+        }
 
         try {
             return block.isValidSpawn(chunk, pos, null);

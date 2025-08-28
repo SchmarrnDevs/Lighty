@@ -81,22 +81,22 @@ public class LightyRenderer {
 
     private static int goThroughEachBuffer(Minecraft minecraft, Camera camera, Vec3 camPos, Frustum frustum, List<RenderPass.Draw<GpuBufferSlice[]>> drawList, List<DynamicUniforms.Transform> transforms) {
         int biggestBufferSize = 0;
-        var cacheIterator = Compute.cachedBuffers.object2ObjectEntrySet().fastIterator();
-        while (cacheIterator.hasNext()) {
+        for (var cacheIterator = Compute.cachedBuffers.object2ObjectEntrySet().fastIterator(); cacheIterator.hasNext();) {
             var entry = cacheIterator.next();
             SectionPos chunkSection = entry.getKey();
             BufferHolder cachedBuffer = entry.getValue();
             var gpuBuffers = cachedBuffer.getGpuBuffers();
-            var bufferIterator = gpuBuffers.object2ObjectEntrySet().fastIterator();
-            while (bufferIterator.hasNext()) {
+            for (var bufferIterator = gpuBuffers.object2ObjectEntrySet().fastIterator(); bufferIterator.hasNext();) {
                 var bufferEntry = bufferIterator.next();
-                if (!cachedBuffer.isValid(bufferEntry.getKey()))
+                if (!cachedBuffer.isValid(bufferEntry.getKey())) {
                     continue;
+                }
 
                 var sectionOrigin = chunkSection.origin();
                 var chunkBoundaries = AABB.encapsulatingFullBlocks(sectionOrigin.offset(-1, -1, -1), sectionOrigin.offset(16, 16, 16));
-                if (!frustum.isVisible(chunkBoundaries))
+                if (!frustum.isVisible(chunkBoundaries)) {
                     continue;
+                }
 
                 // Only continue if the buffer is valid
                 biggestBufferSize = addData(chunkSection, bufferEntry.getValue(), camPos, biggestBufferSize, drawList, transforms);
@@ -117,8 +117,9 @@ public class LightyRenderer {
                     SectionPos chunkSection = SectionPos.of(chunkPos, ii + minecraft.level.getMinSectionY());
 
                     BufferHolder cachedBuffer = Compute.cachedBuffers.get(chunkSection);
-                    if (cachedBuffer == null)
+                    if (cachedBuffer == null) {
                         continue;
+                    }
                     for (var entry : cachedBuffer.getGpuBuffers().entrySet()) {
                         ResourceLocation key = entry.getKey();
                         if (!cachedBuffer.isValid(key)) {
@@ -144,8 +145,9 @@ public class LightyRenderer {
         for (var section : minecraft.levelRenderer.getVisibleSections()) {
             SectionPos sectionPos = SectionPos.of(section.getSectionNode());
             BufferHolder cachedBuffer = Compute.cachedBuffers.get(sectionPos);
-            if (cachedBuffer == null)
+            if (cachedBuffer == null) {
                 continue;
+            }
             for (var entry : cachedBuffer.getGpuBuffers().entrySet()) {
                 ResourceLocation key = entry.getKey();
                 if (!cachedBuffer.isValid(key)) {
@@ -179,7 +181,9 @@ public class LightyRenderer {
     }
 
     public static void render(Frustum frustum) {
-        if (!SMACH.isEnabled()) return;
+        if (!SMACH.isEnabled()) {
+            return;
+        }
 
         // Get required data
         Minecraft minecraft = Minecraft.getInstance();

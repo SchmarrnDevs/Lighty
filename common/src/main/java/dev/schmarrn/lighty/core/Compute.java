@@ -109,8 +109,9 @@ public class Compute {
                         if (!data.valid()) {
                             continue;
                         }
-                        if (dataList == null)
+                        if (dataList == null) {
                             dataList = new ObjectArrayList<>(300);
+                        }
                         dataList.add(data);
                     }
                 }
@@ -181,8 +182,7 @@ public class Compute {
         OverlayRenderer renderer = RendererRegistry.getRenderer();
 
         // Remove any buffer that's outside the overlay distance
-        var cacheIterator = Compute.cachedBuffers.object2ObjectEntrySet().fastIterator();
-        while (cacheIterator.hasNext()) {
+        for (var cacheIterator = Compute.cachedBuffers.object2ObjectEntrySet().fastIterator(); cacheIterator.hasNext();) {
             var entry = cacheIterator.next();
             if (outOfRange(entry.getKey())) {
                 entry.getValue().close();
@@ -200,8 +200,9 @@ public class Compute {
             }
 
             // as long as the section is in range...
-            if (outOfRange(sectionPos))
+            if (outOfRange(sectionPos)) {
                 continue;
+            }
             // ... and the section is already compiled...
             //if (!minecraft.levelRenderer.isSectionCompiled(sectionPos.origin())) {
             //    // chunk data isn't ready yet, keep in queue
