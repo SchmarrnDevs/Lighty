@@ -203,13 +203,6 @@ public class Compute {
             if (outOfRange(sectionPos)) {
                 continue;
             }
-            // ... and the section is already compiled...
-            //if (!minecraft.levelRenderer.isSectionCompiled(sectionPos.origin())) {
-            //    // chunk data isn't ready yet, keep in queue
-            //    keepInUpdate.add(sectionPos);
-            //    continue;
-            //}
-            // ... we compute the new buffers, reduce the counter!
             --ii;
             cachedBuffers.compute(
                     sectionPos,
