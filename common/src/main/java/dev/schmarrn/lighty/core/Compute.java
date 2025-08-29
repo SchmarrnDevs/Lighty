@@ -199,7 +199,7 @@ public class Compute {
                 break;
             }
 
-            // as long as the section is in range...
+            // If the section is out of range, do nothing and continue. This removes the section from toBeUpdated automatically.
             if (outOfRange(sectionPos)) {
                 continue;
             }
