@@ -9,29 +9,34 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 public class BaseDataProvider implements OverlayDataProvider {
-    public OverlayData compute(ClientLevel level, BlockPos pos, Vec3i rPos) {
+    public static void init() {
+        var dp = new BaseDataProvider();
+        ModeManager.registerDataProvider(dp.getResourceLocation(), dp);
+    }
+
+    public OverlayData compute(ClientLevel level, LevelChunk chunk, BlockPos pos, Vec3i rPos) {
+        BlockState blockState = chunk.getBlockState(pos);
+
+        if (LightyHelper.isBlocked(blockState, pos, level, chunk)) {
+            return OverlayData.INVALID;
+        }
+
         BlockPos posUp = pos.above();
-        BlockState blockState = level.getBlockState(pos);
-
-        if (LightyHelper.isBlocked(blockState, pos, level)) {
-            return OverlayData.invalid();
-        }
-
         int blockLightLevel = level.getBrightness(LightLayer.BLOCK, posUp);
-        int skyLightLevel = level.getBrightness(LightLayer.SKY, posUp);
-
-        if (LightyHelper.isSafe(blockLightLevel) && !Config.SHOW_SAFE.getValue()) {
-            return OverlayData.invalid();
+        if (!Config.SHOW_SAFE.getValue() && LightyHelper.isSafe(blockLightLevel)) {
+            return OverlayData.INVALID;
         }
 
-        int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
-
-        float offset = LightyHelper.getOffset(blockState, pos, level);
+        float offset = LightyHelper.getOffset(blockState, pos, level, chunk);
         if (offset == -1f) {
-            return OverlayData.invalid();
+            return OverlayData.INVALID;
         }
+
+        int skyLightLevel = level.getBrightness(LightLayer.SKY, posUp);
+        int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
         return new OverlayData(true, color, skyLightLevel, blockLightLevel, pos, rPos, offset);
     }
@@ -39,10 +44,5 @@ public class BaseDataProvider implements OverlayDataProvider {
     @Override
     public ResourceLocation getResourceLocation() {
         return ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "data_provider_base");
-    }
-
-    public static void init() {
-        var dp = new BaseDataProvider();
-        ModeManager.registerDataProvider(dp.getResourceLocation(), dp);
     }
 }

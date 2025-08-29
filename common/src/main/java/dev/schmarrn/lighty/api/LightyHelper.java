@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.HashSet;
 
@@ -23,22 +24,22 @@ public class LightyHelper {
                 block instanceof LeverBlock;
     }
 
-    private static boolean protectedIsValidSpawnCheck(BlockState block, BlockPos pos, ClientLevel world) {
+    private static boolean protectedIsValidSpawnCheck(BlockState block, BlockPos pos, LevelChunk chunk) {
         // One exception is magma, because that predicate uses the entity without null check
         if (block.getBlock() instanceof MagmaBlock) {
             return true;
-        } else {
-            try {
-                return block.isValidSpawn(world, pos, null);
-            } catch (NullPointerException | IllegalArgumentException e) {
-                ResourceLocation rl = BuiltInRegistries.BLOCK.getKey(block.getBlock());
-                if (!invalidBlocks.contains(rl)) {
-                    invalidBlocks.add(rl);
-                    Lighty.LOGGER.error(e.getMessage());
-                    Lighty.LOGGER.error("Cannot check `isValidSpawn` on Block {} because it uses entity checks. The overlay might not be accurate for that block.", rl);
-                }
-                return true;
+        }
+
+        try {
+            return block.isValidSpawn(chunk, pos, null);
+        } catch (NullPointerException | IllegalArgumentException e) {
+            ResourceLocation rl = BuiltInRegistries.BLOCK.getKey(block.getBlock());
+            if (!invalidBlocks.contains(rl)) {
+                invalidBlocks.add(rl);
+                Lighty.LOGGER.error(e.getMessage());
+                Lighty.LOGGER.error("Cannot check `isValidSpawn` on Block {} because it uses entity checks. The overlay might not be accurate for that block.", rl);
             }
+            return true;
         }
     }
 
@@ -46,9 +47,9 @@ public class LightyHelper {
         return block instanceof CarpetBlock;
     }
 
-    public static float getOffset(BlockState blockState, BlockPos pos, ClientLevel world) {
+    public static float getOffset(BlockState blockState, BlockPos pos, ClientLevel world, LevelChunk chunk) {
         // Returns the offset of blocks that aren't 16 pixels high
-        BlockState blockStateUp = world.getBlockState(pos.above());
+        BlockState blockStateUp = chunk.getBlockState(pos.above());
         Block blockUp = blockStateUp.getBlock();
         if (blockUp instanceof SnowLayerBlock) { // snow layers
             int layer = blockStateUp.getValue(SnowLayerBlock.LAYERS);
@@ -63,15 +64,15 @@ public class LightyHelper {
         return 0f;
     }
 
-    public static boolean isBlocked(BlockState block, BlockPos pos, ClientLevel world) {
+    public static boolean isBlocked(BlockState block, BlockPos pos, ClientLevel world, LevelChunk chunk) {
         BlockPos posUp = pos.above();
-        BlockState blockStateUp = world.getBlockState(posUp);
+        BlockState blockStateUp = chunk.getBlockState(posUp);
         // Resource: https://minecraft.fandom.com/wiki/Tutorials/Spawn-proofing
-        return (blockStateUp.isCollisionShapeFullBlock(world, posUp) || // Full blocks are not spawnable in
-                !block.isFaceSturdy(world, pos, Direction.UP) || // Block below needs to be sturdy
+        return (blockStateUp.isCollisionShapeFullBlock(chunk, posUp) || // Full blocks are not spawnable in
+                !block.isFaceSturdy(chunk, pos, Direction.UP) || // Block below needs to be sturdy
                 isRedstone(blockStateUp.getBlock()) || // Mobs don't spawn in redstone
                 specialCases(blockStateUp.getBlock()) || // Carpets and snow
-                !protectedIsValidSpawnCheck(block, pos, world) || // use minecraft internal isValidSpawn check
+                !protectedIsValidSpawnCheck(block, pos, chunk) || // use minecraft internal isValidSpawn check
                 !blockStateUp.getFluidState().isEmpty()) || // don't spawn in fluidlogged stuff (Kelp, Seagrass, Growlichen)
                 !blockStateUp.getBlock().isPossibleToRespawnInThis(blockStateUp) ||
                 blockStateUp.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE); // As of 1.20.1, only contains rails, don't know if it is even really available on the client

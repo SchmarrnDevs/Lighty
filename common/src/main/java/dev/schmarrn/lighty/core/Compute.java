@@ -16,19 +16,20 @@ package dev.schmarrn.lighty.core;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.api.OverlayData;
 import dev.schmarrn.lighty.api.OverlayDataProvider;
 import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.overlaystate.SMACH;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.*;
 
@@ -41,7 +42,7 @@ public class Compute {
 
     /// Cache of all computed GpuBuffers and so on.
     /// Gets used in LightyRenderer.
-    static final Map<SectionPos, BufferHolder> cachedBuffers = new HashMap<>();
+    static final Object2ObjectOpenHashMap<SectionPos, BufferHolder> cachedBuffers = new Object2ObjectOpenHashMap<>();
 
     /// TreeSet used to create a priority hierarchy, while still
     /// avoiding duplicate entries.
@@ -68,10 +69,9 @@ public class Compute {
 
     public static void clear() {
         toBeUpdated.clear();
-        cachedBuffers.forEach((sectionPos, vertexBuffer) -> {
-            // Important to avoid a Memory leak!
-            vertexBuffer.close();
-        });
+        // Important to avoid a Memory leak!
+        cachedBuffers.values().forEach(BufferHolder::close);
+
         cachedBuffers.clear();
         computationDistance = Math.min(Config.OVERLAY_DISTANCE.getValue(), Minecraft.getInstance().options.renderDistance().get() + 1);
     }
@@ -87,7 +87,7 @@ public class Compute {
     }
 
     public static void updateSection(SectionPos sPos) {
-        if (outOfRange(sPos)) {
+        if (outOfRange(sPos) || !Minecraft.getInstance().levelRenderer.isSectionCompiled(sPos.origin())) {
             return;
         }
 
@@ -95,25 +95,33 @@ public class Compute {
     }
 
     private static BufferHolder buildChunk(OverlayRenderer renderer, List<OverlayDataProvider> dataProviders, SectionPos sPos, ClientLevel level, BufferHolder buffer) {
-        Map<String, List<OverlayData>> overlayData = new HashMap<>();
+        BlockPos sectionOrigin = sPos.origin();
+        LevelChunk computationChunk = level.getChunkAt(sectionOrigin);
 
-        for (int x = 0; x < 16; ++x) {
-            for (int y = 0; y < 16; ++y) {
-                for (int z = 0; z < 16; ++z) {
-                    BlockPos pos = sPos.origin().offset(x, y, z);
+        for (var dataProvider : dataProviders) {
+            ObjectArrayList<OverlayData> dataList = null;
 
-                    for (var dataProvider : dataProviders) {
-                        var data = dataProvider.compute(level, pos, new Vec3i(x, y, z));
-                        overlayData.putIfAbsent(dataProvider.getResourceLocation().toString(), new ArrayList<>());
-                        if (data.valid()) {
-                            overlayData.get(dataProvider.getResourceLocation().toString()).add(data);
+            for (int x = 0; x < 16; ++x) {
+                for (int y = 0; y < 16; ++y) {
+                    for (int z = 0; z < 16; ++z) {
+                        BlockPos pos = sectionOrigin.offset(x, y, z);
+                        var data = dataProvider.compute(level, computationChunk, pos, new Vec3i(x, y, z));
+                        if (!data.valid()) {
+                            continue;
                         }
+                        if (dataList == null) {
+                            dataList = new ObjectArrayList<>(300);
+                        }
+                        dataList.add(data);
                     }
                 }
             }
-        }
 
-        overlayData.forEach((key, dataList) -> {
+            if (dataList == null) {
+                buffer.invalidateBuffer(dataProvider.getResourceLocation());
+                continue;
+            }
+
             BufferBuilder builder = Tesselator.getInstance().begin(renderer.getVertexFormatMode(), renderer.getVertexFormat());
             int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
             // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
@@ -124,18 +132,17 @@ public class Compute {
 
             // builder.build() can return null if there wasn't any data added
             // in that case, the buffer automatically gets set as invalid
-            buffer.upload(builder.build(), key);
-        });
+            buffer.upload(builder.build(), dataProvider.getResourceLocation());
+        }
 
         return buffer;
     }
 
     private static void queueNewChunksSlow(Minecraft minecraft) {
-        for (int xx = -Compute.computationDistance + 1; xx < Compute.computationDistance; ++xx) {
-            for (int zz = -Compute.computationDistance + 1; zz < Compute.computationDistance; ++zz) {
-                ChunkPos chunkPos = new ChunkPos(playerPos.chunk().x + xx, playerPos.chunk().z + zz);
-                for (int ii = 0; ii < minecraft.level.getSectionsCount(); ++ii) {
-                    SectionPos chunkSection = SectionPos.of(chunkPos, ii + minecraft.level.getMinSectionY());
+        for (int yy = minecraft.level.getMinSectionY(); yy < minecraft.level.getSectionsCount() + minecraft.level.getMinSectionY(); ++yy) {
+            for (int xx = 1 - Compute.computationDistance; xx < Compute.computationDistance; ++xx) {
+                for (int zz = 1 - Compute.computationDistance; zz < Compute.computationDistance; ++zz) {
+                    SectionPos chunkSection = SectionPos.of(playerPos.x() + xx, yy, playerPos.z() + zz);
                     if (!cachedBuffers.containsKey(chunkSection) && minecraft.levelRenderer.isSectionCompiled(chunkSection.origin())) {
                         toBeUpdated.add(chunkSection);
                     }
@@ -175,11 +182,11 @@ public class Compute {
         OverlayRenderer renderer = RendererRegistry.getRenderer();
 
         // Remove any buffer that's outside the overlay distance
-        for (var it = cachedBuffers.entrySet().iterator(); it.hasNext();) {
-            var entry = it.next();
+        for (var cacheIterator = Compute.cachedBuffers.object2ObjectEntrySet().fastIterator(); cacheIterator.hasNext();) {
+            var entry = cacheIterator.next();
             if (outOfRange(entry.getKey())) {
                 entry.getValue().close();
-                it.remove();
+                cacheIterator.remove();
             }
         }
 
@@ -192,27 +199,22 @@ public class Compute {
                 break;
             }
 
-            // as long as the section is in range...
-            if (!outOfRange(sectionPos)) {
-                // ... and the section is already compiled...
-                //if (!minecraft.levelRenderer.isSectionCompiled(sectionPos.origin())) {
-                //    // chunk data isn't ready yet, keep in queue
-                //    keepInUpdate.add(sectionPos);
-                //    continue;
-                //}
-                // ... we compute the new buffers, reduce the counter!
-                --ii;
-                cachedBuffers.compute(
-                        sectionPos,
-                        (pos, bufferHolder) -> buildChunk(
-                                renderer,
-                                dataProviders,
-                                pos,
-                                minecraft.level,
-                                bufferHolder != null ? bufferHolder : new BufferHolder()
-                        )
-                );
+            // If the section is out of range, do nothing and continue. This removes the section from toBeUpdated automatically.
+            if (outOfRange(sectionPos)) {
+                continue;
             }
+            // If the section is in range, we compute the new buffers, reduce the counter!
+            --ii;
+            cachedBuffers.compute(
+                    sectionPos,
+                    (pos, bufferHolder) -> buildChunk(
+                            renderer,
+                            dataProviders,
+                            pos,
+                            minecraft.level,
+                            bufferHolder != null ? bufferHolder : new BufferHolder()
+                    )
+            );
         }
     }
 

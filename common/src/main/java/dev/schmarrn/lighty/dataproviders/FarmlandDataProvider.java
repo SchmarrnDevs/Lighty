@@ -12,15 +12,21 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 public class FarmlandDataProvider implements OverlayDataProvider {
+    @Override
     public OverlayData compute(ClientLevel level, BlockPos pos, Vec3i rPos) {
-        BlockPos posUp = pos.above();
-        BlockState blockState = level.getBlockState(pos);
+        return compute(level, level.getChunkAt(pos), pos, rPos);
+    }
 
+    public OverlayData compute(ClientLevel level, LevelChunk chunk, BlockPos pos, Vec3i rPos) {
+        BlockState blockState = chunk.getBlockState(pos);
         if (!(blockState.getBlock() instanceof FarmBlock)) {
-            return OverlayData.invalid();
+            return OverlayData.INVALID;
         }
+
+        BlockPos posUp = pos.above();
 
         int blockLightLevel = level.getBrightness(LightLayer.BLOCK, posUp);
         int skyLightLevel = level.getBrightness(LightLayer.SKY, posUp);

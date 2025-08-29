@@ -4,9 +4,17 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 public interface OverlayDataProvider {
-    OverlayData compute(ClientLevel level, BlockPos pos, Vec3i rPos);
+    @Deprecated
+    default OverlayData compute(ClientLevel level, BlockPos pos, Vec3i rPos) {
+        return OverlayData.INVALID;
+    }
+
+    default OverlayData compute(ClientLevel level, LevelChunk chunk, BlockPos pos, Vec3i rPos) {
+        return this.compute(level, pos, rPos);
+    }
 
     ResourceLocation getResourceLocation();
 }
