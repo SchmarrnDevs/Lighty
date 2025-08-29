@@ -203,6 +203,7 @@ public class Compute {
             if (outOfRange(sectionPos)) {
                 continue;
             }
+            // If the section is in range, we compute the new buffers, reduce the counter!
             --ii;
             cachedBuffers.compute(
                     sectionPos,
