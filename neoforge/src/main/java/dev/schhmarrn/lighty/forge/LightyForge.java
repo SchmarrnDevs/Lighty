@@ -28,6 +28,7 @@ import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 
 @Mod(value = Lighty.MOD_ID, dist = Dist.CLIENT)
 public class LightyForge {
@@ -47,6 +48,11 @@ public class LightyForge {
         @SubscribeEvent
         public static void loadComplete(FMLLoadCompleteEvent event) {
             Lighty.postLoad();
+        }
+
+        @SubscribeEvent
+        public static void Load(LevelEvent.Load event) {
+            Compute.clear();
         }
     }
 
