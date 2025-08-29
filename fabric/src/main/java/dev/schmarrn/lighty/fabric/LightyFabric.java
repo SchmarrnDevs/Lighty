@@ -22,6 +22,7 @@ import dev.schmarrn.lighty.event.KeyBind;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -33,6 +34,7 @@ public class LightyFabric implements ClientModInitializer {
         WorldRenderEvents.AFTER_TRANSLUCENT.register(context -> LightyRenderer.render(context.frustum()));
 
         ClientTickEvents.END_CLIENT_TICK.register(KeyBind::handleKeyBind);
+        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register((minecraft, level) -> Compute.clear());
 
         Lighty.init();
         FabricLoader.getInstance().getEntrypoints("lightyModesRegistration", LightyModesRegistration.class).forEach(LightyModesRegistration::registerLightyModes);
