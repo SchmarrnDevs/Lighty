@@ -67,7 +67,7 @@ public class LightyHelper {
     public static boolean isBlocked(BlockState block, BlockPos pos, ClientLevel world, LevelChunk chunk) {
         BlockPos posUp = pos.above();
         BlockState blockStateUp = chunk.getBlockState(posUp);
-        // Resource: https://minecraft.fandom.com/wiki/Tutorials/Spawn-proofing
+        // Resource: https://minecraft.wiki/w/Tutorial:Spawn-proofing
         return (blockStateUp.isCollisionShapeFullBlock(chunk, posUp) || // Full blocks are not spawnable in
                 !block.isFaceSturdy(chunk, pos, Direction.UP) || // Block below needs to be sturdy
                 isRedstone(blockStateUp.getBlock()) || // Mobs don't spawn in redstone
