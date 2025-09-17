@@ -1,7 +1,7 @@
 {
   "key.lighty.enable": "Abrir Menu de Sobreposição de Luz",
   "key.lighty.toggle": "Ligar Sobreposição de Luz",
-  "category.lighty": "Lighty",
+  "key.category.lighty.lighty": "Lighty",
   "modeSwitcher.lighty.title": "Seletor de Modo 'Lighty'",
   "modeSwitcher.lighty.renderer_number": "Modo de Números",
   "modeSwitcher.lighty.renderer_number.tooltip": "O valor superior é o Nível de Luz do Bloco, o valor inferior é o Nível de Luz do Céu",

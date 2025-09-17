@@ -1,7 +1,7 @@
 {
   "key.lighty.enable": "Open Light Overlay Menu",
   "key.lighty.toggle": "Toggle Light Overlay",
-  "category.lighty": "Lighty",
+  "key.category.lighty.lighty": "Lighty",
   "modeSwitcher.lighty.title": "Lighty Mode Switcher",
   "modeSwitcher.lighty.renderer_number": "Number Mode",
   "modeSwitcher.lighty.renderer_number.tooltip": "The upper value is the BlockLightLevel, the lower value is the SkyLightLevel",

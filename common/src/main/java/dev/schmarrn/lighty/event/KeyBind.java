@@ -15,25 +15,30 @@
 package dev.schmarrn.lighty.event;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.UtilDefinition;
 import dev.schmarrn.lighty.overlaystate.SMACH;
 import dev.schmarrn.lighty.ui.LightyScreen;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 
 public class KeyBind {
+    private static final KeyMapping.Category keyCategory = KeyMapping.Category.register(
+            ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "lighty")
+    );
     public static final KeyMapping enableKeyBind = UtilDefinition.INSTANCE.registerKeyBinding(new KeyMapping(
             "key.lighty.enable",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_F7,
-            "category.lighty"
+            keyCategory
     ));
     public static final KeyMapping toggleKeyBind = UtilDefinition.INSTANCE.registerKeyBinding(new KeyMapping(
             "key.lighty.toggle",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_F8,
-            "category.lighty"
+            keyCategory
     ));
 
     private static boolean oldKeyState = false;

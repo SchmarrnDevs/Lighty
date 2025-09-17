@@ -1,7 +1,7 @@
 {
   "key.lighty.enable": "打开亮度覆盖菜单",
   "key.lighty.toggle": "开关亮度覆盖层",
-  "category.lighty": "Lighty",
+  "key.category.lighty.lighty": "Lighty",
   "modeSwitcher.lighty.title": "Lighty 覆盖层显示模式",
   "modeSwitcher.lighty.renderer_number": "数字模式",
   "modeSwitcher.lighty.renderer_number.tooltip": "上方数字为方块光，下方数字为天空光。",

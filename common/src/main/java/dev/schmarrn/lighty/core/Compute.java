@@ -161,7 +161,7 @@ public class Compute {
     }
 
     public static void computeCache(Minecraft minecraft) {
-        if (minecraft.player == null || minecraft.cameraEntity == null || minecraft.level == null) {
+        if (minecraft.player == null || minecraft.getCameraEntity() == null || minecraft.level == null) {
             return;
         }
 
@@ -169,7 +169,7 @@ public class Compute {
         SMACH.updateCompute(minecraft);
 
         // update player position
-        playerPos = SectionPos.of(minecraft.cameraEntity.blockPosition());
+        playerPos = SectionPos.of(minecraft.getCameraEntity().blockPosition());
 
         if (!SMACH.isEnabled()) {
             return;

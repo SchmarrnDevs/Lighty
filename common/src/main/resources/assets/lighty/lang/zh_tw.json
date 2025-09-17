@@ -1,7 +1,7 @@
 {
   "key.lighty.enable": "開啟光照覆蓋選單",
   "key.lighty.toggle": "切換光照覆蓋",
-  "category.lighty": "Lighty",
+  "key.category.lighty.lighty": "Lighty",
   "modeSwitcher.lighty.title": "Lighty 模式切換器",
   "modeSwitcher.lighty.renderer_number": "數字模式",
   "modeSwitcher.lighty.renderer_number.tooltip": "上面的值是方塊亮度，下面的值是天空亮度",

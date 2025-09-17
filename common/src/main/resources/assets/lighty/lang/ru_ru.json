@@ -1,7 +1,7 @@
 {
   "key.lighty.enable": "Открыть меню Lighty Overlay",
   "key.lighty.toggle": "Переключить Lighty Overlay",
-  "category.lighty": "Lighty",
+  "key.category.lighty.lighty": "Lighty",
   "modeSwitcher.lighty.title": "Переключатель режимов Lighty",
   "modeSwitcher.lighty.renderer_number": "Режим чисел",
   "modeSwitcher.lighty.renderer_number.tooltip": "Верхнее значение - уровень света на блоках, нижнее значение - уровень небесного света",

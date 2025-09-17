@@ -1,7 +1,7 @@
 {
   "key.lighty.enable": "Otwórz menu Light Overlay",
   "key.lighty.toggle": "Przełącz Light Overlay",
-  "category.lighty": "Lighty",
+  "key.category.lighty.lighty": "Lighty",
   "modeSwitcher.lighty.title": "Przełącznik trybu Lighty",
   "modeSwitcher.lighty.renderer_number": "Tryb Liczbowy",
   "modeSwitcher.lighty.renderer_number.tooltip": "Wartość górna to poziom światła bloku, dolna to poziom światła nieba",
