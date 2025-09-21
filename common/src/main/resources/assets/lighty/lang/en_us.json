@@ -36,5 +36,5 @@
   "lighty.options.auto_on": "Auto-On",
   "lighty.options.auto_on.tooltip": "If on, the overlay gets enabled when holding an item of certain type. (Default: OFF, Default items: minecraft:torch, minecraft:soul_torch, minecraft:lantern, minecraft:soul_lantern)",
   "lighty.options.chunks_per_tick": "Chunks per Tick",
-  "lighty.options.chunks_per_tick.tooltip": "Specifies how many chunks to compute per tick. A high number may impact performance severally. (Default: 4)"
+  "lighty.options.chunks_per_tick.tooltip": "Specifies how many chunks to compute per tick. A high number may impact performance severely. (Default: 4)"
 }
