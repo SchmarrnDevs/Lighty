@@ -64,9 +64,12 @@ public class Compute {
     static int computationDistance = Math.min(Config.OVERLAY_DISTANCE.getValue(), Minecraft.getInstance().options.renderDistance().get() + 1);
 
     private static boolean outOfRange(SectionPos sPos) {
-        // squared X and Z
-        int absX = Math.abs(sPos.x() - playerPos.x());
-        int absZ =  Math.abs(sPos.z() - playerPos.z());
+        return outOfRange(sPos, playerPos);
+    }
+
+    public static boolean outOfRange(SectionPos one, SectionPos two) {
+        int absX = Math.abs(one.x() - two.x());
+        int absZ = Math.abs(one.z() - two.z());
 
         return absX > computationDistance || absZ > computationDistance;
     }
@@ -144,27 +147,18 @@ public class Compute {
 
     @Deprecated
     private static void queueNewChunksSlow(Level level, LevelRenderer levelRenderer) {
-        for (int yy = level.getMinSectionY(); yy < level.getSectionsCount() + level.getMinSectionY(); ++yy) {
-            for (int xx = 1 - Compute.computationDistance; xx < Compute.computationDistance; ++xx) {
-                for (int zz = 1 - Compute.computationDistance; zz < Compute.computationDistance; ++zz) {
-                    SectionPos chunkSection = SectionPos.of(playerPos.x() + xx, yy, playerPos.z() + zz);
-                    if (!cachedBuffers.containsKey(chunkSection) && levelRenderer.isSectionCompiled(chunkSection.origin())) {
-                        toBeUpdated.add(chunkSection);
-                    }
-                }
-            }
-        }
+        queueNewChunksSlow(level, levelRenderer, null);
     }
 
     private static void queueNewChunksSlow(Level level, LevelRenderer levelRenderer, Frustum frustum) {
         for (int yy = level.getMinSectionY(); yy < level.getSectionsCount() + level.getMinSectionY(); ++yy) {
-            for (int xx = 1 - Compute.computationDistance; xx < Compute.computationDistance; ++xx) {
-                for (int zz = 1 - Compute.computationDistance; zz < Compute.computationDistance; ++zz) {
+            for (int xx = -Compute.computationDistance; xx <= Compute.computationDistance; ++xx) {
+                for (int zz = -Compute.computationDistance; zz <= Compute.computationDistance; ++zz) {
                     SectionPos chunkSection = SectionPos.of(playerPos.x() + xx, yy, playerPos.z() + zz);
 
                     var sectionOrigin = chunkSection.origin();
                     var chunkBoundaries = AABB.encapsulatingFullBlocks(sectionOrigin.offset(-1, -1, -1), sectionOrigin.offset(16, 16, 16));
-                    if (!frustum.isVisible(chunkBoundaries)) {
+                    if (frustum != null && !frustum.isVisible(chunkBoundaries)) {
                         continue;
                     }
 
