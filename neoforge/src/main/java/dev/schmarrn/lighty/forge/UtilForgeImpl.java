@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dev.schhmarrn.lighty.forge;
+package dev.schmarrn.lighty.forge;
 
 import dev.schmarrn.lighty.UtilDefinition;
 import dev.schmarrn.lighty.core.LightyPipelines;

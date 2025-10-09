@@ -11,15 +11,13 @@ import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.overlaystate.SMACH;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.DynamicUniforms;
 import net.minecraft.client.renderer.chunk.SectionBuffers;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.SectionPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -36,9 +34,9 @@ public class LightyRenderer {
 
     /// See ChunkSectionsToRender
     // TODO? Maybe integrate Lighty render code more tightly into Minecraft render code, but wait if there are major changes in next versions until I do so
-    private record Data(List<RenderPass.Draw<GpuBufferSlice[]>> drawList, int maxIndicesRequired, GpuBufferSlice[] dynamicTransforms) {}
+    public record DrawListData(List<RenderPass.Draw<GpuBufferSlice[]>> drawList, int maxIndicesRequired, GpuBufferSlice[] dynamicTransforms) {}
 
-    private static int addData(SectionPos chunkSection, SectionBuffers gpuBuffer, Vec3 camPos, int biggestBufferSize, List<RenderPass.Draw<GpuBufferSlice[]>> drawList, List<DynamicUniforms.Transform> transforms) {
+    public static int addData(SectionPos chunkSection, SectionBuffers gpuBuffer, Vec3 camPos, int biggestBufferSize, List<RenderPass.Draw<GpuBufferSlice[]>> drawList, List<DynamicUniforms.Transform> transforms) {
         // Calculate the translation required to place the section at its right place
         Vec3 origin = new Vec3(chunkSection.origin());
         Vec3 dPos = origin.subtract(camPos);
@@ -79,9 +77,9 @@ public class LightyRenderer {
         return biggestBufferSize;
     }
 
-    private static int goThroughEachBuffer(Minecraft minecraft, Camera camera, Vec3 camPos, Frustum frustum, List<RenderPass.Draw<GpuBufferSlice[]>> drawList, List<DynamicUniforms.Transform> transforms) {
+    private static int goThroughEachBuffer(Minecraft minecraft, Camera camera, Vec3 camPos, Frustum frustum, List<RenderPass.Draw<GpuBufferSlice[]>> drawList, List<DynamicUniforms.Transform> transforms, Object2ObjectOpenHashMap<SectionPos, BufferHolder> cache) {
         int biggestBufferSize = 0;
-        for (var cacheIterator = Compute.cachedBuffers.object2ObjectEntrySet().fastIterator(); cacheIterator.hasNext();) {
+        for (var cacheIterator = cache.object2ObjectEntrySet().fastIterator(); cacheIterator.hasNext();) {
             var entry = cacheIterator.next();
             SectionPos chunkSection = entry.getKey();
             BufferHolder cachedBuffer = entry.getValue();
@@ -92,12 +90,6 @@ public class LightyRenderer {
                     continue;
                 }
 
-                var sectionOrigin = chunkSection.origin();
-                var chunkBoundaries = AABB.encapsulatingFullBlocks(sectionOrigin.offset(-1, -1, -1), sectionOrigin.offset(16, 16, 16));
-                if (!frustum.isVisible(chunkBoundaries)) {
-                    continue;
-                }
-
                 // Only continue if the buffer is valid
                 biggestBufferSize = addData(chunkSection, bufferEntry.getValue(), camPos, biggestBufferSize, drawList, transforms);
             }
@@ -105,63 +97,7 @@ public class LightyRenderer {
         return biggestBufferSize;
     }
 
-    private static int goThroughEachSection(Minecraft minecraft, Camera camera, Vec3 camPos, Frustum frustum, List<RenderPass.Draw<GpuBufferSlice[]>> drawList, List<DynamicUniforms.Transform> transforms) {
-        ChunkPos cameraChunkPos = new ChunkPos(camera.getBlockPosition());
-        int biggestBufferSize = 0;
-
-        for (int xx = -Compute.computationDistance + 1; xx < Compute.computationDistance; ++xx) {
-            for (int zz = -Compute.computationDistance + 1; zz < Compute.computationDistance; ++zz) {
-                ChunkPos chunkPos = new ChunkPos(cameraChunkPos.x + xx, cameraChunkPos.z + zz);
-
-                for (int ii = 0; ii < minecraft.level.getSectionsCount(); ++ii) {
-                    SectionPos chunkSection = SectionPos.of(chunkPos, ii + minecraft.level.getMinSectionY());
-
-                    BufferHolder cachedBuffer = Compute.cachedBuffers.get(chunkSection);
-                    if (cachedBuffer == null) {
-                        continue;
-                    }
-                    for (var entry : cachedBuffer.getGpuBuffers().entrySet()) {
-                        ResourceLocation key = entry.getKey();
-                        if (!cachedBuffer.isValid(key)) {
-                            continue;
-                        }
-                        if (!frustum.isVisible(
-                                AABB.encapsulatingFullBlocks(chunkSection.origin().offset(-1, -1, -1), chunkSection.origin().offset(16, 16, 16))
-                        )) {
-                            continue;
-                        }
-                        // Only continue if the buffer is valid
-                        biggestBufferSize = addData(chunkSection, entry.getValue(), camPos, biggestBufferSize, drawList, transforms);
-                    }
-                }
-            }
-        }
-
-        return biggestBufferSize;
-    }
-
-    private static int goThroughVisibleSections(Minecraft minecraft, Camera camera, Vec3 camPos, Frustum frustum, List<RenderPass.Draw<GpuBufferSlice[]>> drawList, List<DynamicUniforms.Transform> transforms) {
-        int biggestBufferSize = 0;
-        for (var section : minecraft.levelRenderer.getVisibleSections()) {
-            SectionPos sectionPos = SectionPos.of(section.getSectionNode());
-            BufferHolder cachedBuffer = Compute.cachedBuffers.get(sectionPos);
-            if (cachedBuffer == null) {
-                continue;
-            }
-            for (var entry : cachedBuffer.getGpuBuffers().entrySet()) {
-                ResourceLocation key = entry.getKey();
-                if (!cachedBuffer.isValid(key)) {
-                    continue;
-                }
-                // Only continue if the buffer is valid
-                biggestBufferSize = addData(sectionPos, entry.getValue(), camPos, biggestBufferSize, drawList, transforms);
-            }
-        }
-
-        return biggestBufferSize;
-    }
-
-    private static Data prepareData(Minecraft minecraft, Frustum frustum){
+    private static DrawListData prepareData(Minecraft minecraft, Frustum frustum, Object2ObjectOpenHashMap<SectionPos, BufferHolder> cache){
         // Get some basic stuff
         Camera camera = minecraft.gameRenderer.getMainCamera();
 
@@ -174,13 +110,13 @@ public class LightyRenderer {
 
         // tracking the biggest *vertex* buffer, in case our data didn't return an *index* buffer as well
         // See LevelRenderer#renderSectionLayer (1.21.5) for the place of inspiration
-        int biggestBufferSize = goThroughEachBuffer(minecraft, camera, camPos, frustum, drawList, transforms);
+        int biggestBufferSize = goThroughEachBuffer(minecraft, camera, camPos, frustum, drawList, transforms, cache);
 
         GpuBufferSlice[] dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransforms(transforms.toArray(new DynamicUniforms.Transform[0]));
-        return new Data(drawList, biggestBufferSize, dynamicTransforms);
+        return new DrawListData(drawList, biggestBufferSize, dynamicTransforms);
     }
 
-    public static void render(Frustum frustum) {
+    public static void render(DrawListData data) {
         if (!SMACH.isEnabled()) {
             return;
         }
@@ -188,7 +124,6 @@ public class LightyRenderer {
         // Get required data
         Minecraft minecraft = Minecraft.getInstance();
         OverlayRenderer renderer = RendererRegistry.getRenderer();
-        Data data = prepareData(minecraft, frustum);
 
         // Do the rendering
         GpuDevice device = RenderSystem.getDevice();

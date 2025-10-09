@@ -25,11 +25,15 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.AABB;
 
 import java.util.*;
 
@@ -42,7 +46,7 @@ public class Compute {
 
     /// Cache of all computed GpuBuffers and so on.
     /// Gets used in LightyRenderer.
-    static final Object2ObjectOpenHashMap<SectionPos, BufferHolder> cachedBuffers = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectOpenHashMap<SectionPos, BufferHolder> cachedBuffers = new Object2ObjectOpenHashMap<>();
 
     /// TreeSet used to create a priority hierarchy, while still
     /// avoiding duplicate entries.
@@ -138,12 +142,13 @@ public class Compute {
         return buffer;
     }
 
-    private static void queueNewChunksSlow(Minecraft minecraft) {
-        for (int yy = minecraft.level.getMinSectionY(); yy < minecraft.level.getSectionsCount() + minecraft.level.getMinSectionY(); ++yy) {
+    @Deprecated
+    private static void queueNewChunksSlow(Level level, LevelRenderer levelRenderer) {
+        for (int yy = level.getMinSectionY(); yy < level.getSectionsCount() + level.getMinSectionY(); ++yy) {
             for (int xx = 1 - Compute.computationDistance; xx < Compute.computationDistance; ++xx) {
                 for (int zz = 1 - Compute.computationDistance; zz < Compute.computationDistance; ++zz) {
                     SectionPos chunkSection = SectionPos.of(playerPos.x() + xx, yy, playerPos.z() + zz);
-                    if (!cachedBuffers.containsKey(chunkSection) && minecraft.levelRenderer.isSectionCompiled(chunkSection.origin())) {
+                    if (!cachedBuffers.containsKey(chunkSection) && levelRenderer.isSectionCompiled(chunkSection.origin())) {
                         toBeUpdated.add(chunkSection);
                     }
                 }
@@ -151,31 +156,35 @@ public class Compute {
         }
     }
 
-    private static void queueNewChunksIncompatibleWithSodium(Minecraft minecraft) {
-        for (var section : minecraft.levelRenderer.getVisibleSections()) {
-            SectionPos sectionPos = SectionPos.of(section.getRenderOrigin());
-            if (!cachedBuffers.containsKey(sectionPos)) {
-                toBeUpdated.add(sectionPos);
+    private static void queueNewChunksSlow(Level level, LevelRenderer levelRenderer, Frustum frustum) {
+        for (int yy = level.getMinSectionY(); yy < level.getSectionsCount() + level.getMinSectionY(); ++yy) {
+            for (int xx = 1 - Compute.computationDistance; xx < Compute.computationDistance; ++xx) {
+                for (int zz = 1 - Compute.computationDistance; zz < Compute.computationDistance; ++zz) {
+                    SectionPos chunkSection = SectionPos.of(playerPos.x() + xx, yy, playerPos.z() + zz);
+
+                    var sectionOrigin = chunkSection.origin();
+                    var chunkBoundaries = AABB.encapsulatingFullBlocks(sectionOrigin.offset(-1, -1, -1), sectionOrigin.offset(16, 16, 16));
+                    if (!frustum.isVisible(chunkBoundaries)) {
+                        continue;
+                    }
+
+                    if (!cachedBuffers.containsKey(chunkSection) && levelRenderer.isSectionCompiled(chunkSection.origin())) {
+                        toBeUpdated.add(chunkSection);
+                    }
+                }
             }
         }
     }
 
-    public static void computeCache(Minecraft minecraft) {
-        if (minecraft.player == null || minecraft.getCameraEntity() == null || minecraft.level == null) {
-            return;
-        }
-
-        // update state machine state that's based on items etc
-        SMACH.updateCompute(minecraft);
-
+    public static Object2ObjectOpenHashMap<SectionPos, BufferHolder> computeCache(BlockPos cameraPos, Level level, LevelRenderer levelRenderer, Frustum frustum) {
         // update player position
-        playerPos = SectionPos.of(minecraft.getCameraEntity().blockPosition());
+        playerPos = SectionPos.of(cameraPos);
 
         if (!SMACH.isEnabled()) {
-            return;
+            return null;
         }
 
-        queueNewChunksSlow(minecraft);
+        queueNewChunksSlow(level, levelRenderer, frustum);
 
         // Get the currently active data providers and renderer
         List<OverlayDataProvider> dataProviders = DataProviderRegistry.getActiveProviders();
@@ -191,7 +200,7 @@ public class Compute {
         }
 
         // Compute at maximum as many chunks as specified
-        for (int ii = minecraft.level.getSectionsCount() * Config.CHUNKS_PER_TICK.getValue(); ii > 0;) {
+        for (int ii = level.getSectionsCount() * Config.CHUNKS_PER_TICK.getValue(); ii > 0;) {
             // get the next section pos
             SectionPos sectionPos = toBeUpdated.pollFirst();
             if (sectionPos == null) {
@@ -211,11 +220,12 @@ public class Compute {
                             renderer,
                             dataProviders,
                             pos,
-                            minecraft.level,
+                            (ClientLevel) level,
                             bufferHolder != null ? bufferHolder : new BufferHolder()
                     )
             );
         }
+        return cachedBuffers;
     }
 
 

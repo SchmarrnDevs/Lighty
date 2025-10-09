@@ -36,7 +36,7 @@ public class BufferHolder implements AutoCloseable {
     private static final int BUFFER_TYPE_VERTEX = 40;
     private static final int BUFFER_TYPE_INDEX = 72;
 
-    boolean isValid(ResourceLocation key) {
+    public boolean isValid(ResourceLocation key) {
         return this.isValid.getOrDefault(key, false);
     }
 
@@ -137,7 +137,7 @@ public class BufferHolder implements AutoCloseable {
         this.isValid.put(dataProviderKey, true);
     }
 
-    Object2ObjectOpenHashMap<ResourceLocation, SectionBuffers> getGpuBuffers() {
+    public Object2ObjectOpenHashMap<ResourceLocation, SectionBuffers> getGpuBuffers() {
         return this.overlayBuffers;
     }
 }

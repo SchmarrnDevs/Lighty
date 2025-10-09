@@ -9,7 +9,8 @@ import net.minecraft.world.item.Item;
 public class SMACH {
     private static State state = State.OFF;
 
-    public static void updateCompute(Minecraft client) {
+    public static void updateCompute() {
+        Minecraft client = Minecraft.getInstance();
         if (!Config.SHOULD_AUTO_ON.getValue()) {
             if (state == State.AUTO || state == State.OVERRIDE) {
                 // if auto_on is disabled, but we somehow got stuck inside of one of the auto_on states, reset to OFF
