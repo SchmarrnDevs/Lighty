@@ -105,26 +105,27 @@ public class LightyForge {
                 return;
             }
 
+            var camPos = event.getLevelRenderState().cameraRenderState.pos;
+
             // Prepare render data
 
             List<RenderPass.Draw<GpuBufferSlice[]>> drawList = new ArrayList<>();
             List<DynamicUniforms.Transform> transforms = new ArrayList<>();
 
             int biggestBufferSize = 0;
-            for (IRenderableSection entry : event.getRenderableSections()) {
-                SectionPos sectionPos = SectionPos.of(entry.getRenderOrigin());
-                BufferHolder cachedBuffer = cache.get(sectionPos);
-
-                if (cachedBuffer == null) {
-                    continue;
-                }
-
-                for (var buf : cachedBuffer.getGpuBuffers().entrySet()) {
-                    ResourceLocation key = buf.getKey();
-                    if (!cachedBuffer.isValid(key)) {
+            for (var cacheIterator = cache.object2ObjectEntrySet().fastIterator(); cacheIterator.hasNext();) {
+                var entry = cacheIterator.next();
+                SectionPos chunkSection = entry.getKey();
+                BufferHolder cachedBuffer = entry.getValue();
+                var gpuBuffers = cachedBuffer.getGpuBuffers();
+                for (var bufferIterator = gpuBuffers.object2ObjectEntrySet().fastIterator(); bufferIterator.hasNext();) {
+                    var bufferEntry = bufferIterator.next();
+                    if (!cachedBuffer.isValid(bufferEntry.getKey())) {
                         continue;
                     }
-                    biggestBufferSize = LightyRenderer.addData(sectionPos, buf.getValue(), event.getLevelRenderState().cameraRenderState.pos, biggestBufferSize, drawList, transforms);
+
+                    // Only continue if the buffer is valid
+                    biggestBufferSize = LightyRenderer.addData(chunkSection, bufferEntry.getValue(), camPos, biggestBufferSize, drawList, transforms);
                 }
             }
 
