@@ -23,11 +23,15 @@ public class SMACH {
         boolean holdsItem = false;
         var activationItems = Config.AUTO_ON_ITEM_LIST.getValue();
 
+        if (client.player == null) {
+            return;
+        }
+
+        Item mainHandItem = client.player.getMainHandItem().getItem();
+        Item offHandItem = client.player.getOffhandItem().getItem();
+
         for (var rl : activationItems) {
             Item activationItem = BuiltInRegistries.ITEM.get(rl).get().value();
-            Item mainHandItem = client.player.getMainHandItem().getItem();
-            Item offHandItem = client.player.getOffhandItem().getItem();
-
             // if we hold the activation item in our hands, set auto enabled to true.
             // if we don't, set it to false and if we aren't enabled, return early.
             if (mainHandItem == activationItem || offHandItem == activationItem) {
