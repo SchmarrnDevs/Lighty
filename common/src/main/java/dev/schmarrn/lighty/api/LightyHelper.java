@@ -20,7 +20,8 @@ public class LightyHelper {
     private static boolean isRedstone(Block block) {
         return block instanceof RedStoneWireBlock ||
                 block instanceof ButtonBlock ||
-                block instanceof PressurePlateBlock ||
+                block instanceof DiodeBlock ||
+                block instanceof BasePressurePlateBlock ||
                 block instanceof LeverBlock;
     }
 
@@ -43,8 +44,8 @@ public class LightyHelper {
         }
     }
 
-    private static boolean specialCases(Block block) {
-        return block instanceof CarpetBlock;
+    private static boolean isCarpet(Block block) {
+        return block instanceof CarpetBlock || block instanceof MossyCarpetBlock;
     }
 
     public static float getOffset(BlockState blockState, BlockPos pos, ClientLevel world, LevelChunk chunk) {
@@ -71,7 +72,7 @@ public class LightyHelper {
         return (blockStateUp.isCollisionShapeFullBlock(chunk, posUp) || // Full blocks are not spawnable in
                 !block.isFaceSturdy(chunk, pos, Direction.UP) || // Block below needs to be sturdy
                 isRedstone(blockStateUp.getBlock()) || // Mobs don't spawn in redstone
-                specialCases(blockStateUp.getBlock()) || // Carpets and snow
+                isCarpet(blockStateUp.getBlock()) ||
                 !protectedIsValidSpawnCheck(block, pos, chunk) || // use minecraft internal isValidSpawn check
                 !blockStateUp.getFluidState().isEmpty()) || // don't spawn in fluidlogged stuff (Kelp, Seagrass, Growlichen)
                 !blockStateUp.getBlock().isPossibleToRespawnInThis(blockStateUp) ||
