@@ -9,6 +9,7 @@ import dev.schmarrn.lighty.api.OverlayData;
 import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.core.LightyPipelines;
+import dev.schmarrn.lighty.core.LightyVertexFormat;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -44,7 +45,7 @@ public class CrossRenderer implements OverlayRenderer {
 
     @Override
     public VertexFormat getVertexFormat() {
-        return LightyPipelines.POSITION_COLOR_NORMAL;
+        return LightyVertexFormat.POSITION_COLOR_NORMAL;
     }
 
     @Override

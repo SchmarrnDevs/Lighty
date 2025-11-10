@@ -129,9 +129,15 @@ public class LightyRenderer {
         GpuDevice device = RenderSystem.getDevice();
         // Get the texture specified in the overlay
         GpuTextureView tex = minecraft.getTextureManager().getTexture(renderer.getTextureLocation()).getTextureView();
+        var backupTexture = RenderSystem.getShaderTexture(0);
+        RenderSystem.setShaderTexture(0, tex);
 
         RenderPipeline pipeline = renderer.getPipeline();
-        RenderTarget renderTarget = minecraft.getMainRenderTarget();
+        // See ChunkSectionLayerGroup:outputTarget
+        RenderTarget renderTarget = renderer.getPipeline() == LightyPipelines.TERRAIN_TRANSLUCENT ? minecraft.levelRenderer.getTranslucentTarget() : minecraft.getMainRenderTarget();
+        if (renderTarget == null) {
+            renderTarget = minecraft.getMainRenderTarget();
+        }
 
         RenderSystem.AutoStorageIndexBuffer asib = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
         // Index buffers/type for all the vertex data that didn't get its own IndexBuffer
@@ -163,5 +169,6 @@ public class LightyRenderer {
                     data.dynamicTransforms
             );
         }
+        RenderSystem.setShaderTexture(0, backupTexture);
     }
 }
