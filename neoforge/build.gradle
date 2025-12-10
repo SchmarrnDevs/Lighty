@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id 'eclipse'
     id 'idea'
-    id 'net.neoforged.gradle.userdev' version '7.0.184'
+    id 'net.neoforged.gradle.userdev' version '7.1.9'
 }
 
 version = "${mod_version}+${minecraft_version}"

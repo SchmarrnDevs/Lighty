@@ -21,12 +21,12 @@ import dev.schmarrn.lighty.overlaystate.SMACH;
 import dev.schmarrn.lighty.ui.LightyScreen;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 public class KeyBind {
     private static final KeyMapping.Category keyCategory = KeyMapping.Category.register(
-            ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "lighty")
+            Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "lighty")
     );
     public static final KeyMapping enableKeyBind = UtilDefinition.INSTANCE.registerKeyBinding(new KeyMapping(
             "key.lighty.enable",

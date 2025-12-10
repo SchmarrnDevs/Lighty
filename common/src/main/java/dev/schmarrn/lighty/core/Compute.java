@@ -94,7 +94,7 @@ public class Compute {
     }
 
     public static void updateSection(SectionPos sPos) {
-        if (outOfRange(sPos) || !Minecraft.getInstance().levelRenderer.isSectionCompiled(sPos.origin())) {
+        if (outOfRange(sPos) || !Minecraft.getInstance().levelRenderer.isSectionCompiledAndVisible(sPos.origin())) {
             return;
         }
 
@@ -125,7 +125,7 @@ public class Compute {
             }
 
             if (dataList == null) {
-                buffer.invalidateBuffer(dataProvider.getResourceLocation());
+                buffer.invalidateBuffer(dataProvider.getIdentifier());
                 continue;
             }
 
@@ -139,7 +139,7 @@ public class Compute {
 
             // builder.build() can return null if there wasn't any data added
             // in that case, the buffer automatically gets set as invalid
-            buffer.upload(builder.build(), dataProvider.getResourceLocation());
+            buffer.upload(builder.build(), dataProvider.getIdentifier());
         }
 
         return buffer;
@@ -162,7 +162,7 @@ public class Compute {
                         continue;
                     }
 
-                    if (!cachedBuffers.containsKey(chunkSection) && levelRenderer.isSectionCompiled(chunkSection.origin())) {
+                    if (!cachedBuffers.containsKey(chunkSection) && levelRenderer.isSectionCompiledAndVisible(chunkSection.origin())) {
                         toBeUpdated.add(chunkSection);
                     }
                 }

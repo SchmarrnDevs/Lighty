@@ -18,7 +18,7 @@ import dev.schmarrn.lighty.core.DataProviderRegistry;
 import dev.schmarrn.lighty.core.RendererRegistry;
 import dev.schmarrn.lighty.ui.ModeButtonRegister;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Used for registering your LightyModes.
@@ -32,7 +32,7 @@ public class ModeManager {
      * @param rl Used to generate the translatable text resource locations
      * @param dataProvider Your OverlayDataProvider to be registered
      */
-    public static void registerDataProvider(ResourceLocation rl, OverlayDataProvider dataProvider) {
+    public static void registerDataProvider(Identifier rl, OverlayDataProvider dataProvider) {
         DataProviderRegistry.put(rl, dataProvider);
     }
 
@@ -47,7 +47,7 @@ public class ModeManager {
      * @param rl Used to generate the translatable text resource locations
      * @param renderer Your OverlayRenderer to be registered
      */
-    public static void registerRenderer(ResourceLocation rl, OverlayRenderer renderer) {
+    public static void registerRenderer(Identifier rl, OverlayRenderer renderer) {
         RendererRegistry.put(rl, renderer);
 
         ModeButtonRegister.addButton(

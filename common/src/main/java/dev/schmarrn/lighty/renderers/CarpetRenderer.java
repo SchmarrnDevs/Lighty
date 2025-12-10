@@ -11,9 +11,10 @@ import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.core.LightyPipelines;
 import dev.schmarrn.lighty.core.LightyVertexFormat;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
@@ -81,17 +82,17 @@ public class CarpetRenderer implements OverlayRenderer {
     }
 
     @Override
-    public ResourceLocation getTextureLocation() {
+    public Identifier getTextureLocation() {
         return Config.CARPET_TEXTURE.getValue();
     }
 
     @Override
-    public ResourceLocation getResourceLocation() {
-        return ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "renderer_carpet");
+    public Identifier getIdentifier() {
+        return Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "renderer_carpet");
     }
 
     public static void init() {
         var dp = new CarpetRenderer();
-        ModeManager.registerRenderer(dp.getResourceLocation(), dp);
+        ModeManager.registerRenderer(dp.getIdentifier(), dp);
     }
 }

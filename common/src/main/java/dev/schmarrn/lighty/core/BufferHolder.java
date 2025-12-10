@@ -24,23 +24,23 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.renderer.chunk.SectionBuffers;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.nio.ByteBuffer;
 
 public class BufferHolder implements AutoCloseable {
     // List because we can hold multiple gpuBuffers from different data providers
-    private final Object2ObjectOpenHashMap<ResourceLocation, SectionBuffers> overlayBuffers = new Object2ObjectOpenHashMap<>();
-    private final Object2BooleanMap<ResourceLocation> isValid = new Object2BooleanOpenHashMap<>();
+    private final Object2ObjectOpenHashMap<Identifier, SectionBuffers> overlayBuffers = new Object2ObjectOpenHashMap<>();
+    private final Object2BooleanMap<Identifier> isValid = new Object2BooleanOpenHashMap<>();
 
     private static final int BUFFER_TYPE_VERTEX = 40;
     private static final int BUFFER_TYPE_INDEX = 72;
 
-    public boolean isValid(ResourceLocation key) {
+    public boolean isValid(Identifier key) {
         return this.isValid.getOrDefault(key, false);
     }
 
-    public void invalidateBuffer(ResourceLocation key) {
+    public void invalidateBuffer(Identifier key) {
         this.isValid.put(key, false);
     }
 
@@ -50,7 +50,7 @@ public class BufferHolder implements AutoCloseable {
         this.overlayBuffers.clear();
     }
 
-    void upload(MeshData data, ResourceLocation dataProviderKey) {
+    void upload(MeshData data, Identifier dataProviderKey) {
         if (data == null) {
             this.isValid.put(dataProviderKey, false);
             return;
@@ -137,7 +137,7 @@ public class BufferHolder implements AutoCloseable {
         this.isValid.put(dataProviderKey, true);
     }
 
-    public Object2ObjectOpenHashMap<ResourceLocation, SectionBuffers> getGpuBuffers() {
+    public Object2ObjectOpenHashMap<Identifier, SectionBuffers> getGpuBuffers() {
         return this.overlayBuffers;
     }
 }

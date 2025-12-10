@@ -12,7 +12,7 @@ import dev.schmarrn.lighty.core.LightyPipelines;
 import dev.schmarrn.lighty.core.LightyVertexFormat;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class CrossRenderer implements OverlayRenderer {
     public void build(ClientLevel level, BlockPos pos, OverlayData data, VertexConsumer builder, int lightmap) {
@@ -22,10 +22,10 @@ public class CrossRenderer implements OverlayRenderer {
         float z1 = data.rPos().getZ();
         float z2 = data.rPos().getZ() + 1f;
 
-        builder.addVertex(x1, y, z1).setColor(data.color()).setNormal(1f, 0f, 1f);
-        builder.addVertex(x2, y, z2).setColor(data.color()).setNormal(1f, 0f, 1f);
-        builder.addVertex(x1, y, z2).setColor(data.color()).setNormal(1f, 0f, -1f);
-        builder.addVertex(x2, y, z1).setColor(data.color()).setNormal(1f, 0f, -1f);
+        builder.addVertex(x1, y, z1).setColor(data.color()).setNormal(1f, 0f, 1f).setLineWidth(1.0f);
+        builder.addVertex(x2, y, z2).setColor(data.color()).setNormal(1f, 0f, 1f).setLineWidth(1.0f);
+        builder.addVertex(x1, y, z2).setColor(data.color()).setNormal(1f, 0f, -1f).setLineWidth(1.0f);
+        builder.addVertex(x2, y, z1).setColor(data.color()).setNormal(1f, 0f, -1f).setLineWidth(1.0f);
     }
 
     @Override
@@ -34,18 +34,18 @@ public class CrossRenderer implements OverlayRenderer {
     }
 
     @Override
-    public ResourceLocation getTextureLocation() {
+    public Identifier getTextureLocation() {
         return Config.CROSS_TEXTURE.getValue();
     }
 
     @Override
-    public ResourceLocation getResourceLocation() {
-        return ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "renderer_cross");
+    public Identifier getIdentifier() {
+        return Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "renderer_cross");
     }
 
     @Override
     public VertexFormat getVertexFormat() {
-        return LightyVertexFormat.POSITION_COLOR_NORMAL;
+        return LightyVertexFormat.POSITION_COLOR_NORMAL_LINE_WIDTH;
     }
 
     @Override
@@ -55,6 +55,6 @@ public class CrossRenderer implements OverlayRenderer {
 
     public static void init() {
         var dp = new CrossRenderer();
-        ModeManager.registerRenderer(dp.getResourceLocation(), dp);
+        ModeManager.registerRenderer(dp.getIdentifier(), dp);
     }
 }

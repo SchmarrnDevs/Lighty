@@ -3,23 +3,23 @@ package dev.schmarrn.lighty.core;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.OverlayDataProvider;
 import dev.schmarrn.lighty.config.Config;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class DataProviderRegistry {
-    private static final HashMap<ResourceLocation, OverlayDataProvider> DATA_PROVIDERS = new HashMap<>();
+    private static final HashMap<Identifier, OverlayDataProvider> DATA_PROVIDERS = new HashMap<>();
 
     private static final List<OverlayDataProvider> ACTIVE_PROVIDERS = new ArrayList<>();
 
-    public static void put(ResourceLocation rl, OverlayDataProvider dataProvider) {
+    public static void put(Identifier rl, OverlayDataProvider dataProvider) {
         DATA_PROVIDERS.put(rl, dataProvider);
     }
 
     private static void updateConfig() {
-        ArrayList<ResourceLocation> activeRls = new ArrayList<>();
+        ArrayList<Identifier> activeRls = new ArrayList<>();
         DATA_PROVIDERS.forEach((key, value) -> {
             if (ACTIVE_PROVIDERS.contains(value)) {
                 activeRls.add(key);
@@ -28,7 +28,7 @@ public class DataProviderRegistry {
         Config.ACTIVE_DATA_PROVIDERS.setValue(activeRls);
     }
 
-    public static void activate(ResourceLocation rl) {
+    public static void activate(Identifier rl) {
         if (DATA_PROVIDERS.containsKey(rl)) {
             ACTIVE_PROVIDERS.add(DATA_PROVIDERS.get(rl));
         } else {
@@ -37,7 +37,7 @@ public class DataProviderRegistry {
         updateConfig();
     }
 
-    public static void deactivate(ResourceLocation rl) {
+    public static void deactivate(Identifier rl) {
         if (DATA_PROVIDERS.containsKey(rl)) {
             ACTIVE_PROVIDERS.remove(DATA_PROVIDERS.get(rl));
         } else {

@@ -14,9 +14,6 @@
 
 package dev.schmarrn.lighty.fabric;
 
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.systems.RenderPass;
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.core.BufferHolder;
 import dev.schmarrn.lighty.core.LightyRenderer;
@@ -32,11 +29,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.DynamicUniforms;
 import net.minecraft.core.SectionPos;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LightyFabric implements ClientModInitializer {
     private static RenderStateDataKey<Object2ObjectOpenHashMap<SectionPos, BufferHolder>> DATA_KEY = RenderStateDataKey.create();
@@ -49,7 +42,7 @@ public class LightyFabric implements ClientModInitializer {
         });
 
         WorldRenderEvents.END_EXTRACTION.register(t -> {
-            var cache = Compute.computeCache(t.camera().getBlockPosition(), t.world(), t.worldRenderer(), t.frustum());
+            var cache = Compute.computeCache(t.camera().blockPosition(), t.world(), t.worldRenderer(), t.frustum());
             if (cache != null && !cache.isEmpty()) {
                 t.worldState().setData(DATA_KEY, cache);
             }
@@ -62,34 +55,7 @@ public class LightyFabric implements ClientModInitializer {
             }
             var camPos = context.worldState().cameraRenderState.pos;
 
-            // Prepare render data
-
-            List<RenderPass.Draw<GpuBufferSlice[]>> drawList = new ArrayList<>();
-            List<DynamicUniforms.Transform> transforms = new ArrayList<>();
-
-            int biggestBufferSize = 0;
-            for (var cacheIterator = cache.object2ObjectEntrySet().fastIterator(); cacheIterator.hasNext();) {
-                var entry = cacheIterator.next();
-                SectionPos chunkSection = entry.getKey();
-                BufferHolder cachedBuffer = entry.getValue();
-                var gpuBuffers = cachedBuffer.getGpuBuffers();
-                for (var bufferIterator = gpuBuffers.object2ObjectEntrySet().fastIterator(); bufferIterator.hasNext();) {
-                    var bufferEntry = bufferIterator.next();
-                    if (!cachedBuffer.isValid(bufferEntry.getKey())) {
-                        continue;
-                    }
-
-                    // Only continue if the buffer is valid
-                    biggestBufferSize = LightyRenderer.addData(chunkSection, bufferEntry.getValue(), camPos, biggestBufferSize, drawList, transforms);
-                }
-            }
-
-            GpuBufferSlice[] dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransforms(transforms.toArray(new DynamicUniforms.Transform[0]));
-            LightyRenderer.DrawListData data = new LightyRenderer.DrawListData(drawList, biggestBufferSize, dynamicTransforms);
-
-            // Render
-
-            LightyRenderer.render(data);
+            LightyRenderer.render(camPos, cache);
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(KeyBind::handleKeyBind);

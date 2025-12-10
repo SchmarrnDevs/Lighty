@@ -7,16 +7,17 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.overlaystate.SMACH;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.DynamicUniforms;
 import net.minecraft.client.renderer.chunk.SectionBuffers;
-import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
@@ -34,13 +35,56 @@ public class LightyRenderer {
 
     /// See ChunkSectionsToRender
     // TODO? Maybe integrate Lighty render code more tightly into Minecraft render code, but wait if there are major changes in next versions until I do so
-    public record DrawListData(List<RenderPass.Draw<GpuBufferSlice[]>> drawList, int maxIndicesRequired, GpuBufferSlice[] dynamicTransforms) {}
+    public record DrawListData(
+            List<RenderPass.Draw<GpuBufferSlice[]>> drawList,
+            int maxIndicesRequired,
+            GpuBufferSlice[] uniforms,
+            boolean isChunkSectionUniform
+    ) {}
 
-    public static int addData(SectionPos chunkSection, SectionBuffers gpuBuffer, Vec3 camPos, int biggestBufferSize, List<RenderPass.Draw<GpuBufferSlice[]>> drawList, List<DynamicUniforms.Transform> transforms) {
-        // Calculate the translation required to place the section at its right place
+    private static int addChunkSectionInfo(SectionPos chunkSection, int width, int height, List<DynamicUniforms.ChunkSectionInfo> uniformList) {
+        BlockPos origin = chunkSection.origin();
+        Matrix4f modelViewMatrix = new Matrix4f(RenderSystem.getModelViewMatrix());
+
+        uniformList.add(
+                new DynamicUniforms.ChunkSectionInfo(
+                        modelViewMatrix,
+                        origin.getX(),
+                        origin.getY(),
+                        origin.getZ(),
+                        1.0f, // fade in, for now hard coded to 1
+                        width,
+                        height
+                )
+        );
+        // return index of newly added uniform
+        return uniformList.size() - 1;
+    }
+
+    private static int addTransform(SectionPos chunkSection, Vec3 camPos, List<DynamicUniforms.Transform> uniformList) {
         Vec3 origin = new Vec3(chunkSection.origin());
         Vec3 dPos = origin.subtract(camPos);
 
+        Matrix4f modelViewMatrix = new Matrix4f(RenderSystem.getModelViewMatrix());
+        modelViewMatrix.translate((float) dPos.x, (float) dPos.y, (float) dPos.z);
+
+        uniformList.add(
+                new DynamicUniforms.Transform(
+                        modelViewMatrix,
+                        UNIT_COLOR_MODULATOR,
+                        new Vector3f(),
+                        DEFAULT_TEXTURE_MATRIX
+                )
+        );
+        // return index of newly added uniform
+        return uniformList.size() - 1;
+    }
+
+    private static int addData(SectionBuffers gpuBuffer,
+                              int biggestBufferSize,
+                              List<RenderPass.Draw<GpuBufferSlice[]>> drawList,
+                              String uniformName,
+                              int currentIndex) {
         // Prepare the render data
         // If there is no index buffer available...
         if (gpuBuffer.getIndexBuffer() == null) {
@@ -50,21 +94,6 @@ public class LightyRenderer {
             }
         }
 
-        // Get index of the current transform,
-        // which is the size of the list *before* adding the transform to the list
-        int currentTransformationIndex = transforms.size();
-        Matrix4f modelViewMatrix = new Matrix4f(RenderSystem.getModelViewMatrix());
-        modelViewMatrix.translate((float)dPos.x(), (float)dPos.y(), (float)dPos.z());
-        transforms.add(
-                new DynamicUniforms.Transform(
-                        modelViewMatrix,
-                        UNIT_COLOR_MODULATOR,
-                        new Vector3f(),
-                        DEFAULT_TEXTURE_MATRIX,
-                        1.0F // Line Width
-                )
-        );
-
         drawList.add(new RenderPass.Draw<>(
                 0, // slot (whatever a slot is in this context)
                 gpuBuffer.getVertexBuffer(),
@@ -72,12 +101,18 @@ public class LightyRenderer {
                 gpuBuffer.getIndexType(),
                 0, // first index
                 gpuBuffer.getIndexCount(),
-                (bufferSlice, uniformUploader) -> uniformUploader.upload("DynamicTransforms", bufferSlice[currentTransformationIndex])
+                (bufferSlice, uniformUploader) -> {
+                    uniformUploader.upload(uniformName, bufferSlice[currentIndex]);
+                }
         ));
         return biggestBufferSize;
     }
 
-    private static int goThroughEachBuffer(Minecraft minecraft, Camera camera, Vec3 camPos, Frustum frustum, List<RenderPass.Draw<GpuBufferSlice[]>> drawList, List<DynamicUniforms.Transform> transforms, Object2ObjectOpenHashMap<SectionPos, BufferHolder> cache) {
+    private interface DoTheThing {
+        int theThing(SectionBuffers buffers, int biggestBufferSize, SectionPos chunkSection);
+    }
+
+    private static int goThroughEachBuffer(Object2ObjectOpenHashMap<SectionPos, BufferHolder> cache, DoTheThing fn) {
         int biggestBufferSize = 0;
         for (var cacheIterator = cache.object2ObjectEntrySet().fastIterator(); cacheIterator.hasNext();) {
             var entry = cacheIterator.next();
@@ -91,32 +126,64 @@ public class LightyRenderer {
                 }
 
                 // Only continue if the buffer is valid
-                biggestBufferSize = addData(chunkSection, bufferEntry.getValue(), camPos, biggestBufferSize, drawList, transforms);
+                biggestBufferSize = fn.theThing(bufferEntry.getValue(), biggestBufferSize, chunkSection);
             }
         }
         return biggestBufferSize;
     }
 
-    private static DrawListData prepareData(Minecraft minecraft, Frustum frustum, Object2ObjectOpenHashMap<SectionPos, BufferHolder> cache){
-        // Get some basic stuff
-        Camera camera = minecraft.gameRenderer.getMainCamera();
+    private static String getUniformName(OverlayRenderer renderer) {
+        if (renderer.getPipeline() == LightyPipelines.TERRAIN_TRANSLUCENT || renderer.getPipeline() == LightyPipelines.TERRAIN_CUTOUT) {
+            return "ChunkSection";
+        } else if (renderer.getPipeline() == LightyPipelines.LINES) {
+            return "DynamicTransforms";
+        } else {
+            Lighty.LOGGER.error("LightyRenderer: getUniformName: Don't how to handle RenderPipeline {} of mode {}.", renderer.getPipeline(), renderer.getIdentifier().toString());
+            throw new RuntimeException("Lighty unknown RenderPipeline");
+        }
+    }
 
-        // save camera position to be able to later translate the different sections
-        Vec3 camPos = camera.getPosition();
-
+    public static DrawListData prepareData(Object2ObjectOpenHashMap<SectionPos, BufferHolder> cache, Vec3 camPos, GpuTextureView tex, OverlayRenderer renderer){
         // Create required rendering lists
         List<RenderPass.Draw<GpuBufferSlice[]>> drawList = new ArrayList<>();
-        List<DynamicUniforms.Transform> transforms = new ArrayList<>();
 
         // tracking the biggest *vertex* buffer, in case our data didn't return an *index* buffer as well
         // See LevelRenderer#renderSectionLayer (1.21.5) for the place of inspiration
-        int biggestBufferSize = goThroughEachBuffer(minecraft, camera, camPos, frustum, drawList, transforms, cache);
+        int biggestBufferSize;
+        GpuBufferSlice[] dynamicTransforms;
+        String uniformName = getUniformName(renderer);
+        if (uniformName.equals("ChunkSection")) {
+            List<DynamicUniforms.ChunkSectionInfo> chunkSectionInfoList = new ArrayList<>();
+            biggestBufferSize = goThroughEachBuffer(cache,
+                    (buffers, previousBiggestBufferSize, chunkSection) -> addData(
+                            buffers,
+                            previousBiggestBufferSize,
+                            drawList,
+                            "ChunkSection",
+                            addChunkSectionInfo(chunkSection, tex.getWidth(0), tex.getHeight(0), chunkSectionInfoList)
+                    )
+            );
+            dynamicTransforms = RenderSystem.getDynamicUniforms().writeChunkSections(chunkSectionInfoList.toArray(new DynamicUniforms.ChunkSectionInfo[0]));
+        } else if (uniformName.equals("DynamicTransforms")) {
+            List<DynamicUniforms.Transform> transformList = new ArrayList<>();
+            biggestBufferSize = goThroughEachBuffer(cache,
+                    (buffers, previousBiggestBufferSize, chunkSection) -> addData(
+                            buffers,
+                            previousBiggestBufferSize,
+                            drawList,
+                            "DynamicTransforms",
+                            addTransform(chunkSection, camPos, transformList)
+                    )
+            );
+            dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransforms(transformList.toArray(new DynamicUniforms.Transform[0]));
+        } else {
+            throw new IllegalStateException("unknown uniform type");
+        }
 
-        GpuBufferSlice[] dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransforms(transforms.toArray(new DynamicUniforms.Transform[0]));
-        return new DrawListData(drawList, biggestBufferSize, dynamicTransforms);
+        return new DrawListData(drawList, biggestBufferSize, dynamicTransforms, true);
     }
 
-    public static void render(DrawListData data) {
+    public static void render(Vec3 camPos, Object2ObjectOpenHashMap<SectionPos, BufferHolder> cache) {
         if (!SMACH.isEnabled()) {
             return;
         }
@@ -129,8 +196,8 @@ public class LightyRenderer {
         GpuDevice device = RenderSystem.getDevice();
         // Get the texture specified in the overlay
         GpuTextureView tex = minecraft.getTextureManager().getTexture(renderer.getTextureLocation()).getTextureView();
-        var backupTexture = RenderSystem.getShaderTexture(0);
-        RenderSystem.setShaderTexture(0, tex);
+
+        DrawListData data = prepareData(cache, camPos, tex, renderer);
 
         RenderPipeline pipeline = renderer.getPipeline();
         // See ChunkSectionLayerGroup:outputTarget
@@ -156,19 +223,18 @@ public class LightyRenderer {
                 )
         ) {
             RenderSystem.bindDefaultUniforms(pass);
-            pass.bindSampler("Sampler2", minecraft.gameRenderer.lightTexture().getTextureView());
+            pass.bindTexture("Sampler2", minecraft.gameRenderer.lightTexture().getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 
             pass.setPipeline(pipeline);
-            pass.bindSampler("Sampler0", tex);
+            pass.bindTexture("Sampler0", tex, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));
 
             pass.drawMultipleIndexed(
                     pipeline == LightyPipelines.TERRAIN_TRANSLUCENT ? data.drawList.reversed() : data.drawList,
                     baseIndexBuffer,
                     baseIndexType,
-                    List.of("DynamicTransforms"),
-                    data.dynamicTransforms
+                    List.of(getUniformName(renderer)),
+                    data.uniforms
             );
         }
-        RenderSystem.setShaderTexture(0, backupTexture);
     }
 }

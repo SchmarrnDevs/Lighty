@@ -8,7 +8,7 @@ import dev.schmarrn.lighty.api.OverlayDataProvider;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -39,12 +39,12 @@ public class FarmlandDataProvider implements OverlayDataProvider {
     }
 
     @Override
-    public ResourceLocation getResourceLocation() {
-        return ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "data_provider_farmland");
+    public Identifier getIdentifier() {
+        return Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "data_provider_farmland");
     }
 
     public static void init() {
         var dp = new FarmlandDataProvider();
-        ModeManager.registerDataProvider(dp.getResourceLocation(), dp);
+        ModeManager.registerDataProvider(dp.getIdentifier(), dp);
     }
 }

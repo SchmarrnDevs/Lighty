@@ -12,7 +12,7 @@ import dev.schmarrn.lighty.core.LightyPipelines;
 import dev.schmarrn.lighty.core.LightyVertexFormat;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class NumberRenderer implements OverlayRenderer {
     private static final float PXL = 1/16f;
@@ -77,12 +77,12 @@ public class NumberRenderer implements OverlayRenderer {
     }
 
     @Override
-    public ResourceLocation getTextureLocation() {
-        return ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "textures/block/numbers.png");
+    public Identifier getTextureLocation() {
+        return Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "textures/block/numbers.png");
     }
     @Override
-    public ResourceLocation getResourceLocation() {
-        return ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "renderer_number");
+    public Identifier getIdentifier() {
+        return Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "renderer_number");
     }
 
     @Override
@@ -97,6 +97,6 @@ public class NumberRenderer implements OverlayRenderer {
 
     public static void init() {
         var dp = new NumberRenderer();
-        ModeManager.registerRenderer(dp.getResourceLocation(), dp);
+        ModeManager.registerRenderer(dp.getIdentifier(), dp);
     }
 }

@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.11-SNAPSHOT'
+    id 'net.fabricmc.fabric-loom-remap' version '1.14-SNAPSHOT'
 }
 
 version = "${mod_version}+${minecraft_version}"
@@ -30,9 +30,6 @@ repositories {
 }
 
 loom {
-    mixin {
-        defaultRefmapName.set("lighty.refmap.json")
-    }
     runConfigs.configureEach {
         ideConfigGenerated = true
     }
@@ -41,9 +38,7 @@ loom {
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${minecraft_version}"
-    mappings loom.layered() {
-        officialMojangMappings()
-    }
+    mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
 
     // Fabric API. This is technically optional, but you probably want it anyway.

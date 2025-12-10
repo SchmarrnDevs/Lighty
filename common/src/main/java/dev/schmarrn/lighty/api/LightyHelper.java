@@ -6,7 +6,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -15,7 +15,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import java.util.HashSet;
 
 public class LightyHelper {
-    static HashSet<ResourceLocation> invalidBlocks = new HashSet<>();
+    static HashSet<Identifier> invalidBlocks = new HashSet<>();
 
     private static boolean isRedstone(Block block) {
         return block instanceof RedStoneWireBlock ||
@@ -34,7 +34,7 @@ public class LightyHelper {
         try {
             return block.isValidSpawn(chunk, pos, null);
         } catch (NullPointerException | IllegalArgumentException e) {
-            ResourceLocation rl = BuiltInRegistries.BLOCK.getKey(block.getBlock());
+            Identifier rl = BuiltInRegistries.BLOCK.getKey(block.getBlock());
             if (!invalidBlocks.contains(rl)) {
                 invalidBlocks.add(rl);
                 Lighty.LOGGER.error(e.getMessage());

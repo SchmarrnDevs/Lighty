@@ -63,7 +63,7 @@ public class LightyScreen extends Screen {
         adder.addChild(Button.builder(
                 Component.translatable(
                         "lighty.selected",
-                        Component.translatable("modeSwitcher." + RendererRegistry.getRenderer().getResourceLocation().toString().replace(":", "."))
+                        Component.translatable("modeSwitcher." + RendererRegistry.getRenderer().getIdentifier().toString().replace(":", "."))
                 ),
                 button -> Minecraft.getInstance().setScreen(new ModeSelectionScreen(this))
         ).tooltip(Tooltip.create(Component.translatable("lighty.selected.tooltip"))).build());

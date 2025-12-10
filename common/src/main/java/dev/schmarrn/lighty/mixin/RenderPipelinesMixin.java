@@ -28,16 +28,22 @@ public class RenderPipelinesMixin {
 
     @Inject(method = "<clinit>", at = @At("TAIL"))
     private static void lighty$initRenderPipelines(CallbackInfo ci) {
-        RenderPipeline.Snippet MATRICES_PROJECTION_SNIPPET = RenderPipeline.builder().withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER).withUniform("Projection", UniformType.UNIFORM_BUFFER).buildSnippet();
         RenderPipeline.Snippet FOG_SNIPPET = RenderPipeline.builder().withUniform("Fog", UniformType.UNIFORM_BUFFER).buildSnippet();
+        RenderPipeline.Snippet MATRICES_PROJECTION_SNIPPET = RenderPipeline.builder()
+                .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
+                .withUniform("Projection", UniformType.UNIFORM_BUFFER)
+                .buildSnippet();
         RenderPipeline.Snippet MATRICES_FOG_SNIPPET = RenderPipeline.builder(MATRICES_PROJECTION_SNIPPET, FOG_SNIPPET).buildSnippet();
-
-        LightyPipelines.TERRAIN_SNIPPET = RenderPipeline.builder(MATRICES_FOG_SNIPPET)
-                .withVertexShader("core/terrain")
-                .withFragmentShader("core/terrain")
+        RenderPipeline.Snippet GENERIC_BLOCKS_SNIPPET = RenderPipeline.builder(FOG_SNIPPET)
                 .withSampler("Sampler0")
                 .withSampler("Sampler2")
                 .withVertexFormat(LightyVertexFormat.BLOCK, VertexFormat.Mode.QUADS)
+                .buildSnippet();
+        LightyPipelines.TERRAIN_SNIPPET = RenderPipeline.builder(GENERIC_BLOCKS_SNIPPET)
+                .withUniform("Projection", UniformType.UNIFORM_BUFFER)
+                .withUniform("ChunkSection", UniformType.UNIFORM_BUFFER)
+                .withVertexShader("core/terrain")
+                .withFragmentShader("core/terrain")
                 .buildSnippet();
 
         LightyPipelines.LINES_SNIPPET = RenderPipeline.builder(MATRICES_FOG_SNIPPET, GLOBALS_SNIPPET)
@@ -45,17 +51,18 @@ public class RenderPipelinesMixin {
                 .withFragmentShader("core/rendertype_lines")
                 .withBlend(BlendFunction.TRANSLUCENT)
                 .withCull(false)
-                .withVertexFormat(LightyVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES)
+                .withVertexFormat(LightyVertexFormat.POSITION_COLOR_NORMAL_LINE_WIDTH, VertexFormat.Mode.LINES)
                 .buildSnippet();
 
         LightyPipelines.TERRAIN_TRANSLUCENT = RenderPipeline.builder(LightyPipelines.TERRAIN_SNIPPET)
-                .withLocation(Lighty.MOD_ID + "pipeline/translucent")
+                .withLocation(Lighty.MOD_ID + "pipeline/translucent_terrain")
                 .withBlend(LIGHTY_BLEND)
+                .withShaderDefine("ALPHA_CUTOUT", 0.01F)
                 .build();
 
         LightyPipelines.TERRAIN_CUTOUT = RenderPipeline.builder(LightyPipelines.TERRAIN_SNIPPET)
-                .withLocation(Lighty.MOD_ID + "pipeline/cutout")
-                .withShaderDefine("ALPHA_CUTOUT", 0.1F)
+                .withLocation(Lighty.MOD_ID + "pipeline/cutout_terrain")
+                .withShaderDefine("ALPHA_CUTOUT", 0.5F)
                 .build();
 
         LightyPipelines.LINES = RenderPipeline.builder(LightyPipelines.LINES_SNIPPET)

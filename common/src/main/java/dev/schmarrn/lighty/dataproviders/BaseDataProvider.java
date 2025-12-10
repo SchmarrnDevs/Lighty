@@ -6,7 +6,7 @@ import dev.schmarrn.lighty.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -14,7 +14,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 public class BaseDataProvider implements OverlayDataProvider {
     public static void init() {
         var dp = new BaseDataProvider();
-        ModeManager.registerDataProvider(dp.getResourceLocation(), dp);
+        ModeManager.registerDataProvider(dp.getIdentifier(), dp);
     }
 
     public OverlayData compute(ClientLevel level, LevelChunk chunk, BlockPos pos, Vec3i rPos) {
@@ -42,7 +42,7 @@ public class BaseDataProvider implements OverlayDataProvider {
     }
 
     @Override
-    public ResourceLocation getResourceLocation() {
-        return ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "data_provider_base");
+    public Identifier getIdentifier() {
+        return Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "data_provider_base");
     }
 }

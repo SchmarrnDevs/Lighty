@@ -1,18 +1,18 @@
 package dev.schmarrn.lighty.config;
 
 import net.minecraft.client.OptionInstance;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class ResourceLocationListConfig extends ConfigType<List<ResourceLocation>> {
-    public ResourceLocationListConfig(String key, List<ResourceLocation> defaultValue) {
+public class IdentifierListConfig extends ConfigType<List<Identifier>> {
+    public IdentifierListConfig(String key, List<Identifier> defaultValue) {
         super(key, defaultValue);
     }
 
     @Override
-    public OptionInstance<List<ResourceLocation>> getOptionInstance() {
+    public OptionInstance<List<Identifier>> getOptionInstance() {
         return null;
     }
 
@@ -29,6 +29,6 @@ public class ResourceLocationListConfig extends ConfigType<List<ResourceLocation
 
     @Override
     void deserialize(String value) {
-        setValue(Arrays.stream(value.split(" ")).map(ResourceLocation::parse).toList());
+        setValue(Arrays.stream(value.split(" ")).map(Identifier::parse).toList());
     }
 }

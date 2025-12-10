@@ -3,16 +3,16 @@ package dev.schmarrn.lighty.core;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.config.Config;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.HashMap;
 
 public class RendererRegistry {
-    private static final HashMap<ResourceLocation, OverlayRenderer> RENDERERS = new HashMap<>();
+    private static final HashMap<Identifier, OverlayRenderer> RENDERERS = new HashMap<>();
 
     private static OverlayRenderer renderer;
 
-    public static void put(ResourceLocation rl, OverlayRenderer renderer) {
+    public static void put(Identifier rl, OverlayRenderer renderer) {
         RENDERERS.put(rl, renderer);
     }
 
@@ -20,7 +20,7 @@ public class RendererRegistry {
         return renderer;
     }
 
-    public static void loadRenderer(ResourceLocation rl) {
+    public static void loadRenderer(Identifier rl) {
         OverlayRenderer renderer = RENDERERS.get(rl);
 
         if (renderer == null) {
