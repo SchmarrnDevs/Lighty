@@ -11,6 +11,7 @@ import dev.schmarrn.lighty.UtilDefinition;
 import dev.schmarrn.lighty.core.LightyPipelines;
 import dev.schmarrn.lighty.core.LightyVertexFormat;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -55,18 +56,18 @@ public class RenderPipelinesMixin {
                 .buildSnippet();
 
         LightyPipelines.TERRAIN_TRANSLUCENT = RenderPipeline.builder(LightyPipelines.TERRAIN_SNIPPET)
-                .withLocation(Lighty.MOD_ID + "pipeline/translucent_terrain")
+                .withLocation(Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "pipeline/translucent_terrain"))
                 .withBlend(LIGHTY_BLEND)
-                .withShaderDefine("ALPHA_CUTOUT", 0.01F)
+                //.withShaderDefine("ALPHA_CUTOUT", 0.01F)
                 .build();
 
         LightyPipelines.TERRAIN_CUTOUT = RenderPipeline.builder(LightyPipelines.TERRAIN_SNIPPET)
-                .withLocation(Lighty.MOD_ID + "pipeline/cutout_terrain")
+                .withLocation(Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "pipeline/cutout_terrain"))
                 .withShaderDefine("ALPHA_CUTOUT", 0.5F)
                 .build();
 
         LightyPipelines.LINES = RenderPipeline.builder(LightyPipelines.LINES_SNIPPET)
-                .withLocation(Lighty.MOD_ID + "pipeline/lines")
+                .withLocation(Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "pipeline/lines"))
                 .build();
 
         // If Iris is loaded, register the pipelines with iris as well

@@ -27,14 +27,13 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.DynamicUniforms;
 import net.minecraft.core.SectionPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.context.ContextKey;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.neoforged.neoforge.client.IRenderableSection;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
@@ -87,12 +86,12 @@ public class LightyForge {
         }
 
         private static final ContextKey<Object2ObjectOpenHashMap<SectionPos, BufferHolder>> DATA_KEY = new ContextKey<>(
-                ResourceLocation.fromNamespaceAndPath(Lighty.MOD_ID, "compute_cache")
+                Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "compute_cache")
         );
 
         @SubscribeEvent
         public static void extractRenderState(ExtractLevelRenderStateEvent event) {
-            var cache = Compute.computeCache(event.getCamera().getBlockPosition(), event.getLevel(), event.getLevelRenderer(), event.getFrustum());
+            var cache = Compute.computeCache(event.getCamera().blockPosition(), event.getLevel(), event.getLevelRenderer(), event.getFrustum());
             if (cache != null && !cache.isEmpty()) {
                 event.getRenderState().setRenderData(DATA_KEY, cache);
             }
@@ -107,34 +106,7 @@ public class LightyForge {
 
             var camPos = event.getLevelRenderState().cameraRenderState.pos;
 
-            // Prepare render data
-
-            List<RenderPass.Draw<GpuBufferSlice[]>> drawList = new ArrayList<>();
-            List<DynamicUniforms.Transform> transforms = new ArrayList<>();
-
-            int biggestBufferSize = 0;
-            for (var cacheIterator = cache.object2ObjectEntrySet().fastIterator(); cacheIterator.hasNext();) {
-                var entry = cacheIterator.next();
-                SectionPos chunkSection = entry.getKey();
-                BufferHolder cachedBuffer = entry.getValue();
-                var gpuBuffers = cachedBuffer.getGpuBuffers();
-                for (var bufferIterator = gpuBuffers.object2ObjectEntrySet().fastIterator(); bufferIterator.hasNext();) {
-                    var bufferEntry = bufferIterator.next();
-                    if (!cachedBuffer.isValid(bufferEntry.getKey())) {
-                        continue;
-                    }
-
-                    // Only continue if the buffer is valid
-                    biggestBufferSize = LightyRenderer.addData(chunkSection, bufferEntry.getValue(), camPos, biggestBufferSize, drawList, transforms);
-                }
-            }
-
-            GpuBufferSlice[] dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransforms(transforms.toArray(new DynamicUniforms.Transform[0]));
-            LightyRenderer.DrawListData data = new LightyRenderer.DrawListData(drawList, biggestBufferSize, dynamicTransforms);
-
-            // Render
-
-            LightyRenderer.render(data);
+            LightyRenderer.render(camPos, cache);
         }
     }
 }

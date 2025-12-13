@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id 'eclipse'
     id 'idea'
-    id 'net.neoforged.gradle.userdev' version '7.1.9'
+    id 'net.neoforged.gradle.userdev' version '7.1.11'
 }
 
 version = "${mod_version}+${minecraft_version}"
@@ -46,6 +46,13 @@ runs {
     }
 
     client {
+    }
+    renderDoc {
+        runType 'client'
+        renderDoc {
+            enabled true
+        }
+        environmentVariables "LD_PRELOAD": "/nix/store/cqm1cimvjjs32z25l3x8vbiybk5yqbrj-renderdoc-1.39/lib/librenderdoc.so"
     }
 }
 
