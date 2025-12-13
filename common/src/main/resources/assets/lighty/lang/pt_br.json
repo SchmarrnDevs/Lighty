@@ -31,6 +31,10 @@
   "lighty.options.overlay_brightness.tooltip": "O brilho da sobreposição renderizada. O padrão é 10. Especialmente útil ao usar shaders.",
   "lighty.options.show_safe": "Mostrar 'Pontos Seguros'",
   "lighty.options.show_safe.tooltip": "Se ativado, a sobreposição é renderizada em 'pontos seguros' (verdes).",
+  "lighty.options.show_skylight_level": "Mostra o nível de Luz do Céu",
+  "lighty.options.show_skylight_level.tooltip": "Se ativado, o Modo de Número mostra o nível de luz do bloco e do céu. (Padrão: ATIVADO)",
   "lighty.options.auto_on": "Ativação Automática",
-  "lighty.options.auto_on.tooltip": "Se ativado, a sobreposição é habilitada ao segurar um item de determinado tipo. (Padrão: DESATIVADO, Item padrão: minecraft:torch)"
+  "lighty.options.auto_on.tooltip": "Se ativado, a sobreposição é habilitada ao segurar um item de determinado tipo. (Padrão: DESATIVADO, Itens padrões: minecraft:torch, minecraft:soul_torch, minecraft:lantern, minecraft:soul_lantern)",
+  "lighty.options.chunks_per_tick": "Chunks por Tick",
+  "lighty.options.chunks_per_tick.tooltip": "Especifica quantos chunks computar por tick. Um número mais alto pode impactar severamente a performance. (Padrão: 4)"
 }
