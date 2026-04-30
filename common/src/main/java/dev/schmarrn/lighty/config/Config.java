@@ -43,7 +43,7 @@ public class Config {
             "lighty:data_provider_farmland"
     ));
 
-    public static final IntegerConfig SKY_THRESHOLD = new IntegerConfig("lighty.sky_threshold", 0, 0, 15);
+    public static final IntegerConfig SKY_THRESHOLD = new IntegerConfig("lighty.sky_threshold", 7, 0, 15);
     public static final IntegerConfig BLOCK_THRESHOLD = new IntegerConfig("lighty.block_threshold", 0, 0, 15);
     public static final IntegerConfig OVERLAY_DISTANCE = new IntegerConfig("lighty.overlay_distance", 2, 1, 32);
     public static final IntegerConfig OVERLAY_BRIGHTNESS = new IntegerConfig("lighty.overlay_brightness", 10, 0, 15);
