@@ -4,10 +4,13 @@ import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.core.Compute;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 
 public class SMACH {
     private static State state = State.OFF;
+    private static boolean oldEnabled = false;
 
     public static void updateCompute() {
         Minecraft client = Minecraft.getInstance();
@@ -58,7 +61,7 @@ public class SMACH {
                 }
             }
         }
-
+        checkEnabledTransition();
     }
 
     public static void toggle() {
@@ -71,6 +74,7 @@ public class SMACH {
             case AUTO -> state = State.OVERRIDE;
             case OVERRIDE -> state = State.AUTO;
         }
+        checkEnabledTransition();
     }
 
     public static State getState() {
@@ -79,6 +83,23 @@ public class SMACH {
 
     public static boolean isEnabled() {
         return state == State.AUTO || state == State.ON;
+    }
+
+    private static void checkEnabledTransition() {
+        var enabled = isEnabled();
+        if (enabled != oldEnabled) {
+            displayClientMessage();
+        }
+        oldEnabled = enabled;
+    }
+
+    private static void displayClientMessage() {
+        Minecraft.getInstance().player.displayClientMessage(
+                Component.translatable(
+                        "lighty.overlay",
+                        CommonComponents.optionStatus(isEnabled()).getString()),
+                true
+        );
     }
 
     private static void whenSwitchingToOff() {
