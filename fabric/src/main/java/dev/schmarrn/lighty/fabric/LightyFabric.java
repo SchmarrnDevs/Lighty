@@ -48,7 +48,7 @@ public class LightyFabric implements ClientModInitializer {
             }
         });
 
-        WorldRenderEvents.AFTER_ENTITIES.register(context -> {
+        WorldRenderEvents.BEFORE_TRANSLUCENT.register(context -> {
             var cache = context.worldState().getData(DATA_KEY);
             if (cache == null) {
                 return;
