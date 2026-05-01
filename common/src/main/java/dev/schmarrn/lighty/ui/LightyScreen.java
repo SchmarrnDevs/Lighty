@@ -18,7 +18,7 @@ import dev.schmarrn.lighty.core.RendererRegistry;
 import dev.schmarrn.lighty.event.KeyBind;
 import dev.schmarrn.lighty.overlaystate.SMACH;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.layouts.FrameLayout;
@@ -79,9 +79,9 @@ public class LightyScreen extends Screen {
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        super.render(guiGraphics, mouseX, mouseY, delta);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width/2, 15, 0xFFFFFF);
+    public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
+        guiGraphics.centeredText(this.font, this.title, this.width/2, 15, 0xFFFFFF);
     }
 
     @Override

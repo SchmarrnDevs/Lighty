@@ -16,5 +16,7 @@ public interface OverlayDataProvider {
         return this.compute(level, pos, rPos);
     }
 
+    OverlayRenderer getRenderer();
+
     Identifier getIdentifier();
 }

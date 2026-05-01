@@ -10,6 +10,7 @@ import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.core.LightyPipelines;
 import dev.schmarrn.lighty.core.LightyVertexFormat;
+import dev.schmarrn.lighty.core.OverlaySectionLayer;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
@@ -72,27 +73,18 @@ public class NumberRenderer implements OverlayRenderer {
     }
 
     @Override
-    public RenderPipeline getPipeline() {
-        return LightyPipelines.TERRAIN_CUTOUT;
+    public OverlaySectionLayer getOverlaySectionLayer() {
+        return OverlaySectionLayer.CUTOUT;
     }
 
     @Override
     public Identifier getTextureLocation() {
         return Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "textures/block/numbers.png");
     }
+
     @Override
     public Identifier getIdentifier() {
         return Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "renderer_number");
-    }
-
-    @Override
-    public VertexFormat getVertexFormat() {
-        return LightyVertexFormat.BLOCK;
-    }
-
-    @Override
-    public VertexFormat.Mode getVertexFormatMode() {
-        return VertexFormat.Mode.QUADS;
     }
 
     public static void init() {

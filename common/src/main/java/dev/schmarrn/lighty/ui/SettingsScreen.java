@@ -15,7 +15,7 @@
 package dev.schmarrn.lighty.ui;
 
 import dev.schmarrn.lighty.config.Config;
-import dev.schmarrn.lighty.core.Compute;
+import dev.schmarrn.lighty.core.LightyExtractor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.options.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -52,7 +52,7 @@ public class SettingsScreen extends OptionsSubScreen {
 
     @Override
     public void removed() {
-        Compute.clear();
+        LightyExtractor.clear();
     }
 
     @Override

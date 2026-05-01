@@ -1,6 +1,6 @@
 package dev.schmarrn.lighty.mixin;
 
-import dev.schmarrn.lighty.core.Compute;
+import dev.schmarrn.lighty.core.LightyExtractor;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
@@ -16,6 +16,6 @@ public class BlockPlacedMixin {
     private void lighty$onPlace(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, BlockState blockState2, int i, CallbackInfo ci) {
         // TODO Nice to have: Only execute on blocks that don't change the lightmap
         // On the other Hand: We are just inserting into a HashMap, which should be cheap enough to don't care
-        Compute.updateBlockPos(blockPos);
+        LightyExtractor.updateBlockPos(blockPos);
     }
 }

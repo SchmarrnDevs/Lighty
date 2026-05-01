@@ -10,8 +10,8 @@ import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.core.LightyPipelines;
 import dev.schmarrn.lighty.core.LightyVertexFormat;
+import dev.schmarrn.lighty.core.OverlaySectionLayer;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
@@ -67,18 +67,8 @@ public class CarpetRenderer implements OverlayRenderer {
     }
 
     @Override
-    public RenderPipeline getPipeline() {
-        return LightyPipelines.TERRAIN_TRANSLUCENT;
-    }
-
-    @Override
-    public VertexFormat getVertexFormat() {
-        return LightyVertexFormat.BLOCK;
-    }
-
-    @Override
-    public VertexFormat.Mode getVertexFormatMode() {
-        return VertexFormat.Mode.QUADS;
+    public OverlaySectionLayer getOverlaySectionLayer() {
+        return OverlaySectionLayer.TRANSLUCENT;
     }
 
     @Override

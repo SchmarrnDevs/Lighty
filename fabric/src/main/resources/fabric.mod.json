@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "id": "${mod_id}",
-  "version": "${mod_version}",
+  "version": "${version}",
   "name": "${mod_name}",
-  "description": "${mod_description}",
+  "description": "${description}",
   "authors": [
     "andi_makes"
   ],
@@ -14,9 +14,9 @@
   ],
   "contact": {
     "sources": "https://github.com/SchmarrnDevs/Lighty",
-    "issues": "${issue_url}"
+    "issues": "https://github.com/SchmarrnDevs/Lighty/issues"
   },
-  "license": "${mod_license}",
+  "license": "${license}",
   "icon": "icon.png",
   "environment": "client",
   "entrypoints": {
@@ -32,10 +32,7 @@
   ],
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",
-    "minecraft": ">=${minecraft_version_lower_bound}",
+    "minecraft": ">=26.1.2",
     "fabric-api": ">=0.137.0+1.21.10"
-  },
-  "recommends": {
-    "modmenu": ">=${modmenu_version}"
   }
 }

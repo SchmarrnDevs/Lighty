@@ -9,6 +9,7 @@ public class LightyVertexFormat {
             .add("Color", VertexFormatElement.COLOR)
             .add("Normal", VertexFormatElement.NORMAL)
             .add("LineWidth", VertexFormatElement.LINE_WIDTH)
+            .padding(1)
             .build();
     public static VertexFormat BLOCK = VertexFormat.builder()
             .add("Position", VertexFormatElement.POSITION)

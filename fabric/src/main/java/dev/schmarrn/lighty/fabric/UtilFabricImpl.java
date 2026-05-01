@@ -16,7 +16,7 @@ package dev.schmarrn.lighty.fabric;
 
 import dev.schmarrn.lighty.UtilDefinition;
 import dev.schmarrn.lighty.core.LightyPipelines;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.irisshaders.iris.api.v0.IrisProgram;
@@ -38,7 +38,7 @@ public class UtilFabricImpl implements UtilDefinition {
 
     @Override
     public KeyMapping registerKeyBinding(KeyMapping mapping) {
-        return KeyBindingHelper.registerKeyBinding(mapping);
+        return KeyMappingHelper.registerKeyMapping(mapping);
     }
 
     @Override

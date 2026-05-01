@@ -1,7 +1,7 @@
 package dev.schmarrn.lighty.overlaystate;
 
 import dev.schmarrn.lighty.config.Config;
-import dev.schmarrn.lighty.core.Compute;
+import dev.schmarrn.lighty.core.LightyExtractor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.CommonComponents;
@@ -94,16 +94,15 @@ public class SMACH {
     }
 
     private static void displayClientMessage() {
-        Minecraft.getInstance().player.displayClientMessage(
+        Minecraft.getInstance().player.sendOverlayMessage(
                 Component.translatable(
                         "lighty.overlay",
-                        CommonComponents.optionStatus(isEnabled()).getString()),
-                true
+                        CommonComponents.optionStatus(isEnabled()).getString())
         );
     }
 
     private static void whenSwitchingToOff() {
         // TODO: find a more elegant solution
-        Compute.clear();
+        LightyExtractor.clear();
     }
 }

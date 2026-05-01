@@ -3,6 +3,7 @@ package dev.schmarrn.lighty.dataproviders;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.*;
 import dev.schmarrn.lighty.config.Config;
+import dev.schmarrn.lighty.core.RendererRegistry;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -39,6 +40,11 @@ public class BaseDataProvider implements OverlayDataProvider {
         int color = LightyColors.getARGB(blockLightLevel, skyLightLevel);
 
         return new OverlayData(true, color, skyLightLevel, blockLightLevel, pos, rPos, offset);
+    }
+
+    @Override
+    public OverlayRenderer getRenderer() {
+        return RendererRegistry.getRenderer();
     }
 
     @Override

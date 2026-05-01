@@ -14,8 +14,13 @@
 
 package dev.schmarrn.lighty.core;
 
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.systems.CommandEncoder;
+import com.mojang.blaze3d.systems.GpuDevice;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.api.OverlayData;
 import dev.schmarrn.lighty.api.OverlayDataProvider;
 import dev.schmarrn.lighty.api.OverlayRenderer;
@@ -26,33 +31,33 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 
+import java.nio.ByteBuffer;
 import java.util.*;
 
-public class Compute {
+public class LightyExtractor {
     /// Private copy of the player's currently occupied section.
     /// Used to clean up cachedBuffers that are out of range.
     /// Used to prioritize closer chunks when computing the overlay.
     /// Updated each tick.
     private static SectionPos playerPos = SectionPos.of(0,0,0);
 
-    /// Cache of all computed GpuBuffers and so on.
-    /// Gets used in LightyRenderer.
-    private static final Object2ObjectOpenHashMap<SectionPos, BufferHolder> cachedBuffers = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectOpenHashMap<SectionPos, Map<OverlaySectionLayer, LightyExtractor.RenderData>> cachedBuffers = new Object2ObjectOpenHashMap<>();
 
     /// TreeSet used to create a priority hierarchy, while still
     /// avoiding duplicate entries.
     private static final TreeSet<SectionPos> toBeUpdated = new TreeSet<>(
             Comparator.comparingDouble(self -> {
-                // As a distance measure, the manhattan distance is used,
+                // As a distance measure, the Manhattan distance is used,
                 // additionally with a tie_breaker term based on the long-representation
                 // of the section pos in question
                 int manhattanDistance = self.distManhattan(playerPos);
@@ -77,7 +82,7 @@ public class Compute {
     public static void clear() {
         toBeUpdated.clear();
         // Important to avoid a Memory leak!
-        cachedBuffers.values().forEach(BufferHolder::close);
+        cachedBuffers.values().forEach((map) -> map.values().forEach(RenderData::release));
 
         cachedBuffers.clear();
         computationDistance = Math.min(Config.OVERLAY_DISTANCE.getValue(), Minecraft.getInstance().options.renderDistance().get() + 1);
@@ -101,9 +106,24 @@ public class Compute {
         toBeUpdated.add(sPos);
     }
 
-    private static BufferHolder buildChunk(OverlayRenderer renderer, List<OverlayDataProvider> dataProviders, SectionPos sPos, ClientLevel level, BufferHolder buffer) {
+    private static BufferBuilder getOrBeginLayer(Map<OverlaySectionLayer, BufferBuilder> startedLayers, OverlayBufferBuilderPack buffers, OverlaySectionLayer layer) {
+        BufferBuilder builder = startedLayers.get(layer);
+        if (builder == null) {
+            builder = new BufferBuilder(
+                    buffers.buffer(layer),
+                    layer.pipeline().getVertexFormatMode(),
+                    layer.vertexFormat()
+            );
+            startedLayers.put(layer, builder);
+        }
+        return builder;
+    }
+
+    private static Map<OverlaySectionLayer, MeshData> buildChunk(List<OverlayDataProvider> dataProviders, SectionPos sPos, ClientLevel level, OverlayBufferBuilderPack buffers) {
         BlockPos sectionOrigin = sPos.origin();
         LevelChunk computationChunk = level.getChunkAt(sectionOrigin);
+
+        Map<OverlaySectionLayer, BufferBuilder> startedLayers = new EnumMap<>(OverlaySectionLayer.class);
 
         for (var dataProvider : dataProviders) {
             ObjectArrayList<OverlayData> dataList = null;
@@ -124,36 +144,56 @@ public class Compute {
                 }
             }
 
-            if (dataList == null) {
-                buffer.invalidateBuffer(dataProvider.getIdentifier());
-                continue;
-            }
+            if (dataList == null) continue;
+            var renderer = dataProvider.getRenderer();
 
-            BufferBuilder builder = Tesselator.getInstance().begin(renderer.getVertexFormatMode(), renderer.getVertexFormat());
+            BufferBuilder builder = getOrBeginLayer(startedLayers, buffers, renderer.getOverlaySectionLayer());
+
             int overlayBrightness = Config.OVERLAY_BRIGHTNESS.getValue();
             // the first parameter corresponds to the blockLightLevel, the second to the skyLightLevel
-            int lightmap = LightTexture.pack(overlayBrightness, overlayBrightness);
+            int lightmap = LightCoordsUtil.pack(overlayBrightness, overlayBrightness);
             for (var data : dataList) {
                 renderer.build(level, data.pos(), data, builder, lightmap);
             }
-
-            // builder.build() can return null if there wasn't any data added
-            // in that case, the buffer automatically gets set as invalid
-            buffer.upload(builder.build(), dataProvider.getIdentifier());
         }
 
-        return buffer;
+        Map<OverlaySectionLayer, MeshData> data = new EnumMap<>(OverlaySectionLayer.class);
+        for (var entry : startedLayers.entrySet()) {
+            data.put(entry.getKey(), entry.getValue().build());
+        }
+        return data;
     }
 
-    @Deprecated
-    private static void queueNewChunksSlow(Level level, LevelRenderer levelRenderer) {
-        queueNewChunksSlow(level, levelRenderer, null);
+    private static Map<OverlaySectionLayer, LightyExtractor.RenderData> upload(Map<OverlaySectionLayer, MeshData> data) {
+        GpuDevice device = RenderSystem.getDevice();
+        CommandEncoder commandEncoder = device.createCommandEncoder();
+
+        Map<OverlaySectionLayer, RenderData> draw = new EnumMap<>(OverlaySectionLayer.class);
+        data.forEach((layer, mesh) -> {
+            GpuBuffer vertexBuffer = device.createBuffer(
+                    () -> "Lighty vertex buffer",
+                    GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_MAP_WRITE,
+                    mesh.vertexBuffer()
+            );
+            ByteBuffer indexBuffer = mesh.indexBuffer();
+            GpuBuffer gpuIndexBuffer = indexBuffer != null ? device.createBuffer(
+                    () -> "Lighty index buffer",
+                    GpuBuffer.USAGE_INDEX | GpuBuffer.USAGE_MAP_WRITE,
+                    indexBuffer
+            ) : null;
+            var bufferSlice = new RenderData(
+                    vertexBuffer, gpuIndexBuffer, mesh.drawState().indexCount(), gpuIndexBuffer != null ? mesh.drawState().indexType() : null
+            );
+            draw.put(layer, bufferSlice);
+            mesh.close();
+        });
+        return draw;
     }
 
     private static void queueNewChunksSlow(Level level, LevelRenderer levelRenderer, Frustum frustum) {
         for (int yy = level.getMinSectionY(); yy < level.getSectionsCount() + level.getMinSectionY(); ++yy) {
-            for (int xx = -Compute.computationDistance; xx <= Compute.computationDistance; ++xx) {
-                for (int zz = -Compute.computationDistance; zz <= Compute.computationDistance; ++zz) {
+            for (int xx = -LightyExtractor.computationDistance; xx <= LightyExtractor.computationDistance; ++xx) {
+                for (int zz = -LightyExtractor.computationDistance; zz <= LightyExtractor.computationDistance; ++zz) {
                     SectionPos chunkSection = SectionPos.of(playerPos.x() + xx, yy, playerPos.z() + zz);
 
                     var sectionOrigin = chunkSection.origin();
@@ -170,7 +210,7 @@ public class Compute {
         }
     }
 
-    public static Object2ObjectOpenHashMap<SectionPos, BufferHolder> computeCache(BlockPos cameraPos, Level level, LevelRenderer levelRenderer, Frustum frustum) {
+    public static Object2ObjectOpenHashMap<SectionPos, Map<OverlaySectionLayer, LightyExtractor.RenderData>> extract(BlockPos cameraPos, Level level, LevelRenderer levelRenderer, Frustum frustum) {
         // update player position
         playerPos = SectionPos.of(cameraPos);
 
@@ -182,13 +222,11 @@ public class Compute {
 
         // Get the currently active data providers and renderer
         List<OverlayDataProvider> dataProviders = DataProviderRegistry.getActiveProviders();
-        OverlayRenderer renderer = RendererRegistry.getRenderer();
 
         // Remove any buffer that's outside the overlay distance
-        for (var cacheIterator = Compute.cachedBuffers.object2ObjectEntrySet().fastIterator(); cacheIterator.hasNext();) {
+        for (var cacheIterator = LightyExtractor.cachedBuffers.object2ObjectEntrySet().fastIterator(); cacheIterator.hasNext();) {
             var entry = cacheIterator.next();
             if (outOfRange(entry.getKey())) {
-                entry.getValue().close();
                 cacheIterator.remove();
             }
         }
@@ -208,20 +246,25 @@ public class Compute {
             }
             // If the section is in range, we compute the new buffers, reduce the counter!
             --ii;
-            cachedBuffers.compute(
+            cachedBuffers.put(
                     sectionPos,
-                    (pos, bufferHolder) -> buildChunk(
-                            renderer,
+                    upload(buildChunk(
                             dataProviders,
-                            pos,
+                            sectionPos,
                             (ClientLevel) level,
-                            bufferHolder != null ? bufferHolder : new BufferHolder()
-                    )
+                            new OverlayBufferBuilderPack()
+                    ))
             );
         }
         return cachedBuffers;
     }
 
+    public record RenderData(GpuBuffer vertexBuffer, GpuBuffer indexBuffer, int indexCount, VertexFormat.IndexType indexType) {
+        public void release() {
+            vertexBuffer.close();
+            indexBuffer.close();
+        }
+    }
 
-    private Compute() {}
+    private LightyExtractor() {}
 }

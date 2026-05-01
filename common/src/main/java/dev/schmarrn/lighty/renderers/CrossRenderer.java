@@ -10,6 +10,7 @@ import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.config.Config;
 import dev.schmarrn.lighty.core.LightyPipelines;
 import dev.schmarrn.lighty.core.LightyVertexFormat;
+import dev.schmarrn.lighty.core.OverlaySectionLayer;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
@@ -29,8 +30,8 @@ public class CrossRenderer implements OverlayRenderer {
     }
 
     @Override
-    public RenderPipeline getPipeline() {
-        return LightyPipelines.LINES;
+    public OverlaySectionLayer getOverlaySectionLayer() {
+        return OverlaySectionLayer.LINES;
     }
 
     @Override
@@ -41,16 +42,6 @@ public class CrossRenderer implements OverlayRenderer {
     @Override
     public Identifier getIdentifier() {
         return Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "renderer_cross");
-    }
-
-    @Override
-    public VertexFormat getVertexFormat() {
-        return LightyVertexFormat.POSITION_COLOR_NORMAL_LINE_WIDTH;
-    }
-
-    @Override
-    public VertexFormat.Mode getVertexFormatMode() {
-        return VertexFormat.Mode.LINES;
     }
 
     public static void init() {

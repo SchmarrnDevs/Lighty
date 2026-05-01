@@ -50,14 +50,14 @@ public class RenderPipelinesMixin {
         LightyPipelines.LINES_SNIPPET = RenderPipeline.builder(MATRICES_FOG_SNIPPET, GLOBALS_SNIPPET)
                 .withVertexShader("core/rendertype_lines")
                 .withFragmentShader("core/rendertype_lines")
-                .withBlend(BlendFunction.TRANSLUCENT)
+                //.withBlend(BlendFunction.TRANSLUCENT)
                 .withCull(false)
                 .withVertexFormat(LightyVertexFormat.POSITION_COLOR_NORMAL_LINE_WIDTH, VertexFormat.Mode.LINES)
                 .buildSnippet();
 
         LightyPipelines.TERRAIN_TRANSLUCENT = RenderPipeline.builder(LightyPipelines.TERRAIN_SNIPPET)
                 .withLocation(Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "pipeline/translucent_terrain"))
-                .withBlend(LIGHTY_BLEND)
+                //.withBlend(LIGHTY_BLEND)
                 //.withShaderDefine("ALPHA_CUTOUT", 0.01F)
                 .build();
 

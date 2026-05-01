@@ -14,18 +14,15 @@
 
 package dev.schmarrn.lighty.forge;
 
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.systems.RenderPass;
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.schmarrn.lighty.Lighty;
-import dev.schmarrn.lighty.core.BufferHolder;
+import dev.schmarrn.lighty.core.OverlayBufferBuilderPack;
 import dev.schmarrn.lighty.core.LightyRenderer;
-import dev.schmarrn.lighty.core.Compute;
+import dev.schmarrn.lighty.core.LightyExtractor;
+import dev.schmarrn.lighty.core.OverlaySectionLayer;
 import dev.schmarrn.lighty.event.KeyBind;
 import dev.schmarrn.lighty.overlaystate.SMACH;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.DynamicUniforms;
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.context.ContextKey;
@@ -34,6 +31,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.neoforged.neoforge.client.event.AddSectionGeometryEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
@@ -41,8 +39,7 @@ import net.neoforged.neoforge.event.level.LevelEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 @Mod(value = Lighty.MOD_ID, dist = Dist.CLIENT)
 public class LightyForge {
@@ -68,7 +65,12 @@ public class LightyForge {
 
         @SubscribeEvent
         public static void Load(LevelEvent.Load event) {
-            Compute.clear();
+            LightyExtractor.clear();
+        }
+
+        @SubscribeEvent
+        public static void bla(AddSectionGeometryEvent event) {
+            event.addRenderer();
         }
     }
 
@@ -85,20 +87,20 @@ public class LightyForge {
             SMACH.updateCompute();
         }
 
-        private static final ContextKey<Object2ObjectOpenHashMap<SectionPos, BufferHolder>> DATA_KEY = new ContextKey<>(
+        private static final ContextKey<Object2ObjectOpenHashMap<SectionPos, Map<OverlaySectionLayer, LightyExtractor.RenderData>>> DATA_KEY = new ContextKey<>(
                 Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "compute_cache")
         );
 
         @SubscribeEvent
         public static void extractRenderState(ExtractLevelRenderStateEvent event) {
-            var cache = Compute.computeCache(event.getCamera().blockPosition(), event.getLevel(), event.getLevelRenderer(), event.getFrustum());
+            var cache = LightyExtractor.extract(event.getCamera().blockPosition(), event.getLevel(), event.getLevelRenderer(), event.getFrustum());
             if (cache != null && !cache.isEmpty()) {
                 event.getRenderState().setRenderData(DATA_KEY, cache);
             }
         }
 
         @SubscribeEvent
-        public static void render(RenderLevelStageEvent.AfterTripwireBlocks event) {
+        public static void render(RenderLevelStageEvent.AfterTranslucentBlocks event) {
             var cache = event.getLevelRenderState().getRenderData(DATA_KEY);
             if (cache == null) {
                 return;
