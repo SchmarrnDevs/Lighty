@@ -15,54 +15,57 @@
 package dev.schmarrn.lighty.fabric;
 
 import dev.schmarrn.lighty.Lighty;
-import dev.schmarrn.lighty.core.OverlayBufferBuilderPack;
-import dev.schmarrn.lighty.core.LightyRenderer;
-import dev.schmarrn.lighty.core.OverlaySectionLayer;
+import dev.schmarrn.lighty.core.*;
 import dev.schmarrn.lighty.fabric.api.LightyModesRegistration;
-import dev.schmarrn.lighty.core.LightyExtractor;
 import dev.schmarrn.lighty.event.KeyBind;
 import dev.schmarrn.lighty.overlaystate.SMACH;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.SectionPos;
 
-import java.util.Map;
+import java.util.List;
 
 public class LightyFabric implements ClientModInitializer {
-    private static RenderStateDataKey<Object2ObjectOpenHashMap<SectionPos, Map<OverlaySectionLayer, LightyExtractor.RenderData>>> DATA_KEY = RenderStateDataKey.create();
+    public static final Object2ObjectOpenHashMap<SectionPos, List<AddSectionGeometryEvent.AdditionalSectionRenderer>> CACHE = new Object2ObjectOpenHashMap<>();
     @Override
     public void onInitializeClient() {
-
-        ClientTickEvents.END_CLIENT_TICK.register(event -> {
-            KeyBind.handleKeyBind(Minecraft.getInstance());
-            SMACH.updateCompute();
+        ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+            KeyBind.handleKeyBind(minecraft);
+            SMACH.tick();
+            Compute.tick();
         });
 
-        LevelRenderEvents.END_EXTRACTION.register(t -> {
-            var cache = LightyExtractor.extract(t.camera().blockPosition(), t.level(), t.levelRenderer(), t.camera().getCapturedFrustum());
-            if (cache != null && !cache.isEmpty()) {
-                t.levelState().setData(DATA_KEY, cache);
-            }
-        });
-
-        LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register(context -> {
-            var cache = context.levelState().getData(DATA_KEY);
-            if (cache == null) {
+        AddSectionGeometryEvent.EVENT.register(((additionalRenderers, sectionOrigin, level) -> {
+            if (!Compute.shouldRender()) {
                 return;
             }
-            var camPos = context.levelState().cameraRenderState.pos;
 
-            LightyRenderer.render(camPos, cache);
-        });
+            for (final var dataProvider : DataProviderRegistry.getActiveProviders()) {
+                var dataList = Compute.buildChunk(dataProvider, sectionOrigin, (ClientLevel) level);
 
-        ClientTickEvents.END_CLIENT_TICK.register(KeyBind::handleKeyBind);
-        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((minecraft, level) -> LightyExtractor.clear());
+                if (dataList == null || dataList.isEmpty()) {
+                    return;
+                }
+
+                additionalRenderers.add(context -> {
+                    Compute.render(
+                            RendererRegistry.getRenderer(),
+                            dataList,
+                            layer -> context.getOrCreateChunkBuffer((ChunkSectionLayer) layer),
+                            (ClientLevel) level,
+                            context.getRegion(),
+                            context.getBlockRenderer()
+                    );
+                });
+            }
+        }));
+
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((minecraft, level) -> Compute.markDirty());
 
         Lighty.init();
         FabricLoader.getInstance().getEntrypoints("lightyModesRegistration", LightyModesRegistration.class).forEach(LightyModesRegistration::registerLightyModes);

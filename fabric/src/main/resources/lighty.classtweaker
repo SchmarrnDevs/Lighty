@@ -1,0 +1,2 @@
+classTweaker  v1  official
+accessible field net/minecraft/client/renderer/chunk/SectionRenderDispatcher level Lnet/minecraft/client/multiplayer/ClientLevel;

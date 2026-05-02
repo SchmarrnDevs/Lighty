@@ -1,7 +1,7 @@
 package dev.schmarrn.lighty.overlaystate;
 
 import dev.schmarrn.lighty.config.Config;
-import dev.schmarrn.lighty.core.LightyExtractor;
+import dev.schmarrn.lighty.core.Compute;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.CommonComponents;
@@ -12,52 +12,50 @@ public class SMACH {
     private static State state = State.OFF;
     private static boolean oldEnabled = false;
 
-    public static void updateCompute() {
+    public static void tick() {
         Minecraft client = Minecraft.getInstance();
         if (!Config.SHOULD_AUTO_ON.getValue()) {
             if (state == State.AUTO || state == State.OVERRIDE) {
                 // if auto_on is disabled, but we somehow got stuck inside of one of the auto_on states, reset to OFF
                 state = State.OFF;
-                whenSwitchingToOff();
             }
-            return;
-        }
-        // check whether we are holding an item defined as a valid auto_on item
-        boolean holdsItem = false;
-        var activationItems = Config.AUTO_ON_ITEM_LIST.getValue();
+        } else {
+            // check whether we are holding an item defined as a valid auto_on item
+            boolean holdsItem = false;
+            var activationItems = Config.AUTO_ON_ITEM_LIST.getValue();
 
-        if (client.player == null) {
-            return;
-        }
-
-        Item mainHandItem = client.player.getMainHandItem().getItem();
-        Item offHandItem = client.player.getOffhandItem().getItem();
-
-        for (var rl : activationItems) {
-            Item activationItem = BuiltInRegistries.ITEM.get(rl).get().value();
-            // if we hold the activation item in our hands, set auto enabled to true.
-            // if we don't, set it to false and if we aren't enabled, return early.
-            if (mainHandItem == activationItem || offHandItem == activationItem) {
-                holdsItem = true;
-                break;
+            if (client.player == null) {
+                return;
             }
-        }
 
-        // update state:
-        switch (state) {
-            case OFF -> {
-                if (holdsItem) {
-                    state = State.AUTO;
+            Item mainHandItem = client.player.getMainHandItem().getItem();
+            Item offHandItem = client.player.getOffhandItem().getItem();
+
+            for (var rl : activationItems) {
+                Item activationItem = BuiltInRegistries.ITEM.get(rl).get().value();
+                // if we hold the activation item in our hands, set auto enabled to true.
+                // if we don't, set it to false and if we aren't enabled, return early.
+                if (mainHandItem == activationItem || offHandItem == activationItem) {
+                    holdsItem = true;
+                    break;
                 }
             }
-            case ON -> {
-                // we stay in on, because auto_on should never override on state
-            }
-            case AUTO, OVERRIDE -> {
-                // in both cases AUTO and OVERRIDE, if we let go of the item, we reset to state OFF
-                if (!holdsItem) {
-                    state = State.OFF;
-                    whenSwitchingToOff();
+
+            // update state:
+            switch (state) {
+                case OFF -> {
+                    if (holdsItem) {
+                        state = State.AUTO;
+                    }
+                }
+                case ON -> {
+                    // we stay in on, because auto_on should never override on state
+                }
+                case AUTO, OVERRIDE -> {
+                    // in both cases AUTO and OVERRIDE, if we let go of the item, we reset to state OFF
+                    if (!holdsItem) {
+                        state = State.OFF;
+                    }
                 }
             }
         }
@@ -69,12 +67,10 @@ public class SMACH {
             case OFF -> state = State.ON;
             case ON -> {
                 state = State.OFF;
-                whenSwitchingToOff();
             }
             case AUTO -> state = State.OVERRIDE;
             case OVERRIDE -> state = State.AUTO;
         }
-        checkEnabledTransition();
     }
 
     public static State getState() {
@@ -89,6 +85,7 @@ public class SMACH {
         var enabled = isEnabled();
         if (enabled != oldEnabled) {
             displayClientMessage();
+            Compute.markDirty();
         }
         oldEnabled = enabled;
     }
@@ -99,10 +96,5 @@ public class SMACH {
                         "lighty.overlay",
                         CommonComponents.optionStatus(isEnabled()).getString())
         );
-    }
-
-    private static void whenSwitchingToOff() {
-        // TODO: find a more elegant solution
-        LightyExtractor.clear();
     }
 }

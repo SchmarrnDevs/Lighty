@@ -30,7 +30,7 @@ public class RendererRegistry {
 
         RendererRegistry.renderer = renderer;
         Config.LAST_USED_RENDERER.setValue(rl);
-        LightyExtractor.clear();
+        Compute.markDirty();
     }
 
     /**

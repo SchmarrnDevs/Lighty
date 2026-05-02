@@ -15,7 +15,7 @@
 package dev.schmarrn.lighty.ui;
 
 import dev.schmarrn.lighty.config.Config;
-import dev.schmarrn.lighty.core.LightyExtractor;
+import dev.schmarrn.lighty.core.Compute;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.options.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -32,7 +32,6 @@ public class SettingsScreen extends OptionsSubScreen {
 
     @Override
     protected void addOptions() {
-        this.list.addBig(Config.OVERLAY_DISTANCE.getOptionInstance());
         this.list.addBig(Config.OVERLAY_BRIGHTNESS.getOptionInstance());
         this.list.addSmall(
                 Config.BLOCK_THRESHOLD.getOptionInstance(),
@@ -45,14 +44,13 @@ public class SettingsScreen extends OptionsSubScreen {
                 Config.SHOW_SKYLIGHT_LEVEL.getOptionInstance()
         );
         this.list.addSmall(
-                Config.SHOULD_AUTO_ON.getOptionInstance(),
-                Config.CHUNKS_PER_TICK.getOptionInstance()
+                Config.SHOULD_AUTO_ON.getOptionInstance()
         );
     }
 
     @Override
     public void removed() {
-        LightyExtractor.clear();
+        Compute.markDirty();
     }
 
     @Override

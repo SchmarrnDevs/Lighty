@@ -1,14 +1,14 @@
 modLoader = "javafml"
-loaderVersion = "${loader_version_range}"
-issueTrackerURL = "${issue_url}"
-license = "${mod_license}"
+loaderVersion = "${neoforge_loader_version_range}"
+issueTrackerURL = "https://github.com/SchmarrnDevs/Lighty/issues"
+license = "${license}"
 
 [[mods]]
 modId = "${mod_id}"
-version = "${mod_version}"
+version = "${version}"
 displayName = "${mod_name}"
-authors = "${mod_authors}"
-description = '''${mod_description}'''
+authors = "${mod_author} with help from ${credits}"
+description = '''${description}'''
 logoFile = "icon_high_res.png"
 displayTest="IGNORE_ALL_VERSION"
 
@@ -18,7 +18,7 @@ config="${mod_id}.mixins.json"
 [[dependencies.${mod_id}]]
 modId = "neoforge"
 mandatory = true
-versionRange = "${neo_version_range}"
+versionRange = "[${neoforge_version},)"
 ordering = "NONE"
 side = "CLIENT"
 

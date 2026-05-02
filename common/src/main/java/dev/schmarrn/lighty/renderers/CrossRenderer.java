@@ -1,17 +1,17 @@
 package dev.schmarrn.lighty.renderers;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.api.ModeManager;
 import dev.schmarrn.lighty.api.OverlayData;
 import dev.schmarrn.lighty.api.OverlayRenderer;
 import dev.schmarrn.lighty.config.Config;
-import dev.schmarrn.lighty.core.LightyPipelines;
-import dev.schmarrn.lighty.core.LightyVertexFormat;
-import dev.schmarrn.lighty.core.OverlaySectionLayer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 
@@ -23,15 +23,17 @@ public class CrossRenderer implements OverlayRenderer {
         float z1 = data.rPos().getZ();
         float z2 = data.rPos().getZ() + 1f;
 
-        builder.addVertex(x1, y, z1).setColor(data.color()).setNormal(1f, 0f, 1f).setLineWidth(1.0f);
-        builder.addVertex(x2, y, z2).setColor(data.color()).setNormal(1f, 0f, 1f).setLineWidth(1.0f);
-        builder.addVertex(x1, y, z2).setColor(data.color()).setNormal(1f, 0f, -1f).setLineWidth(1.0f);
-        builder.addVertex(x2, y, z1).setColor(data.color()).setNormal(1f, 0f, -1f).setLineWidth(1.0f);
+        TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().get(new SpriteId(TextureAtlas.LOCATION_BLOCKS, getTextureLocation()));
+
+        builder.addVertex(x1, y, z1).setColor(data.color()).setUv(sprite.getU0(), sprite.getV0()).setLight(lightmap).setNormal(0f, 1f, 0f);
+        builder.addVertex(x1, y, z2).setColor(data.color()).setUv(sprite.getU0(), sprite.getV1()).setLight(lightmap).setNormal(0f, 1f, 0f);
+        builder.addVertex(x2, y, z2).setColor(data.color()).setUv(sprite.getU1(), sprite.getV1()).setLight(lightmap).setNormal(0f, 1f, 0f);
+        builder.addVertex(x2, y, z1).setColor(data.color()).setUv(sprite.getU1(), sprite.getV0()).setLight(lightmap).setNormal(0f, 1f, 0f);
     }
 
     @Override
-    public OverlaySectionLayer getOverlaySectionLayer() {
-        return OverlaySectionLayer.LINES;
+    public ChunkSectionLayer getOverlaySectionLayer() {
+        return ChunkSectionLayer.CUTOUT;
     }
 
     @Override

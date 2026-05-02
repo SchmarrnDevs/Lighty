@@ -1,12 +1,17 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "dev.schmarrn.lighty.mixin",
+  "package": "dev.schmarrn.lighty.fabric.mixin",
   "refmap": "lighty.refmap.json",
   "compatibilityLevel": "JAVA_8",
   "client": [
+    "SectionCompilerMixin",
+    "SectionRenderDispatcherRenderSectionMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+    "SodiumMixin"
+  ]
 }

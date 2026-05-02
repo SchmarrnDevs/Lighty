@@ -15,7 +15,6 @@
 package dev.schmarrn.lighty.forge;
 
 import dev.schmarrn.lighty.UtilDefinition;
-import dev.schmarrn.lighty.core.LightyPipelines;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.irisshaders.iris.api.v0.IrisProgram;
 import net.minecraft.client.KeyMapping;
@@ -31,17 +30,6 @@ import java.util.List;
 
 @EventBusSubscriber(value = Dist.CLIENT)
 public class UtilForgeImpl implements UtilDefinition {
-    private static final IrisApi IRIS;
-    static {
-        IrisApi i;
-        try {
-            i = (IrisApi)Class.forName("net.irisshaders.iris.apiimpl.IrisApiV0Impl").getField("INSTANCE").get(null);
-        } catch (NoSuchFieldException | ClassNotFoundException | IllegalAccessException var1) {
-            i = null;
-        }
-        IRIS = i;
-    }
-
     private static final List<KeyMapping> MAPPINGS = new ArrayList<>();
 
     @Override
@@ -53,20 +41,6 @@ public class UtilForgeImpl implements UtilDefinition {
     @Override
     public Path getConfigDir() {
         return FMLPaths.CONFIGDIR.get();
-    }
-
-    @Override
-    public boolean shadersEnabled() {
-        return IRIS != null && IRIS.isShaderPackInUse();
-    }
-
-    @Override
-    public void registerPipelinesWithIris() {
-        if (IRIS != null) {
-            IRIS.assignPipeline(LightyPipelines.TERRAIN_TRANSLUCENT, IrisProgram.TERRAIN_CUTOUT);
-            IRIS.assignPipeline(LightyPipelines.TERRAIN_CUTOUT, IrisProgram.TERRAIN_CUTOUT);
-            IRIS.assignPipeline(LightyPipelines.LINES, IrisProgram.LINES);
-        }
     }
 
     @SubscribeEvent

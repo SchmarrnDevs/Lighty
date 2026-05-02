@@ -16,7 +16,6 @@ package dev.schmarrn.lighty.config;
 
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.UtilDefinition;
-import dev.schmarrn.lighty.config.compat.Lighty2Config;
 import net.minecraft.resources.Identifier;
 
 import java.io.*;
@@ -45,14 +44,12 @@ public class Config {
 
     public static final IntegerConfig SKY_THRESHOLD = new IntegerConfig("lighty.sky_threshold", 7, 0, 15);
     public static final IntegerConfig BLOCK_THRESHOLD = new IntegerConfig("lighty.block_threshold", 0, 0, 15);
-    public static final IntegerConfig OVERLAY_DISTANCE = new IntegerConfig("lighty.overlay_distance", 2, 1, 32);
     public static final IntegerConfig OVERLAY_BRIGHTNESS = new IntegerConfig("lighty.overlay_brightness", 10, 0, 15);
 
     public static final IntegerConfig FARM_GROWTH_THRESHOLD = new IntegerConfig("lighty.farm_growth_threshold", 8, 0, 15);
     public static final IntegerConfig FARM_UPROOT_THRESHOLD = new IntegerConfig("lighty.farm_uproot_threshold", 8, 0, 15);
 
     public static final BooleanConfig SHOW_SAFE = new BooleanConfig("lighty.show_safe", true);
-    public static final IntegerConfig CHUNKS_PER_TICK = new IntegerConfig("lighty.chunks_per_tick", 4, 1, 1024);
 
     public static final ColorConfig OVERLAY_GREEN = new ColorConfig("lighty.overlay_green", 0x00FF00);
     public static final ColorConfig OVERLAY_ORANGE = new ColorConfig("lighty.overlay_orange", 0xFF6600);
@@ -72,8 +69,8 @@ public class Config {
 
     public static final BooleanConfig SHOW_SKYLIGHT_LEVEL = new BooleanConfig("lighty.show_skylight_level", true);
 
-    public static final IdentifierConfig CARPET_TEXTURE = new IdentifierConfig("lighty.mode.carpet.texture", Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "textures/block/transparent.png"));
-    public static final IdentifierConfig CROSS_TEXTURE = new IdentifierConfig("lighty.mode.cross.texture", Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "textures/block/cross.png"));
+    public static final IdentifierConfig CARPET_TEXTURE = new IdentifierConfig("lighty.mode.carpet.texture", Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "block/transparent"));
+    public static final IdentifierConfig CROSS_TEXTURE = new IdentifierConfig("lighty.mode.cross.texture", Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "block/cross"));
 
     private static void loadFromFile(String key, ConfigSerDe type) {
         // If the file contains the config value, get the configured value...
@@ -146,16 +143,11 @@ public class Config {
     }
 
     public static void init() {
-        // Load config data (first try old config file)
-        if (Lighty2Config.exists()) {
-            Lighty2Config.migrate();
-        } else {
-            // If there is no old config, try to read the normal config from disk.
-            reloadFromDisk();
-        }
+        // Load config data
+        reloadFromDisk();
         // Init Stage complete!
         initStage = false;
-        // save the newly loaded config values to disk once, for good measure (and to persist old config state)
+        // save the newly loaded config values to disk once, for good measure
         save();
     }
 }

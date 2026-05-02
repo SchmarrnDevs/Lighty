@@ -15,17 +15,13 @@
 package dev.schmarrn.lighty.forge;
 
 import dev.schmarrn.lighty.Lighty;
-import dev.schmarrn.lighty.core.OverlayBufferBuilderPack;
-import dev.schmarrn.lighty.core.LightyRenderer;
-import dev.schmarrn.lighty.core.LightyExtractor;
-import dev.schmarrn.lighty.core.OverlaySectionLayer;
+import dev.schmarrn.lighty.core.*;
 import dev.schmarrn.lighty.event.KeyBind;
 import dev.schmarrn.lighty.overlaystate.SMACH;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.SectionPos;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.context.ContextKey;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.core.BlockPos;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -33,27 +29,20 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.client.event.AddSectionGeometryEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-
 @Mod(value = Lighty.MOD_ID, dist = Dist.CLIENT)
 public class LightyForge {
-
-    private static final Logger log = LoggerFactory.getLogger(LightyForge.class);
-
     public LightyForge() {
         Lighty.init();
     }
 
-
     /**
      * This is an inner class to prevent server crashes if this mod is installed on a dedicated server.
-     * It's also an EventListener for all events that are {@linkplain net.neoforged.fml.event.IModBusEvent ModBusEvents}. ModBusEvents are events that are gameload events (fired during game loading or resource reload) and don't have game context.
+     * It's also an EventListener for all events that are {@linkplain net.neoforged.fml.event.IModBusEvent ModBusEvents}.
+     * ModBusEvents are events that are gameload events (fired during game loading or resource reload) and don't have game context.
      */
     @EventBusSubscriber(value = Dist.CLIENT)
     private static class ClassLoadingProtection {
@@ -65,12 +54,36 @@ public class LightyForge {
 
         @SubscribeEvent
         public static void Load(LevelEvent.Load event) {
-            LightyExtractor.clear();
+            Compute.markDirty();
         }
 
         @SubscribeEvent
-        public static void bla(AddSectionGeometryEvent event) {
-            event.addRenderer();
+        public static void addSectionGeometry(AddSectionGeometryEvent event) {
+            if (!Compute.shouldRender()) {
+                return;
+            }
+
+            ClientLevel level = (ClientLevel) event.getLevel();
+            BlockPos sectionOrigin = event.getSectionOrigin();
+
+            for (final var dataProvider : DataProviderRegistry.getActiveProviders()) {
+                var dataList = Compute.buildChunk(dataProvider, sectionOrigin, level);
+
+                if (dataList == null || dataList.isEmpty()) {
+                    return;
+                }
+
+                event.addRenderer(context -> {
+                    Compute.render(
+                            RendererRegistry.getRenderer(),
+                            dataList,
+                            (layer) -> context.getOrCreateChunkBuffer((ChunkSectionLayer) layer),
+                            level,
+                            context.getRegion(),
+                            context.getBlockRenderer()
+                    );
+                });
+            }
         }
     }
 
@@ -82,33 +95,9 @@ public class LightyForge {
     private static class ClassLoadingProtection2 {
         @SubscribeEvent
         public static void clientTick(ClientTickEvent.Post event) {
-            //Compute.computeCache(Minecraft.getInstance());
             KeyBind.handleKeyBind(Minecraft.getInstance());
-            SMACH.updateCompute();
-        }
-
-        private static final ContextKey<Object2ObjectOpenHashMap<SectionPos, Map<OverlaySectionLayer, LightyExtractor.RenderData>>> DATA_KEY = new ContextKey<>(
-                Identifier.fromNamespaceAndPath(Lighty.MOD_ID, "compute_cache")
-        );
-
-        @SubscribeEvent
-        public static void extractRenderState(ExtractLevelRenderStateEvent event) {
-            var cache = LightyExtractor.extract(event.getCamera().blockPosition(), event.getLevel(), event.getLevelRenderer(), event.getFrustum());
-            if (cache != null && !cache.isEmpty()) {
-                event.getRenderState().setRenderData(DATA_KEY, cache);
-            }
-        }
-
-        @SubscribeEvent
-        public static void render(RenderLevelStageEvent.AfterTranslucentBlocks event) {
-            var cache = event.getLevelRenderState().getRenderData(DATA_KEY);
-            if (cache == null) {
-                return;
-            }
-
-            var camPos = event.getLevelRenderState().cameraRenderState.pos;
-
-            LightyRenderer.render(camPos, cache);
+            SMACH.tick();
+            Compute.tick();
         }
     }
 }
