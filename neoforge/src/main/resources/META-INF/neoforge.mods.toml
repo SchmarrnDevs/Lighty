@@ -1,6 +1,6 @@
 modLoader = "javafml"
 loaderVersion = "${neoforge_loader_version_range}"
-issueTrackerURL = "https://github.com/SchmarrnDevs/Lighty/issues"
+issueTrackerURL = "${repo_url}/issues"
 license = "${license}"
 
 [[mods]]

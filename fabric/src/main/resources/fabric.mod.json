@@ -13,8 +13,8 @@
     "poqli"
   ],
   "contact": {
-    "sources": "https://github.com/SchmarrnDevs/Lighty",
-    "issues": "https://github.com/SchmarrnDevs/Lighty/issues"
+    "sources": "${repo_url}",
+    "issues": "${repo_url}/issues"
   },
   "license": "${license}",
   "icon": "icon.png",
@@ -30,11 +30,12 @@
   "accessWidener": "lighty.classtweaker",
   "mixins": [
     "${mod_id}.mixins.json",
-    "lighty.fabric.mixins.json"
+    "${mod_id}.fabric.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",
-    "minecraft": ">=26.1.2",
-    "fabric-api": ">=0.137.0+1.21.10"
+    "minecraft": "~${minecraft_version}",
+    "fabric-api": "*",
+    "java": ">=${java_version}"
   }
 }
