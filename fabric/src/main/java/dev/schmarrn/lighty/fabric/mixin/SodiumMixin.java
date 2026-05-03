@@ -1,7 +1,7 @@
 package dev.schmarrn.lighty.fabric.mixin;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import dev.schmarrn.lighty.fabric.AddSectionGeometryEvent;
+import dev.schmarrn.lighty.fabric.api.AddSectionGeometryEvent;
 import net.caffeinemc.mods.sodium.client.world.LevelSlice;
 import net.caffeinemc.mods.sodium.fabric.level.FabricLevelRenderHooks;
 import net.minecraft.client.Minecraft;
@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+/// Implement the FabricLevelRenderHooks for my custom implementation of the AdditionalSectionRenderers NeoForge API.
+/// This WILL BREAK once Sodium implements something for Fabric here.
+/// The implementation is mostly ported from NeoForgeLevelRenderHooks.
 @Pseudo
 @Mixin(FabricLevelRenderHooks.class)
 public class SodiumMixin {

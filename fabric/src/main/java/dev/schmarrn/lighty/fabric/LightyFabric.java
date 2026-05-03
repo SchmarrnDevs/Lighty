@@ -16,22 +16,18 @@ package dev.schmarrn.lighty.fabric;
 
 import dev.schmarrn.lighty.Lighty;
 import dev.schmarrn.lighty.core.*;
+import dev.schmarrn.lighty.fabric.api.AddSectionGeometryEvent;
 import dev.schmarrn.lighty.fabric.api.LightyModesRegistration;
 import dev.schmarrn.lighty.event.KeyBind;
 import dev.schmarrn.lighty.overlaystate.SMACH;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
-import net.minecraft.core.SectionPos;
-
-import java.util.List;
 
 public class LightyFabric implements ClientModInitializer {
-    public static final Object2ObjectOpenHashMap<SectionPos, List<AddSectionGeometryEvent.AdditionalSectionRenderer>> CACHE = new Object2ObjectOpenHashMap<>();
     @Override
     public void onInitializeClient() {
         ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
@@ -54,7 +50,7 @@ public class LightyFabric implements ClientModInitializer {
 
                 additionalRenderers.add(context -> {
                     Compute.render(
-                            RendererRegistry.getRenderer(),
+                            dataProvider.getRenderer(),
                             dataList,
                             layer -> context.getOrCreateChunkBuffer((ChunkSectionLayer) layer),
                             (ClientLevel) level,

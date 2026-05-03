@@ -104,7 +104,6 @@ public class Compute {
         for (var data : dataList) {
             renderer.build(
                     level,
-                    data.pos(),
                     data,
                     consumer,
                     lightMap

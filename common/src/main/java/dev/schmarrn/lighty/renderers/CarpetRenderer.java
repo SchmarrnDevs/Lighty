@@ -12,18 +12,18 @@ import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.sprite.SpriteId;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 public class CarpetRenderer implements OverlayRenderer {
-    public void build(ClientLevel level, BlockPos pos, OverlayData data, VertexConsumer builder, int lightmap) {
+    public void build(ClientLevel level, OverlayData data, VertexConsumer builder, int lightmap) {
         float x = data.rPos().getX();
         float y = data.rPos().getY() + 1 + data.yOffset();
         float z = data.rPos().getZ();
 
+        var pos = data.pos();
         TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().get(new SpriteId(TextureAtlas.LOCATION_BLOCKS, getTextureLocation()));
 
         try {

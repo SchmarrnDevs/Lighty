@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.sprite.SpriteId;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 
 public class NumberRenderer implements OverlayRenderer {
@@ -59,7 +58,7 @@ public class NumberRenderer implements OverlayRenderer {
         }
     }
 
-    public void build(ClientLevel level, BlockPos pos, OverlayData data, VertexConsumer builder, int lightmap) {
+    public void build(ClientLevel level, OverlayData data, VertexConsumer builder, int lightmap) {
         float x1 = data.rPos().getX() + PXL * 5.25f;
         float y  = data.rPos().getY() + 1f + 0.005f + data.yOffset();
         float z1 = data.rPos().getZ() + PXL * 4f;

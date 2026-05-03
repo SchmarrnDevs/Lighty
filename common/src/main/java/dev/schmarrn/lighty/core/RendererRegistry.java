@@ -33,10 +33,8 @@ public class RendererRegistry {
         Compute.markDirty();
     }
 
-    /**
-     * Needs to be called AFTER registering all the different Lighty renderers.
-     * If the requested renderer isn't loaded, default to the first registered mode.
-     */
+    /// Needs to be called AFTER registering all the different Lighty renderers.
+    /// If the requested renderer isn't loaded, default to the first registered mode.
     public static void setLastUsedRenderer() {
         renderer = RENDERERS.getOrDefault(Config.LAST_USED_RENDERER.getValue(), RENDERERS.values().iterator().next());
     }

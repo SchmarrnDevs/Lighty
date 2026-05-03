@@ -12,11 +12,10 @@ import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.sprite.SpriteId;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 
 public class CrossRenderer implements OverlayRenderer {
-    public void build(ClientLevel level, BlockPos pos, OverlayData data, VertexConsumer builder, int lightmap) {
+    public void build(ClientLevel level, OverlayData data, VertexConsumer builder, int lightmap) {
         float x1 = data.rPos().getX();
         float x2 = data.rPos().getX() + 1f;
         float y  = data.rPos().getY() + 1.005f + data.yOffset();

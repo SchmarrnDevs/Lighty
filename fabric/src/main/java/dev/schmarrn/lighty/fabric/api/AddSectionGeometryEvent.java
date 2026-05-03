@@ -1,4 +1,4 @@
-package dev.schmarrn.lighty.fabric;
+package dev.schmarrn.lighty.fabric.api;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.event.Event;
@@ -7,13 +7,12 @@ import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
 import java.util.function.Function;
 
-/// Stolen from Neoforge AddSectionGeometryEvent
+/// Stolen from NeoForge AddSectionGeometryEvent
 public interface AddSectionGeometryEvent {
     Event<AddSectionGeometryEvent> EVENT = EventFactory.createArrayBacked(
             AddSectionGeometryEvent.class,
@@ -21,7 +20,6 @@ public interface AddSectionGeometryEvent {
                 for (var listener : listeners) {
                     listener.run(additionalRenderers, sectionOrigin, level);
                 }
-                LightyFabric.CACHE.put(SectionPos.of(sectionOrigin), additionalRenderers);
             });
 
     void run(List<AdditionalSectionRenderer> additionalRenderers, BlockPos sectionOrigin, Level level);

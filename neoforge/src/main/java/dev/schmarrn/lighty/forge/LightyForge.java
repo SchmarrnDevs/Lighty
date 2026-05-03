@@ -30,8 +30,6 @@ import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.client.event.AddSectionGeometryEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Mod(value = Lighty.MOD_ID, dist = Dist.CLIENT)
 public class LightyForge {
@@ -75,7 +73,7 @@ public class LightyForge {
 
                 event.addRenderer(context -> {
                     Compute.render(
-                            RendererRegistry.getRenderer(),
+                            dataProvider.getRenderer(),
                             dataList,
                             (layer) -> context.getOrCreateChunkBuffer((ChunkSectionLayer) layer),
                             level,
