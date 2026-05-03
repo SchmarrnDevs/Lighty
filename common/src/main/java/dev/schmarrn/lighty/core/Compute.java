@@ -38,8 +38,7 @@ import java.util.*;
 
 public class Compute {
     /// Private copy of the player's currently occupied section.
-    /// Used to clean up cachedBuffers that are out of range.
-    /// Used to prioritize closer chunks when computing the overlay.
+    /// Used to mark SectionPoses around the player as dirty.
     /// Updated each tick.
     private static SectionPos playerPos = SectionPos.of(0,0,0);
 
