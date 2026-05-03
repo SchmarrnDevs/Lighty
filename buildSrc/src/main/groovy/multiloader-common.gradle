@@ -3,8 +3,10 @@ plugins {
     id 'maven-publish'
 }
 
+version = "${mod_version}+${minecraft_version}"
+
 base {
-    archivesName = "${mod_id}-${project.name}-${minecraft_version}"
+    archivesName = "${mod_id}-${project.name}"
 }
 
 java {
@@ -57,7 +59,7 @@ jar {
 
 processResources {
     var expandProps = [
-            'version'                      : version,
+            'mod_version'                  : mod_version,
             'group'                        : project.group, //Else we target the task's group.
             'minecraft_version'            : minecraft_version,
             'minecraft_version_range'      : minecraft_version_range,
